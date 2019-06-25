@@ -1,4 +1,4 @@
-(ns lambdago.core
+(ns lgo.core
   (:gen-class))
 
 (defn -main

@@ -6,6 +6,6 @@
             :year 2019
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.0"]]
-  :main ^:skip-aot lambdago.core
+  :main ^:skip-aot lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
