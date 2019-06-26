@@ -6,6 +6,11 @@
             :year 2019
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.1"]]
+  :plugins [[lein-cloverage "1.1.1"]
+            [lein-kibit "0.1.6"]
+            [lein-ancient "0.6.15"]
+            [lein-bikeshed "0.5.2"]
+            [jonase/eastwood "0.3.5"]]
   :main ^:skip-aot lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
