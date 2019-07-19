@@ -7,4 +7,7 @@
 ;; When connecting the newer chain is merged to the older one.
 
 
-(def symbols {:b \x :w \o})
+(def symbols {:b \x :w \o nil \.})
+
+;; a chain, the stones order is not guaranteed since connecting could happen
+{:player :b, :stones [[3 4] [4 4]]}
