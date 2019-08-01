@@ -12,16 +12,18 @@
   (filter #(and (vector? %) (= ID (first %)))
           (tree-seq vector? identity fpt)))
 
-(defn extract-position
+
+(defn positionsgf->goban
   [sgf]
   (let [pt (SGFparser sgf)
         fpt (insta/transform flatten pt)
-        whites (rest (first (extract-property fpt "AW")))
-        blacks (rest (first (extract-property fpt "AB")))]
-    {:white whites :black blacks}))
-
-(defn position->goban
-  [m]
-  (let [bs (string/join "," (:black m))
-        ws (string/join "," (:white m))]
-    (str "\\gobanplace{black}{" bs "} \\gobanplace{white}{" ws "}")))
+        size (second (first (extract-property fpt "SZ")))
+        white-stones (string/join ","
+                                  (rest (first (extract-property fpt "AW"))))
+        black-stones (string/join ","
+                                  (rest (first (extract-property fpt "AB"))))]
+    (str "\\gobanclear"
+         "\\gobansize{" size "}{" size "}\n"
+         "\\gobanplace{black}{" black-stones "}\n"
+         " \\gobanplace{white}{" white-stones "}\n"
+         "\\gobanshowfull")))
