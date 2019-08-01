@@ -1,28 +1,7 @@
- Collection = GameTree { GameTree }
-  GameTree   = <"("> Sequence { GameTree } <")">
-  Sequence   = Node { Node }
-  Node       = <";"> { Property }
-  Property   = PropIdent PropValue { PropValue }
-  PropIdent  = #'[A-Z]+'
-  PropValue  = <"["> CValueType <"]">
-  CValueType = (ValueType | Compose)
-  ValueType  = (None | Number | Real | Double | Color | Point | SimpleText |
-		Text | Move | Stone)
-
-  Digit      = #"0-9"
-  None       = ""
-
-  Number     = [("+"|"-")] Digit { Digit }
-  Real       = Number ["." Digit { Digit }]
-
-  Double     = ("1" | "2")
-  Color      = ("B" | "W")
-
-  SimpleText = #"[A-Za-z0-9-.:]+"
-  Text       = SimpleText
-
-  Point      = #"a-z" #"a-z"
-  Move       = "[]" | "[" Point "]"
-  Stone      = Point
-
-  Compose    = ValueType ":" ValueType              
+GameRecord = GameTree { GameTree }
+GameTree   = <"("> Sequence { GameTree } <")">
+Sequence   = Node { Node }
+Node       = <";"> { Property }
+Property   = Identifier Value { Value }
+Identifier  = #'[A-Z]+'
+Value  = <"["> #"[A-Za-z0-9-.:]+" <"]">

@@ -7,7 +7,8 @@
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [com.bhauman/rebel-readline "0.1.4"]
-                 [instaparse "1.4.10"]]
+                 [instaparse "1.4.10"]
+                 [rhizome "0.2.9"]]
   :plugins [[lein-cloverage "1.1.1"]
             [lein-kibit "0.1.7"]
             [lein-ancient "0.6.15"]
