@@ -1,18 +1,15 @@
  Collection = GameTree { GameTree }
-  GameTree   = "(" Sequence { GameTree } ")"
+  GameTree   = <"("> Sequence { GameTree } <")">
   Sequence   = Node { Node }
-  Node       = ";" { Property }
+  Node       = <";"> { Property }
   Property   = PropIdent PropValue { PropValue }
-  PropIdent  = UcLetter { UcLetter }
-  PropValue  = "[" CValueType "]"
+  PropIdent  = #'[A-Z]+'
+  PropValue  = <"["> CValueType <"]">
   CValueType = (ValueType | Compose)
-  ValueType  = (None | Number | Real | Double | Color | SimpleText |
-		Text | Point  | Move | Stone)
-'list of':    PropValue { PropValue }
-'elist of':   ((PropValue { PropValue }) | None)
-              In other words elist is list or "[]".
-UcLetter   = "A".."Z"
-  Digit      = "0".."9"
+  ValueType  = (None | Number | Real | Double | Color | Point | SimpleText |
+		Text | Move | Stone)
+
+  Digit      = #"0-9"
   None       = ""
 
   Number     = [("+"|"-")] Digit { Digit }
@@ -21,11 +18,11 @@ UcLetter   = "A".."Z"
   Double     = ("1" | "2")
   Color      = ("B" | "W")
 
-  SimpleText = { any character (handling see below) }
-  Text       = { any character (handling see below) }
+  SimpleText = #"[A-Za-z0-9-.:]+"
+  Text       = SimpleText
 
-  Point      = game-specific
-  Move       = game-specific
-  Stone      = game-specific
+  Point      = #"a-z" #"a-z"
+  Move       = "[]" | "[" Point "]"
+  Stone      = Point
 
   Compose    = ValueType ":" ValueType              
