@@ -1,44 +1,27 @@
 (ns lgo.sgf
   "Functions for working with the Smart Game Format"
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [instaparse.core :as insta]))
 
-(def letters "abcdefghijklmnopqrstuvwxyz")
-(def noiletters "abcdefghjklmnopqrstuvwxyz")
+(def SGFparser (insta/parser (slurp "resources/SGF.bnf")))
 
-(def letter->coord (zipmap letters
-                           (range 1 (inc (count letters)))))
+(def flatten
+  {:Property (comp (fn [l] (mapv second l)) list)})
 
-(def letter->noiletter (zipmap letters noiletters))
+(defn extract-property [fpt ID];;flattened-parse-tree
+  (filter #(and (vector? %) (= ID (first %)))
+          (tree-seq vector? identity fpt)))
 
-(defn sgfcoord->igocoord
-  [cc]
-  (str (letter->noiletter (first cc))
-       (letter->coord (second cc))))
+(defn extract-position
+  [sgf]
+  (let [pt (SGFparser sgf)
+        fpt (insta/transform flatten pt)
+        whites (rest (first (extract-property fpt "AW")))
+        blacks (rest (first (extract-property fpt "AB")))]
+    {:white whites :black blacks}))
 
-(defn sgfcoords->igocoords
-  [s]
-  (let [coords (re-seq #"[a-z]+" s)
-        converted (map sgfcoord->igocoord coords)]
-    (string/join "," converted)))
-
-(defn extract-black
-  [s]
-  (str "\\black{"
-       (sgfcoords->igocoords
-        (first (re-find #"AB(\[[a-z]*\])*" s)))
-       "}"))
-
-(defn extract-white
-  [s]
-  (str "\\white{"
-       (sgfcoords->igocoords
-        (first (re-find #"AW(\[[a-z]*\])*" s)))
-       "}"))
-
-(defn extract
-  [s]
-  (str (extract-white s)
-       (extract-black s)))
-
-(defn convert [file]
-  (println (extract (slurp file))))
+(defn position->goban
+  [m]
+  (let [bs (string/join "," (:black m))
+        ws (string/join "," (:white m))]
+    (str "\\gobanplace{black}{" bs "} \\gobanplace{white}{" ws "}")))
