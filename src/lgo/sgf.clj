@@ -15,11 +15,30 @@
   (filter #(and (vector? %) (= ID (first %)))
           (tree-seq vector? identity fpt)))
 
+(defn flattened-parse-tree
+  "It returns the flattened parse tree ready for property value extraction of a
+  given SGF string.
+  It has to remove returns and newlines (or can we modify the grammar?)"
+  [sgfstring]
+  (let [sgf (apply str (remove #{\newline \return} sgfstring))
+        pt (SGFparser sgf)
+        fpt (insta/transform flatten-properties pt)]
+    fpt))
+
+(defn extract-properties [fpt p]
+  (filter #(and (vector? %) (p (first %)))
+          (tree-seq vector? identity fpt)))
+
+(defn extract-game-moves
+  [sgf]
+  (extract-properties (flattened-parse-tree sgf)
+                      #(or (= % "B") (= % "W"))))
+
+;; LaTeX export to the goban package
 (defn positionsgf->goban
   "Converts SGF board positions to goban (LaTeX) format."
   [sgf]
-  (let [pt (SGFparser sgf)
-        fpt (insta/transform flatten-properties pt)
+  (let [fpt (flattened-parse-tree sgf)
         size (second (first (extract-property fpt "SZ")))
         white-stones (string/join ","
                                   (rest (first (extract-property fpt "AW"))))
