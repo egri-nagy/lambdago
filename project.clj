@@ -9,7 +9,7 @@
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.10"]
                  [rhizome "0.2.9"]
-                 [kigen "18.05.10"]]
+                 [kigen "19.08.05"]]
   :plugins [[lein-cloverage "1.1.1"]
             [lein-kibit "0.1.7"]
             [lein-ancient "0.6.15"]

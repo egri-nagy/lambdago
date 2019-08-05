@@ -38,6 +38,9 @@
             points)))
 
 (defn containing-chain
+  "Returns the chain containing the given point.
+  It can be used for retrieving touching chains by calling it for
+  the neighbours of a grid point."
   [{chains :chains} [column row :as point]]
   (filter
    (fn [chain] (let [stones (:stones chain)]
