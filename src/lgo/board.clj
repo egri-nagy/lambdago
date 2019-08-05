@@ -63,11 +63,11 @@
           opponent-chains (filter (fn [chain] (= (opposite color) (:player chain)))
                                   connected-chains)]
       (cond
-        (empty? connected-chains)
+        (empty? connected-chains) ;; an individual stone
         (update board :chains
                 (fn [chains] (conj chains {:player color :stones [point]})))
 
-        (= 1 (count friendly-chains))
+        (= 1 (count friendly-chains)) ;; a single friendly chain
         (update-in board
                    [:chains (index chains (first friendly-chains)) :stones]
                    (fn [v] (conj v point)))
