@@ -14,7 +14,7 @@
 
 ;; a chain is a hash-map , the stones' order is not guaranteed since connecting could happen
 ;; internally we use numbers for coordinates
-{:player :b, :stones [[3 4] [4 4]]}
+{:player :b, :stones [[3 4] [4 4]] :liberties [[][]]}
 
 ;;board position is a vector of chains + zobrist hash + whose move is that
 
@@ -33,9 +33,9 @@
                  [(inc column) row]
                  [column (dec row)]
                  [column (inc row)]]]
-    (filter (fn [[c r]] (and (<= 1 c width)
-                             (<= 1 r height)))
-            points)))
+    (filterv (fn [[c r]] (and (<= 1 c width)
+                              (<= 1 r height)))
+             points)))
 
 (defn containing-chain
   "Returns the chain containing the given point.
@@ -46,6 +46,13 @@
    (fn [chain] (let [stones (:stones chain)]
                  (not (empty? (filter (partial = point) stones)))))
    chains))
+
+(defn self-capture?
+  "Decides whether placing a stone results in self-capture or not."
+  [{width :width height :height chains :chains :as board}
+   [column row :as point]
+   color]
+  )
 
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
@@ -65,7 +72,7 @@
       (cond
         (empty? connected-chains) ;; an individual stone
         (update board :chains
-                (fn [chains] (conj chains {:player color :stones [point]})))
+                (fn [chains] (conj chains {:player color :stones [point] :liberties points})))
 
         (= 1 (count friendly-chains)) ;; a single friendly chain
         (update-in board
