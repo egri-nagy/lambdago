@@ -75,29 +75,29 @@
    color]
   (if (empty? (containing-chain board point))
     ;;the stone is not on the board yet
-    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
-          connected-chains (remove nil? (map (partial containing-chain board) adjpts))
-          friendly-chains (filter (fn [chain] (= color (:player chain)))
-                                  connected-chains)
-          opponent-chains (filter (fn [chain] (= (opposite color) (:player chain)))
-                                  connected-chains)
-          ;;newer way of doing it
+    (let [opponent (opposite color)
+          adjpts (neighbours point width height) ;;adjacent points, neighbours
           chain_lookup (into {}
                              (map (fn [pt] [pt (containing-chain board pt)])
-                                  adjpts))]
+                                  adjpts))
+          liberties (filter (complement chain_lookup) adjpts)
+          friendly_pts (filter #(= color (:player (chain_lookup %))) adjpts)
+          enemy_pts (filter #(= opponent (:player (chain_lookup %))) adjpts)]
+      (println enemy_pts)
       (cond
-        (empty? connected-chains) ;; an individual stone, new chain
+        (= (count liberties) (count adjpts)) ;; an individual stone, new chain
         (update board :chains
                 (fn [chains] (conj chains {:player color
                                            :stones [point]
                                            :liberties (set adjpts)})))
 
-        (= 1 (count friendly-chains)) ;; a single friendly chain
-        (-> board
-            (update-in [:chains (index chains (first friendly-chains)) :stones]
-                       (fn [v] (conj v point)))
-            (update-in [:chains (index chains (first friendly-chains)) :liberties]
-                       (fn [s] (union ))))))
+        (= 1 (count friendly_pts)) ;; a single friendly chain
+        (let [chain_index (index chains (chain_lookup (first friendly_pts)))]
+            (-> board
+                (update-in [:chains  chain_index :stones]
+                           (fn [v] (conj v point)))
+                (update-in [:chains chain_index :liberties]
+                           (fn [s] (union )))))))
     ;;illegal move, it's on the board already
     (do
       (println point " already on board")
