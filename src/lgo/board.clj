@@ -2,7 +2,7 @@
   "Functions for representing board state and its evolution."
   (:require
    [lgo.grid :refer [neighbours]]
-   [lgo.util :refer [vec-rm-all]]
+   [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
    [clojure.set :refer [union difference]]))
 
