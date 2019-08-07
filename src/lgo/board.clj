@@ -36,6 +36,10 @@
    :chains []
    :lookup {}}) ;; points to chains
 
+(defn recompute-liberties
+  [board chain]
+  )
+
 (defn add-chain
   [board chain]
   ;;adding it to the list of chains

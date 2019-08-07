@@ -28,3 +28,13 @@
   [stones width height]
   (remove (set (inside-points stones width height))
           stones))
+
+(defn envelope
+  [stones width height]
+  (let [boundary (boundary-points stones width height)
+        inside (set (inside-points stones width height))
+        fullneighbours (reduce (fn [r pt]
+                                 (into r (neighbours pt width height )))
+                               #{}
+                               boundary)]
+    (remove inside fullneighbours)))
