@@ -21,6 +21,7 @@
 
 (declare put-stone ;; this puts a stone on a board position
          legal-move? ;;decides whether the is legal or not on a given board position, ko?
+         merge-chains
          )
 
 ;;empty board
@@ -88,7 +89,7 @@
         ;; we create new chain
         (let [newchain {:color color
                         :stones [point]
-                        :liberties (set adjpts)}]
+                        :liberties liberties}]
           ;;adding it to the list of chains
           (-> board
               (update :chains (fn [chains] (conj chains newchain)))
@@ -104,18 +105,35 @@
           (println point "self-capture")
           board)
         :else
-        (let [chain_index (index chains (first friendly_chains))]
-          (-> board
-              (update-in [:chains  chain_index :stones]
-                         (fn [v] (conj v point)))
-              (update-in [:chains chain_index :liberties]
-                         (fn [s] (union )))))))))
+        ;;trick is to add the connecting point as if it was a chain on its own
+        (merge-chains board (conj friendly_chains {:color color
+                                                   :stones [point]
+                                                   :liberties liberties}))))))
 
 (defn merge-chains
-  "merging chains touching a point "
-     [{chains :chains lookup :lookup :as board}
-      point]
-     )
+  "merging chains touching a point, heavy processing due to the
+  high-maintenance data structure
+  at this point we assume it is not a self-capture
+  merging to the first"
+  [{chains :chains lookup :lookup :as board}
+   friendly_chains]
+  (let [chain_indices (map (partial index chains) friendly_chains)
+        chain_index (first chain_indices)
+        the_chain (first friendly_chains)
+        upd_chain (reduce
+                   (fn [ch1 ch2]
+                     {:color (:color ch1)
+                      :stones (into (:stones ch1) (:stones ch2))
+                      :liberties (union (:liberties ch1) (:liberties ch2))})
+                   the_chain
+                   (rest friendly_chains))]
+    (-> board
+        (update-in [:chains  chain_index]
+                   (constantly upd_chain))
+        (update-in [:chains]
+                   ;;removing the rest of chain_indices
+                   )))
+  )
 
 (def single-stone-to-append
   (-> (empty-board 1 2)
