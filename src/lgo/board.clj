@@ -1,7 +1,7 @@
 (ns lgo.board
   "Functions for representing board state and its evolution."
   (:require
-   [lgo.grid :refer [neighbours]]
+   [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
    [clojure.set :refer [union difference]]))
@@ -37,8 +37,13 @@
    :lookup {}}) ;; points to chains
 
 (defn recompute-liberties
-  [board chain]
-  )
+  [{width :width height :height chains :chains lookup :lookup :as board} chain]
+  (let [e (envelope (:stones chain) width height)]
+    (update-in board [:chains (index chains chain)]
+               (fn [c] (update c :liberties
+                               (fn [l]
+                                 (set
+                                  (remove lookup e))))))))
 
 (defn add-chain
   [board chain]
