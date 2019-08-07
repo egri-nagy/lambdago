@@ -29,7 +29,10 @@
   [width height]
   {:width width
    :height height
-   :chains []})
+   :chains []
+   :empty (set (for [col (range 1 (inc width))
+                     row (range 1 (inc height))]
+                 [col row]))})
 
 (defn neighbours
   "Neighbours of a grid point considering the size of the board,
@@ -120,7 +123,7 @@
 (def ponnuki
   (reduce (fn [board point]
             (put-stone board point :b))
-          (empty-board 3 3)
+          (empty-board 19 19)
           [[1 2] [2 1] [3 2] [2 3]]))
 
 (defn board-string
