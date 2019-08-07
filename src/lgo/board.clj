@@ -4,7 +4,7 @@
    [lgo.grid :refer [neighbours]]
    [lgo.util :refer [vec-rm-all]]
    [kigen.position :refer [index]]
-   [clojure.set :refer [union]]))
+   [clojure.set :refer [union difference]]))
 
 ;; The board position is stored as a vector of chains, in the order of creation.
 ;; A chain is represented by its oldest stone.
@@ -44,9 +44,19 @@
       ;;updating the reverse lookup
       (update :lookup (fn [m] (conj m [(first (:stones chain)) chain])))))
 
+(defn capture-chain
+  [board chain]
+  (-> board
+      (update :chains
+              (fn [chains] (vec-rm  chains
+                                    (index chains chain))))
+      (update :lookup
+              (fn [m]
+                (apply dissoc m (:stones chain))))))
+
 (defn capture-chains
-  [board chains]
-  board)
+  [board ochains]
+  (reduce capture-chain board ochains))
 
 (defn update-chains
   [{chains :chains :as board} ochains point]
@@ -54,7 +64,7 @@
             (let [chn_index (index chains chn)
                   brd2 (update-in brd
                                   [:chains chn_index :liberties]
-                                  (partial remove #{point}))
+                                  #(difference % #{point}))
                   chn2 (nth (brd2 :chains) chn_index)]
               (update brd2
                       :lookup
