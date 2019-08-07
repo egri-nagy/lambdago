@@ -25,6 +25,7 @@
 
 ;;empty board
 (defn empty-board
+  "Creates an empty board with the given dimensions."
   [width height]
   {:width width
    :height height
@@ -116,3 +117,17 @@
   (-> (empty-board 3 3)
       (put-stone [1 2] :b)
       (put-stone [3 2] :b)))
+(def ponnuki
+  (reduce (fn [board point]
+            (put-stone board point :b))
+          (empty-board 3 3)
+          [[1 2] [2 1] [3 2] [2 3]]))
+
+(defn board-string
+  [{width :width height :height chains :chains :as board}]
+  (apply str (apply concat
+                   (for [c (range 1 (inc width))]
+                     (concat
+                      (for [r (range 1 (inc height))]
+                        (symbols (:player (containing-chain board [c r]))))
+                      '(\newline))))))
