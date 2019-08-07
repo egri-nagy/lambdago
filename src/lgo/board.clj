@@ -1,6 +1,6 @@
 (ns lgo.board
   "Functions for representing board state and its evolution."
-  (:require [lgo.util :refer [vec-rm]]
+  (:require [lgo.util :refer [vec-rm-all]]
             [kigen.position :refer [index]]
             [clojure.set :refer [union]]))
 
@@ -76,7 +76,7 @@
     ;;otherwise the stone is not on the board yet
     (let [opponent (opposite color)
           adjpts (neighbours point width height) ;;adjacent points, neighbours
-          liberties (filter (complement lookup) adjpts)
+          liberties (set (filter (complement lookup) adjpts))
           ;; adjacent chains, no duplicates
           adj_chains (filter identity (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
@@ -106,9 +106,9 @@
           board)
         :else
         ;;trick is to add the connecting point as if it was a chain on its own
-        (merge-chains board (conj friendly_chains {:color color
-                                                   :stones [point]
-                                                   :liberties liberties}))))))
+        (merge-chains board (concat friendly_chains [{:color color
+                                                      :stones [point]
+                                                      :liberties liberties}]))))))
 
 (defn merge-chains
   "merging chains touching a point, heavy processing due to the
@@ -117,7 +117,7 @@
   merging to the first"
   [{chains :chains lookup :lookup :as board}
    friendly_chains]
-  (let [chain_indices (map (partial index chains) friendly_chains)
+  (let [chain_indices (map (partial index chains) (butlast friendly_chains))
         chain_index (first chain_indices)
         the_chain (first friendly_chains)
         upd_chain (reduce
@@ -127,13 +127,14 @@
                       :liberties (union (:liberties ch1) (:liberties ch2))})
                    the_chain
                    (rest friendly_chains))]
+    (println chain_indices)
     (-> board
         (update-in [:chains  chain_index]
                    (constantly upd_chain))
-        (update-in [:chains]
-                   ;;removing the rest of chain_indices
-                   )))
-  )
+        (update :chains
+                (fn [chains] (vec-rm-all chains (rest chain_indices))))
+        (update :lookup
+                (fn [m] (into m (map (fn [pt] [pt upd_chain]) (:stones upd_chain))))))))
 
 (def single-stone-to-append
   (-> (empty-board 1 2)
