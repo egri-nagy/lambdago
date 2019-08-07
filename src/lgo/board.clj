@@ -38,12 +38,18 @@
 
 (defn recompute-liberties
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
-  (let [e (envelope (:stones chain) width height)]
-    (update-in board [:chains (index chains chain)]
-               (fn [c] (update c :liberties
-                               (fn [l]
-                                 (set
-                                  (remove lookup e))))))))
+  (let [e (envelope (:stones chain) width height)
+        chain_index (index chains chain)]
+    (-> board
+     (update-in [:chains  chain_index :liberties]
+                (fn [l] (set (remove lookup e))))
+     (update :lookup
+             (fn [m] (let [nchain (chains chain_index)]
+                       (into m (map (fn [pt] [pt nchain]) (:stones nchain)))))))))
+
+(defn update-liberties
+  [board chains]
+  (reduce recompute-liberties board chains))
 
 (defn add-chain
   [board chain]
@@ -54,14 +60,19 @@
       (update :lookup (fn [m] (conj m [(first (:stones chain)) chain])))))
 
 (defn capture-chain
-  [board chain]
-  (-> board
-      (update :chains
-              (fn [chains] (vec-rm  chains
-                                    (index chains chain))))
-      (update :lookup
-              (fn [m]
-                (apply dissoc m (:stones chain))))))
+  [{lookup :lookup width :width height :height :as board}
+   {stones :stones color :color :as chain}]
+  (let [opp (opposite color)
+        affected_chains (filter #(= opp (:color %))
+                                (distinct (map lookup (envelope stones width height))))]
+    (-> board
+        (update :chains
+                (fn [chains] (vec-rm  chains
+                                      (index chains chain))))
+        (update :lookup
+                (fn [m]
+                  (apply dissoc m (:stones chain))))
+        (update-liberties affected_chains))))
 
 (defn capture-chains
   [board ochains]
