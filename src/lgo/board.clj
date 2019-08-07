@@ -46,12 +46,20 @@
                               (<= 1 r height)))
              points)))
 
-(defn self-capture?
-  "Decides whether placing a stone results in self-capture or not."
-  [{width :width height :height chains :chains :as board}
-   [column row :as point]
-   color]
-  )
+(defn inside-points
+  "Returns the stones that are 'inside' in the given group of stones.
+  This is meant for chains, however definition makes sense for general groups."
+  [stones width height]
+  (let [S (set stones)]
+    (filter (fn [point] (every? S (neighbours point width height)))
+            S)))
+
+(defn boundary-points
+  "Returns the stones that are 'inside' in the given group of stones.
+  This is meant for chains, however definition makes sense for general groups."
+  [stones width height]
+  (remove (set (inside-points stones width height))
+          stones))
 
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
@@ -80,9 +88,9 @@
           ;; adjacent chains, no duplicates
           adj_chains (filter identity (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
-          friendly_chains (grouped_chains color)]
-      (println liberties)
-      (println grouped_chains)
+          friendly_chains (grouped_chains color)
+          opponent_chains (grouped_chains (opposite color))
+          to_be_captured (filter #(= 1 (count (:liberties %))) opponent_chains)]
       (cond
         ;; an individual stone, all neighbours are liberties
         (= (count liberties) (count adjpts))
