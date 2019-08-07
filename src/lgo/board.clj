@@ -22,8 +22,13 @@
 (declare put-stone ;; this puts a stone on a board position
          legal-move? ;;decides whether the is legal or not on a given board position, ko?
          )
-;;empty board
 
+;;empty board
+(defn empty-board
+  [width height]
+  {:width width
+   :height height
+   :chains []})
 
 (defn neighbours
   "Neighbours of a grid point considering the size of the board,
@@ -81,9 +86,10 @@
                              (map (fn [pt] [pt (containing-chain board pt)])
                                   adjpts))
           liberties (filter (complement chain_lookup) adjpts)
+          xyz (group-by chain_lookup adjpts)
           friendly_pts (filter #(= color (:player (chain_lookup %))) adjpts)
           enemy_pts (filter #(= opponent (:player (chain_lookup %))) adjpts)]
-      (println enemy_pts)
+      (println xyz)
       (cond
         (= (count liberties) (count adjpts)) ;; an individual stone, new chain
         (update board :chains
@@ -103,11 +109,10 @@
       (println point " already on board")
       board)))
 
-(def empty-board {:width 3 :height 3 :chains []})
 (def single-stone-to-append
-  (-> empty-board
+  (-> (empty-board 3 3)
       (put-stone [1 2] :b)))
 (def two-stones-to-be-merged
-  (-> empty-board
+  (-> (empty-board 3 3)
       (put-stone [1 2] :b)
       (put-stone [3 2] :b)))
