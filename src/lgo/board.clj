@@ -30,9 +30,7 @@
   {:width width
    :height height
    :chains []
-   :empty (set (for [col (range 1 (inc width))
-                     row (range 1 (inc height))]
-                 [col row]))})
+   :lookup {}}) ;; points to chains
 
 (defn neighbours
   "Neighbours of a grid point considering the size of the board,
@@ -46,19 +44,6 @@
     (filterv (fn [[c r]] (and (<= 1 c width)
                               (<= 1 r height)))
              points)))
-
-(defn containing-chain
-  "Returns the chain containing the given point.
-  It can be used for retrieving touching chains by calling it for
-  the neighbours of a grid point.
-  There can be only one chain, as a point is occupied by one only, or nil.
-  TODO: replace this with a reverse map (points to chains)."
-  [{chains :chains} [column row :as point]]
-  (first
-   (filter
-    (fn [chain] (let [stones (:stones chain)]
-                  (not (empty? (filter (partial = point) stones)))))
-    chains)))
 
 (defn self-capture?
   "Decides whether placing a stone results in self-capture or not."
@@ -79,27 +64,32 @@
   3. when occupied by a friendly stone, chains
     a. get merged
     b. possibly captured."
-  [{width :width height :height chains :chains :as board}
+  [{width :width height :height chains :chains lookup :lookup :as board}
    [column row :as point]
    color]
-  (if (empty? (containing-chain board point))
-    ;;the stone is not on the board yet
+  (if (lookup point)
+    ;;illegal move, it's on the board already
+    (do
+      (println point " already on board")
+      board)
+    ;;otherwise the stone is not on the board yet
     (let [opponent (opposite color)
           adjpts (neighbours point width height) ;;adjacent points, neighbours
-          chain_lookup (into {}
-                             (map (fn [pt] [pt (containing-chain board pt)])
-                                  adjpts))
+          chain_lookup (into {} (map lookup adjpts))
           liberties (filter (complement chain_lookup) adjpts)
           xyz (group-by chain_lookup adjpts)
           friendly_pts (filter #(= color (:player (chain_lookup %))) adjpts)
           enemy_pts (filter #(= opponent (:player (chain_lookup %))) adjpts)]
-      (println xyz)
       (cond
         (= (count liberties) (count adjpts)) ;; an individual stone, new chain
-        (update board :chains
-                (fn [chains] (conj chains {:player color
-                                           :stones [point]
-                                           :liberties (set adjpts)})))
+        (let [newchain {:player color ;;creating this new chain
+                        :stones [point]
+                        :liberties (set adjpts)}]
+          ;;adding it to the list of chains
+          (-> board
+              (update :chains (fn [chains] (conj chains newchain)))
+              ;;updating the reverse lookup
+              (update :lookup (fn [m] (conj m [point newchain])))))
 
         (= 1 (count friendly_pts)) ;; a single friendly chain
         (let [chain_index (index chains (chain_lookup (first friendly_pts)))]
@@ -107,11 +97,7 @@
                 (update-in [:chains  chain_index :stones]
                            (fn [v] (conj v point)))
                 (update-in [:chains chain_index :liberties]
-                           (fn [s] (union )))))))
-    ;;illegal move, it's on the board already
-    (do
-      (println point " already on board")
-      board)))
+                           (fn [s] (union )))))))))
 
 (def single-stone-to-append
   (-> (empty-board 3 3)
@@ -127,10 +113,10 @@
           [[1 2] [2 1] [3 2] [2 3]]))
 
 (defn board-string
-  [{width :width height :height chains :chains :as board}]
+  [{width :width height :height chains :chains lookup :lookup :as board}]
   (apply str (apply concat
                    (for [c (range 1 (inc width))]
                      (concat
                       (for [r (range 1 (inc height))]
-                        (symbols (:player (containing-chain board [c r]))))
+                        (symbols (:player (lookup [c r]))))
                       '(\newline))))))
