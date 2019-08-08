@@ -45,8 +45,8 @@
   (let [e (envelope (:stones chain) width height)
         chain_index (index chains chain)]
     (-> board
-     (update-in [:chains  chain_index :liberties]
-                (fn [l] (set (remove lookup e))))
+     (update-in [:chains  chain_index :liberties]                
+                (fn [l] (union l (set (remove lookup e)))))
      (update :lookup
              (fn [m] (let [nchain (chains chain_index)]
                        (into m (map (fn [pt] [pt nchain]) (:stones nchain)))))))))
@@ -127,42 +127,38 @@
           opponent_chains (grouped_chains (opposite color))
           to_be_captured (filter #(= 1 (count (:liberties %))) opponent_chains)
           to_be_updated (remove (set to_be_captured) opponent_chains)
+          nchain (single-stone  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
-                            (update-chains to_be_updated point))]
-      (println updated_board)
-      ;; an individual stone, all neighbours are liberties
-      (if (empty? friendly_chains)
-        (if (= 1 (count (reduce union
-                                (union liberties #{point})
-                                (map :liberties friendly_chains))))
+                            (update-chains to_be_updated point)
+                            (add-chain nchain)
+                            (merge-chains (concat friendly_chains [nchain])))]
+      (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
+        
+        (if (empty? (:liberties ((:lookup brd) point)))
           (do
             (println friendly_chains point "self-capture")
             board)
-          (add-chain updated_board
-                     (single-stone  color point liberties)))
-        (merge-chains updated_board
-                      (concat friendly_chains
-                              [(single-stone  color point liberties)]))))))
+          brd
+          )))))
 
 (defn merge-chains
-  "merging chains touching a point, heavy processing due to the
+  "merging chains to the first one, heavy processing due to the
   high-maintenance data structure
   at this point we assume it is not a self-capture
   merging to the first"
   [{chains :chains lookup :lookup :as board}
-   friendly_chains]
-  (let [chain_indices (map (partial index chains) (butlast friendly_chains))
+   chains]
+  (let [chain_indices (map (partial index chains) chains)
         chain_index (first chain_indices)
-        the_chain (first friendly_chains)
+        the_chain (first chains)
         upd_chain (reduce
                    (fn [ch1 ch2]
                      {:color (:color ch1)
                       :stones (into (:stones ch1) (:stones ch2))
                       :liberties (union (:liberties ch1) (:liberties ch2))})
                    the_chain
-                   (rest friendly_chains))]
-    (println chain_indices)
+                   (rest chains))]
     (-> board
         (update-in [:chains  chain_index]
                    (constantly upd_chain))
