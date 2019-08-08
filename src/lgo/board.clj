@@ -10,16 +10,11 @@
 ;; A chain is represented by its oldest stone.
 ;; When connecting the newer chain is merged to the older one.
 
-
+;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
 
+;;for switching between the colors
 (def opposite {:b :w, :w :b})
-
-;; a chain is a hash-map , the stones' order is not guaranteed since connecting could happen
-;; internally we use numbers for coordinates
-{:color :b, :stones [[3 4] [4 4]] :liberties [[][]]}
-
-;;board position is a vector of chains + zobrist hash + whose move is that
 
 (declare empty-board ;; data structure for an empty board
          put-stone ;; this puts a stone on a board position
@@ -33,8 +28,17 @@
   [width height]
   {:width width
    :height height
-   :chains []
+   :chains [] ;; ordered by the age of the chains, newer chains merged to to oldest one
    :lookup {}}) ;; points to chains
+
+(defn single-stone
+  "Creates a single stone chain.
+  A chain is a hash-map , the stones' order is not guaranteed since connecting could happen
+   internally we use numbers for coordinates."
+  [color point liberties]
+  {:color color
+   :stones [point]
+   :liberties liberties})
 
 (defn recompute-liberties
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
@@ -135,13 +139,11 @@
           (do
             (println friendly_chains point "self-capture")
             board)
-          (add-chain updated_board {:color color
-                            :stones [point]
-                            :liberties liberties}))
+          (add-chain updated_board
+                     (single-stone  color point liberties)))
         (merge-chains updated_board
-                      (concat friendly_chains [{:color color
-                                                :stones [point]
-                                                :liberties liberties}]))))))
+                      (concat friendly_chains
+                              [(single-stone  color point liberties)]))))))
 
 (defn merge-chains
   "merging chains touching a point, heavy processing due to the
