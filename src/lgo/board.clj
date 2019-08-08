@@ -117,8 +117,7 @@
       (println point " already on board")
       board)
     ;;otherwise the stone is not on the board yet
-    (let [opponent (opposite color)
-          adjpts (neighbours point width height) ;;adjacent points, neighbours
+    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
           liberties (set (filter (complement lookup) adjpts))
           ;; adjacent chains, no duplicates
           adj_chains (filter identity (distinct (map lookup adjpts)))
@@ -132,6 +131,7 @@
                             (capture-chains to_be_captured)
                             (update-chains to_be_updated point)
                             (add-chain nchain)
+                            (recompute-liberties nchain)
                             (merge-chains (concat friendly_chains [nchain])))]
       (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
         
