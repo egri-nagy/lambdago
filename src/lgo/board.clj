@@ -43,7 +43,9 @@
   "updating the lookup table of the board by registering a given chain"
   [board chain]
   (update board :lookup
-          (fn [m] (into m (map (fn [pt] [pt chain]) (:stones chain))))))
+          (fn [m] (into m (map (fn [pt] [pt chain])
+                               (:stones chain))))))
+
 (defn register-chain-by-index
   [board n]
   (register-chain board ((:chains board) n)))
@@ -56,6 +58,10 @@
      (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
      (register-chain-by-index chain_index))))
+
+(defn recompute-liberties-by-point
+  [board point]
+  (recompute-liberties board ((:lookup board) point)))
 
 (defn update-liberties
   [board chains]
@@ -139,14 +145,13 @@
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
                             (add-chain nchain)
-                            (merge-chains friendly_chains nchain))
-          final (recompute-liberties updated_board
-                                     ((:lookup updated_board) point))]
-      (if (empty? (:liberties ((:lookup final) point)))
+                            (merge-chains friendly_chains nchain)
+                            (recompute-liberties-by-point point))]
+      (if (empty? (:liberties ((:lookup updated_board) point)))
         (do
           (println "self-capture")
           board)
-        final))))
+        updated_board))))
 
 (defn merge-chains
   "merging chains to the first one, heavy processing due to the
