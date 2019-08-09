@@ -39,6 +39,12 @@
    :stones [point]
    :liberties liberties})
 
+(defn register-chain
+  "updating the lookup table of the board by registering a given chain"
+  [board chain]
+  (update board :lookup
+          (fn [m] (into m (map (fn [pt] [pt chain]) (:stones chain))))))
+
 (defn recompute-liberties
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
   (let [e (envelope (:stones chain) width height)
@@ -46,9 +52,7 @@
     (-> board
      (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
-     (update :lookup
-             (fn [m] (let [nchain (chains chain_index)]
-                       (into m (map (fn [pt] [pt nchain]) (:stones nchain)))))))))
+     (register-chain (chains chain_index)))))
 
 (defn update-liberties
   [board chains]
@@ -56,11 +60,11 @@
 
 (defn add-chain
   [board chain]
-  ;;adding it to the list of chains
   (-> board
+      ;;adding it to the list of chains
       (update :chains (fn [chains] (conj chains chain)))
       ;;updating the reverse lookup
-      (update :lookup (fn [m] (conj m [(first (:stones chain)) chain])))))
+      (register-chain chain)))
 
 (defn capture-chain
   [{lookup :lookup width :width height :height :as board}
