@@ -45,7 +45,7 @@
   (let [e (envelope (:stones chain) width height)
         chain_index (index chains chain)]
     (-> board
-     (update-in [:chains  chain_index :liberties]                
+     (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
      (update :lookup
              (fn [m] (let [nchain (chains chain_index)]
@@ -118,24 +118,22 @@
       board)
     ;;otherwise the stone is not on the board yet
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
-          liberties (set (filter (complement lookup) adjpts))
           ;; adjacent chains, no duplicates
           adj_chains (filter identity (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
           opponent_chains (grouped_chains (opposite color))
-          to_be_captured (filter #(= 1 (count (:liberties %))) opponent_chains)
+          to_be_captured (set (filter #(= 1 (count (:liberties %))) opponent_chains))
           to_be_updated (remove (set to_be_captured) opponent_chains)
+          liberties (set (filter #(or (nil? (lookup %)) (to_be_captured %)) adjpts))
           nchain (single-stone  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (update-chains to_be_updated point)
                             (add-chain nchain)
-                            (recompute-liberties nchain)
                             (merge-chains (concat friendly_chains [nchain])))]
-      (println friendly_chains)
       (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
-        
+
         (if (empty? (:liberties ((:lookup brd) point)))
           (do
             (println friendly_chains point "self-capture")
@@ -150,7 +148,6 @@
   merging to the first"
   [{chains :chains lookup :lookup :as board}
    to_be_merged]
-  (println "merging " (count to_be_merged) " chains"  to_be_merged)
   (let [chain_indices (map (partial index chains) to_be_merged)
         chain_index (first chain_indices)
         the_chain (first to_be_merged)
@@ -161,7 +158,6 @@
                       :liberties (union (:liberties ch1) (:liberties ch2))})
                    the_chain
                    (rest to_be_merged))]
-    (println chain_index)
     (-> board
         (update-in [:chains  chain_index]
                    (constantly upd_chain))
@@ -170,24 +166,12 @@
         (update :lookup
                 (fn [m] (into m (map (fn [pt] [pt upd_chain]) (:stones upd_chain))))))))
 
-(def single-stone-to-append
-  (-> (empty-board 1 2)
-      (put-stone [1 1] :b)))
-(def two-stones-to-be-merged
-  (-> (empty-board 3 3)
-      (put-stone [1 2] :b)
-      (put-stone [3 2] :b)))
 
-(def atari
-  (-> (empty-board 2 2)
-      (put-stone [1 1] :w)
-      (put-stone [1 2] :b)))
-
-(def ponnuki
-  (reduce (fn [board point]
-            (put-stone board point :b))
-          (empty-board 19 19)
-          [[1 2] [2 1] [3 2] [2 3]]))
+;; (def ponnuki
+;;   (reduce (fn [board point]
+;;             (put-stone board point :b))
+;;           (empty-board 19 19)
+;;           [[1 2] [2 1] [3 2] [2 3]]))
 
 (defn board-string
   [{width :width height :height chains :chains lookup :lookup :as board}]
