@@ -10,8 +10,6 @@
 ;; A chain is represented by its oldest stone.
 ;; When connecting the newer chain is merged to the older one.
 
-;;for the ASCII rendering of a board
-(def symbols {:b \X :w \O nil \.})
 
 ;;for switching between the colors
 (def opposite {:b :w, :w :b})
@@ -172,6 +170,9 @@
 ;;             (put-stone board point :b))
 ;;           (empty-board 19 19)
 ;;           [[1 2] [2 1] [3 2] [2 3]]))
+
+;;for the ASCII rendering of a board
+(def symbols {:b \X :w \O nil \.})
 
 (defn board-string
   [{width :width height :height chains :chains lookup :lookup :as board}]

@@ -11,7 +11,7 @@
                  [rhizome "0.2.9"]
                  [kigen "19.08.05"]]
   :plugins [[lein-cloverage "1.1.1"]
-            [lein-kibit "0.1.7"]
+            [lein-kibit "0.1.6"]
             [lein-ancient "0.6.15"]
             [lein-bikeshed "0.5.2"]
             [jonase/eastwood "0.3.6"]]
