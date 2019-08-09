@@ -4,7 +4,8 @@
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
-   [clojure.set :refer [union difference]]))
+   [clojure.set :refer [union difference]]
+   [clojure.string :as string]))
 
 ;; The board position is stored as a vector of chains, in the order of creation.
 ;; A chain is represented by its oldest stone.
@@ -175,10 +176,13 @@
 (def symbols {:b \X :w \O nil \.})
 
 (defn board-string
-  [{width :width height :height chains :chains lookup :lookup :as board}]
-  (apply str (apply concat
-                   (for [c (range 1 (inc width))]
-                     (concat
-                      (for [r (range 1 (inc height))]
-                        (symbols (:color (lookup [c r]))))
-                      '(\newline))))))
+  "The string representation of a board position.
+  This relies only on the lookup function of the data structure."
+  [{width :width height :height lookup :lookup}]
+  (string/join
+   (apply concat
+          (for [r (range 1 (inc height))]
+            (concat
+             (for [c (range 1 (inc width))]
+               (symbols (:color (lookup [c r]))))
+             '(\newline))))))

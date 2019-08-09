@@ -20,7 +20,7 @@
   given SGF string.
   It has to remove returns and newlines (or can we modify the grammar?)"
   [sgfstring]
-  (let [sgf (apply str (remove #{\newline \return} sgfstring))
+  (let [sgf (string/join (remove #{\newline \return} sgfstring))
         pt (SGFparser sgf)
         fpt (insta/transform flatten-properties pt)]
     fpt))
