@@ -133,6 +133,7 @@
                             (add-chain nchain)
                             (recompute-liberties nchain)
                             (merge-chains (concat friendly_chains [nchain])))]
+      (println friendly_chains)
       (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
         
         (if (empty? (:liberties ((:lookup brd) point)))
@@ -148,17 +149,19 @@
   at this point we assume it is not a self-capture
   merging to the first"
   [{chains :chains lookup :lookup :as board}
-   chains]
-  (let [chain_indices (map (partial index chains) chains)
+   to_be_merged]
+  (println "merging " (count to_be_merged) " chains"  to_be_merged)
+  (let [chain_indices (map (partial index chains) to_be_merged)
         chain_index (first chain_indices)
-        the_chain (first chains)
+        the_chain (first to_be_merged)
         upd_chain (reduce
                    (fn [ch1 ch2]
                      {:color (:color ch1)
                       :stones (into (:stones ch1) (:stones ch2))
                       :liberties (union (:liberties ch1) (:liberties ch2))})
                    the_chain
-                   (rest chains))]
+                   (rest to_be_merged))]
+    (println chain_index)
     (-> board
         (update-in [:chains  chain_index]
                    (constantly upd_chain))
