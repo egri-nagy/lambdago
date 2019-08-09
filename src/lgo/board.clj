@@ -128,21 +128,20 @@
           opponent_chains (grouped_chains (opposite color))
           to_be_captured (set (filter #(= 1 (count (:liberties %))) opponent_chains))
           to_be_updated (remove (set to_be_captured) opponent_chains)
-          liberties (set (filter #(or (nil? (lookup %)) (to_be_captured %)) adjpts))
+          liberties (set (filter #(or (nil? (lookup %)) (to_be_captured (lookup %))) adjpts))
           nchain (single-stone  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (update-chains to_be_updated point)
                             (add-chain nchain)
-                            (merge-chains (concat friendly_chains [nchain])))]
+                            (merge-chains friendly_chains nchain))]
       (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
 
         (if (empty? (:liberties ((:lookup brd) point)))
           (do
-            (println friendly_chains point "self-capture")
+            (println "self-capture")
             board)
-          brd
-          )))))
+          brd)))))
 
 (defn merge-chains
   "merging chains to the first one, heavy processing due to the
@@ -150,24 +149,31 @@
   at this point we assume it is not a self-capture
   merging to the first"
   [{chains :chains lookup :lookup :as board}
-   to_be_merged]
-  (let [chain_indices (map (partial index chains) to_be_merged)
-        chain_index (first chain_indices)
-        the_chain (first to_be_merged)
-        upd_chain (reduce
-                   (fn [ch1 ch2]
-                     {:color (:color ch1)
-                      :stones (into (:stones ch1) (:stones ch2))
-                      :liberties (union (:liberties ch1) (:liberties ch2))})
-                   the_chain
-                   (rest to_be_merged))]
-    (-> board
-        (update-in [:chains  chain_index]
-                   (constantly upd_chain))
-        (update :chains
-                (fn [chains] (vec-rm-all chains (rest chain_indices))))
-        (update :lookup
-                (fn [m] (into m (map (fn [pt] [pt upd_chain]) (:stones upd_chain))))))))
+   to_be_merged
+   connector]
+  (if (empty? to_be_merged) ;;nothing to merge
+    board
+    (let [cs (concat to_be_merged [connector])
+          chain_indices (map (partial index chains) cs)
+          chain_index (first chain_indices)
+          the_chain (first cs)
+          upd_chain (reduce
+                     (fn [ch1 ch2]
+                       {:color (:color ch1)
+                        :stones (into (:stones ch1) (:stones ch2))
+                        :liberties (union (:liberties ch1) (:liberties ch2))
+                        })
+                     the_chain
+                     (rest cs))
+          upd2 (update upd_chain :liberties
+                       (fn [l] (difference l (set (:stones connector)))))]
+      (-> board
+          (update-in [:chains  chain_index]
+                     (constantly upd2))
+          (update :chains
+                  (fn [chains] (vec-rm-all chains (rest chain_indices))))
+          (recompute-liberties upd2)
+          (register-chain upd2)))))
 
 
 ;; (def ponnuki
