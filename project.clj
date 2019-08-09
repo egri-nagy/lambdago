@@ -1,6 +1,6 @@
-(defproject lambdago "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+(defproject lambdago "2019.08.09"
+  :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
+  :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
             :url "none"
             :year 2019
