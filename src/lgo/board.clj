@@ -1,5 +1,8 @@
 (ns lgo.board
-  "Functions for representing board state and its evolution."
+  "Functions for representing board state and its evolution.
+  The board position is stored as a vector of chains, in the order of creation.
+  A chain is represented by its oldest stone.
+   When connecting the newer chain is merged to the older one."
   (:require
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
@@ -7,9 +10,6 @@
    [clojure.set :refer [union difference]]
    [clojure.string :as string]))
 
-;; The board position is stored as a vector of chains, in the order of creation.
-;; A chain is represented by its oldest stone.
-;; When connecting the newer chain is merged to the older one.
 
 
 ;;for switching between the colors
@@ -17,7 +17,7 @@
 
 (declare empty-board ;; data structure for an empty board
          put-stone ;; this puts a stone on a board position
-         legal-move? ;;decides whether the is legal or not on a given board position, ko?
+         legal-move? ;;decides whether the is legal or not on a given board
          merge-chains ;;merging friendly chains
          board-string ;; traditional ASCII rendering of the board
          )
@@ -27,13 +27,13 @@
   [width height]
   {:width width
    :height height
-   :chains [] ;; ordered by the age of the chains, newer chains merged to to oldest one
+   :chains [] ;; ordered by the age of the chains
    :lookup {}}) ;; points to chains
 
 (defn single-stone
   "Creates a single stone chain.
-  A chain is a hash-map , the stones' order is not guaranteed since connecting could happen
-   internally we use numbers for coordinates."
+  A chain is a hash-map , the stones' order is not guaranteed since merging
+  will happen."
   [color point liberties]
   {:color color
    :stones [point]
@@ -74,7 +74,9 @@
    {stones :stones color :color :as chain}]
   (let [opp (opposite color)
         affected_chains (filter #(= opp (:color %))
-                                (distinct (map lookup (envelope stones width height))))]
+                                (distinct
+                                 (map lookup
+                                      (envelope stones width height))))]
     (-> board
         (update :chains
                 (fn [chains] (vec-rm  chains
@@ -126,22 +128,25 @@
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
           opponent_chains (grouped_chains (opposite color))
-          to_be_captured (set (filter #(= 1 (count (:liberties %))) opponent_chains))
+          to_be_captured (set (filter #(= 1 (count (:liberties %)))
+                                      opponent_chains))
           to_be_deced (remove (set to_be_captured) opponent_chains)
-          liberties (set (filter #(or (nil? (lookup %)) (to_be_captured (lookup %))) adjpts))
+          liberties (set (filter #(or (nil? (lookup %))
+                                      (to_be_captured (lookup %)))
+                                 adjpts))
           nchain (single-stone  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
                             (add-chain nchain)
-                            (merge-chains friendly_chains nchain))]
-      (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
-
-        (if (empty? (:liberties ((:lookup brd) point)))
-          (do
-            (println "self-capture")
-            board)
-          brd)))))
+                            (merge-chains friendly_chains nchain))
+          final (recompute-liberties updated_board
+                                     ((:lookup updated_board) point))]
+      (if (empty? (:liberties ((:lookup final) point)))
+        (do
+          (println "self-capture")
+          board)
+        final))))
 
 (defn merge-chains
   "merging chains to the first one, heavy processing due to the
