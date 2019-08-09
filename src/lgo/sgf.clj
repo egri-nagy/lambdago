@@ -1,5 +1,7 @@
 (ns lgo.sgf
-  "Functions for working with the Smart Game Format"
+  "Functions for working with the Smart Game Format.
+  Extracting positions and move sequences.
+  Exporting to the (unreleased) goban LaTeX package."
   (:require [clojure.string :as string]
             [instaparse.core :as insta]))
 
