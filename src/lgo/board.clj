@@ -88,15 +88,14 @@
   [board ochains]
   (reduce capture-chain board ochains))
 
-(defn update-chains ;;removing a single liberty
+(defn dec-liberties
   [{chains :chains :as board} ochains point]
   (reduce (fn [brd chn]
-            (let [chn_index (index chains chn)
-                  brd2 (update-in brd
-                                  [:chains chn_index :liberties]
-                                  #(difference % #{point}))
-                  chn2 (nth (brd2 :chains) chn_index)]
-              (register-chain brd2 chn2)))
+            (let [chn_index (index chains chn)]
+              (-> brd
+                  (update-in [:chains chn_index :liberties]
+                             #(difference % #{point}))
+                  (register-chain-by-index  chn_index))))
           board
           ochains))
 
@@ -128,12 +127,12 @@
           friendly_chains (grouped_chains color)
           opponent_chains (grouped_chains (opposite color))
           to_be_captured (set (filter #(= 1 (count (:liberties %))) opponent_chains))
-          to_be_updated (remove (set to_be_captured) opponent_chains)
+          to_be_deced (remove (set to_be_captured) opponent_chains)
           liberties (set (filter #(or (nil? (lookup %)) (to_be_captured (lookup %))) adjpts))
           nchain (single-stone  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
-                            (update-chains to_be_updated point)
+                            (dec-liberties to_be_deced point)
                             (add-chain nchain)
                             (merge-chains friendly_chains nchain))]
       (let [brd (recompute-liberties updated_board ((:lookup updated_board) point))]
