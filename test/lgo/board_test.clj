@@ -21,3 +21,6 @@
                              (put-stone [1 2] :w)
                              (put-stone [2 2] :b)))
            "X.\n.X\n"))))
+
+;; (print (board-string (-> (empty-board 5 5) (put-stone [3 4] :b) (put-stone [3 3] :w) (put-stone [4 3] :b) (put-stone [4 4] :w) (put-stone [4 5] :b) (put-stone [2 4] :w) (put-stone [5 4] :b) (put-stone [3 2] :w) (put-stone [2 5] :b) (put-stone [1 4] :w) (put-stone [4 2] :b))))
+;; future test case, the last one breaks, coming from 5x5_3-2optimal.sgf

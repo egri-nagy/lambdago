@@ -44,6 +44,9 @@
   [board chain]
   (update board :lookup
           (fn [m] (into m (map (fn [pt] [pt chain]) (:stones chain))))))
+(defn register-chain-by-index
+  [board n]
+  (register-chain board ((:chains board) n)))
 
 (defn recompute-liberties
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
@@ -52,7 +55,7 @@
     (-> board
      (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
-     (register-chain (chains chain_index)))))
+     (register-chain-by-index chain_index))))
 
 (defn update-liberties
   [board chains]
@@ -85,7 +88,7 @@
   [board ochains]
   (reduce capture-chain board ochains))
 
-(defn update-chains
+(defn update-chains ;;removing a single liberty
   [{chains :chains :as board} ochains point]
   (reduce (fn [brd chn]
             (let [chn_index (index chains chn)
@@ -93,9 +96,7 @@
                                   [:chains chn_index :liberties]
                                   #(difference % #{point}))
                   chn2 (nth (brd2 :chains) chn_index)]
-              (update brd2
-                      :lookup
-                      (fn [m] (into m (map (fn [pt] [pt chn2]) (:stones chn2)))))))
+              (register-chain brd2 chn2)))
           board
           ochains))
 
@@ -174,7 +175,6 @@
                   (fn [chains] (vec-rm-all chains (rest chain_indices))))
           (recompute-liberties upd2)
           (register-chain upd2)))))
-
 
 ;; (def ponnuki
 ;;   (reduce (fn [board point]
