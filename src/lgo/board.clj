@@ -10,8 +10,6 @@
    [clojure.set :refer [union difference]]
    [clojure.string :as string]))
 
-
-
 ;;for switching between the colors
 (def opposite {:b :w, :w :b})
 
@@ -47,27 +45,33 @@
                                (:stones chain))))))
 
 (defn register-chain-by-index
+  "Calls register-chain. It is useful when we have the index of the chain to be
+  registered but not the chain itself."
   [board n]
   (register-chain board ((:chains board) n)))
 
 (defn recompute-liberties
+  "Recomputes liberties of a chain."
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
   (let [e (envelope (:stones chain) width height)
         chain_index (index chains chain)]
     (-> board
      (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
-     (register-chain-by-index chain_index))))
+     (register-chain-by-index chain_index)))) ;; why do we have to do this?
 
 (defn recompute-liberties-by-point
+  "Recomputes liberties of a chain specified by one of its points."
   [board point]
   (recompute-liberties board ((:lookup board) point)))
 
 (defn update-liberties
+  "Recomputes liberties for the set of chains given."
   [board chains]
   (reduce recompute-liberties board chains))
 
 (defn add-chain
+  "Adding a new chain to a board."
   [board chain]
   (-> board
       ;;adding it to the list of chains
@@ -113,8 +117,8 @@
   move fully.
   The following things can happen to adjacent points:
   1. if it's empty, it becomes a liberty
-  2. when occupied by enemy stones, that is
-    a. captured if the point is its last liberty
+  2. when occupied by enemy stones,
+    a. its chain captured if the point is its last liberty
     b. needs to be updated by removing the point from its liberties
   3. when occupied by a friendly stone, chains
     a. get merged
@@ -129,7 +133,7 @@
       board)
     ;;otherwise the stone is not on the board yet
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
-          ;; adjacent chains, no duplicates
+          ;; adjacent chains, no duplicates, nils removed
           adj_chains (filter identity (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
