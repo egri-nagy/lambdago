@@ -40,6 +40,9 @@
           stones))
 
 (defn envelope
+  "Returns the points that are needed to surround the group of stones.
+  Method: We compute all neighbours of the boundary, and remove the set
+  of original stones from that."
   [stones width height]
   (let [boundary (boundary-points stones width height)
         inside (set (inside-points stones width height))
