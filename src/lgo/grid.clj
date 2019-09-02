@@ -47,4 +47,4 @@
                                  (into r (neighbours pt width height )))
                                #{}
                                boundary)]
-    (remove inside fullneighbours)))
+    (remove (set stones) fullneighbours)))
