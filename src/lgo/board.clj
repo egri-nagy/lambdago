@@ -17,8 +17,8 @@
          put-stone ;; this puts a stone on a board position
          legal-move? ;;decides whether the is legal or not on a given board
          merge-chains ;;merging friendly chains
-         board-string ;; traditional ASCII rendering of the board
-         )
+         board-string) ;; traditional ASCII rendering of the board
+         
 
 (defn empty-board
   "Creates an empty board with the given dimensions."
@@ -175,8 +175,8 @@
                      (fn [ch1 ch2]
                        {:color (:color ch1)
                         :stones (into (:stones ch1) (:stones ch2))
-                        :liberties (union (:liberties ch1) (:liberties ch2))
-                        })
+                        :liberties (union (:liberties ch1) (:liberties ch2))})
+                        
                      the_chain
                      (rest cs))
           upd2 (update upd_chain :liberties
