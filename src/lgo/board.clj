@@ -6,7 +6,7 @@
   (:require
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
-   [kigen.position :refer [index]]
+   [kigen.position :refer [index position]]
    [clojure.set :refer [union difference]]
    [clojure.string :as string]))
 
@@ -18,7 +18,13 @@
          legal-move? ;;decides whether the is legal or not on a given board
          merge-chains ;;merging friendly chains
          board-string) ;; traditional ASCII rendering of the board
-         
+
+(defn chain_eq_by_stones
+  "Deciding equality of chains by the contained stones only. During putting a
+  stone the liberties might be out of sync for instances of the same chain.
+  This fixes an error, but may not be the best way to do it."
+  [chain1 chain2]
+  (= (:stones chain1) (:stones chain2)))
 
 (defn empty-board
   "Creates an empty board with the given dimensions."
@@ -54,7 +60,7 @@
   "Recomputes liberties of a chain."
   [{width :width height :height chains :chains lookup :lookup :as board} chain]
   (let [e (envelope (:stones chain) width height)
-        chain_index (index chains chain)]
+        chain_index (position (partial chain_eq_by_stones chain) chains)]
     (-> board
      (update-in [:chains  chain_index :liberties]
                 (fn [l] (union l (set (remove lookup e)))))
@@ -168,7 +174,7 @@
   (if (empty? to_be_merged) ;;nothing to merge
     board
     (let [cs (concat to_be_merged [connector])
-          chain_indices (map (partial index chains) cs)
+          chain_indices (map (fn [c] (position (partial chain_eq_by_stones c) chains)) cs)
           chain_index (first chain_indices)
           the_chain (first cs)
           upd_chain (reduce
@@ -176,11 +182,13 @@
                        {:color (:color ch1)
                         :stones (into (:stones ch1) (:stones ch2))
                         :liberties (union (:liberties ch1) (:liberties ch2))})
-                        
+
                      the_chain
                      (rest cs))
           upd2 (update upd_chain :liberties
                        (fn [l] (difference l (set (:stones connector)))))]
+      (when (nil? chain_index)
+        (println "chain index for merging" chain_index "\n chains in board" chains "\n chains we got fopr merging" cs))
       (-> board
           (update-in [:chains  chain_index]
                      (constantly upd2))
