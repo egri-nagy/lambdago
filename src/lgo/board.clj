@@ -140,7 +140,7 @@
     ;;otherwise the stone is not on the board yet
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
           ;; adjacent chains, no duplicates, nils removed
-          adj_chains (filter identity (distinct (map lookup adjpts)))
+          adj_chains (remove nil? (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
           opponent_chains (grouped_chains (opposite color))
