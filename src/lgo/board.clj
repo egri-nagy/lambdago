@@ -34,7 +34,7 @@
    :chains [] ;; ordered by the age of the chains
    :lookup {}}) ;; points to chains
 
-(defn single-stone
+(defn single-stone-chain
   "Creates a single stone chain.
   A chain is a hash-map , the stones' order is not guaranteed since merging
   will happen."
@@ -150,7 +150,7 @@
           liberties (set (filter #(or (nil? (lookup %))
                                       (to_be_captured (lookup %)))
                                  adjpts))
-          nchain (single-stone  color point liberties)
+          nchain (single-stone-chain  color point liberties)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
