@@ -51,3 +51,8 @@
          "\\gobanplace{black}{" black-stones "}\n"
          " \\gobanplace{white}{" white-stones "}\n"
          "\\gobanshowfull")))
+
+;; (require '[clojure.java.io :as io :refer :all])
+;;  (require '[lgo.sgf :refer :all])
+;;  (def fs (.list (io/file "/home/dersu/igomath/PROBLEMS/IGOPUZZLE/")))
+;; (doseq [f (sort fs)] (println "%" f) (println (positionsgf->goban (slurp (str "/home/dersu/igomath/PROBLEMS/IGOPUZZLE/" f)))))
