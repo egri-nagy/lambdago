@@ -38,10 +38,18 @@
 (def games
   [
    {:b "A" :w "B" :r "b+12.5"}
-   {:b "A" :w "B" :r "w+12.5"}
-   {:b "A" :w "B" :r "b+12.5"}
-   {:b "A" :w "B" :r "b+12.5"}
-   {:b "A" :w "B" :r "b+12.5"}
+   {:b "A" :w "B" :r "w+1.5"}
+   {:b "A" :w "B" :r "b+r"}
+   {:b "A" :w "B" :r "b+r"}
+   {:b "A" :w "B" :r "w+2.5"}
    ])
 
-(process-games players games)
+
+(def t (process-games players games))
+
+(use 'clojure.pprint)
+
+(pprint
+ (into (sorted-map-by (fn [key1 key2]
+                        (compare (get t key2)
+                                 (get t key1))))t))
