@@ -24,7 +24,6 @@
                   Rw (plyrs w)
                   S (if ( = (first r) \b) 1.0 0.0)
                   Db (rating-adjustment S (EA Rb Rw))]
-              (println Db)
               (-> plyrs
                   (update-in [b] + Db)
                   (update-in [w] - Db))))
@@ -49,6 +48,10 @@
 
 (use 'clojure.pprint)
 
+(pprint t)
+
+
+;;todo this is wrong
 (pprint
  (into (sorted-map-by (fn [key1 key2]
                         (compare (get t key2)
