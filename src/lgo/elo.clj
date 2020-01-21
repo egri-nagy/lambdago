@@ -14,3 +14,6 @@
 
 (defn rating-adjustment [SA EA]
   (math/round (* K (- SA EA))))
+
+(defn new-rating [RA RB result]
+  (+ RA (rating-adjustment result (EA RA RB))))
