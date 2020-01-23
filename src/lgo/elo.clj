@@ -46,13 +46,5 @@
 
 (def t (process-games players games))
 
-(use 'clojure.pprint)
-
-(pprint t)
-
-
-;;todo this is wrong
-(pprint
- (into (sorted-map-by (fn [key1 key2]
-                        (compare (get t key2)
-                                 (get t key1))))t))
+(doseq [[name rating] (reverse (sort-by  second t ))]
+  (println name " " rating))
