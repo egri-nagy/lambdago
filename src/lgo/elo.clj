@@ -15,13 +15,19 @@
         QB (Q RB)]
     (/ QA (+ QA QB))))
 
-(defn rating-adjustment [SA EA K]
+(defn rating-adjustment
+  "The rating adjustment for result SA and expectation EA with constant K."
+  [SA EA K]
   (math/round (* K (- SA EA))))
 
-(defn new-rating [RA RB result K]
+(defn new-rating
+  "Calculates the new rating for player A."
+  [RA RB result K]
   (+ RA (rating-adjustment result (EA RA RB) K)))
 
-(defn process-games [players games K]
+(defn process-games
+  "Batch processing game results."
+  [players games K]
   (reduce (fn [plyrs {b :b w :w r :r}]
             (let [Rb (plyrs b)
                   Rw (plyrs w)
@@ -32,6 +38,13 @@
                   (update-in [w] - Db))))
           players
           games))
+
+(defn print-ratings
+  "Prints the names and the ratings to the console."
+  [players]
+  (doseq [[name rating] (reverse (sort-by  second players))]
+    (println name " " rating))
+)
 
 (def players
   {"A" 1200
@@ -47,7 +60,4 @@
    ])
 
 
-(def t (process-games players games 32))
-
-(doseq [[name rating] (reverse (sort-by  second t ))]
-  (println name " " rating))
+(print-ratings (process-games players games 32))
