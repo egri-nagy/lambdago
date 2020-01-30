@@ -45,19 +45,3 @@
   (doseq [[name rating] (reverse (sort-by  second players))]
     (println name " " rating))
 )
-
-(def players
-  {"A" 1200
-   "B" 1200})
-
-(def games
-  [
-   {:b "A" :w "B" :r "b+12.5"}
-   {:b "A" :w "B" :r "w+1.5"}
-   {:b "A" :w "B" :r "b+r"}
-   {:b "A" :w "B" :r "b+r"}
-   {:b "A" :w "B" :r "w+2.5"}
-   ])
-
-
-(print-ratings (process-games players games 32))
