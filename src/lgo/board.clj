@@ -1,7 +1,7 @@
 (ns lgo.board
   "Functions for representing board state and its evolution.
   The board position is stored as a vector of chains, in the order of creation.
-  A chain is represented by its oldest stone.
+   A chain is represented by its oldest stone (first?).
    When connecting the newer chain is merged to the older one."
   (:require
    [lgo.grid :refer [neighbours envelope]]

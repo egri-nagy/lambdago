@@ -1,5 +1,7 @@
 (ns lgo.grid
-  "Functions for dealing with a rectangular grid.")
+  "Functions for dealing with a rectangular grid.
+  Representation: a point is a pair (vector) of integers.
+  [column row]")
 
 (declare neighbours
          inside-points
@@ -11,7 +13,7 @@
   i.e. edges and corners are handled properly.
   Method:
   We generate all neighbours, then filter the valid ones (not the fastest)."
-  [[column row :as point] width height]
+  [[column row] width height]
   (let [points  [[(dec column) row]
                  [(inc column) row]
                  [column (dec row)]
@@ -28,7 +30,8 @@
   Color is not considered here."
   [stones width height]
   (let [S (set stones)]
-    (filter (fn [point] (every? S (neighbours point width height)))
+    (filter (fn [point]
+              (every? S (neighbours point width height)))
             S)))
 
 (defn boundary-points
@@ -45,7 +48,6 @@
   of original stones from that."
   [stones width height]
   (let [boundary (boundary-points stones width height)
-        inside (set (inside-points stones width height))
         fullneighbours (reduce (fn [r pt]
                                  (into r (neighbours pt width height )))
                                #{}
