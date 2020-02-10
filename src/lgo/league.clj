@@ -1,4 +1,4 @@
-(ns lgo.elo
+(ns lgo.league
   "Function for managing a league."
   (:require [lgo.elo :refer [rating-adjustment EA]]))
 
@@ -21,3 +21,23 @@
   [players]
   (doseq [[name rating] (reverse (sort-by  second players))]
     (println name " " rating)))
+
+(defn even-pairings
+  "Gives a pairing for the players based on their ratings for even games
+  with nigiri. Missing players are ignored.
+  The top player can end up as a bye, or play a simul."
+  [players missing]
+  (let [names (map first players)
+        present (remove (set missing) names)
+        ordered (sort-by players present)]
+    (partition 2 ordered)))
+
+(defn handicap-pairings
+  "Cuts the players into an upper and loewr part and pairs them systematically
+  for handicap games."
+  [players missing]
+  (let [names (map first players)
+        present (remove (set missing) names)
+        ordered (sort-by players present)
+        h (int (/ (count ordered) 2))]
+    (apply map vector (partition h ordered))))
