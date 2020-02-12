@@ -123,8 +123,8 @@
   3. when occupied by a friendly stone, chains
     a. get merged
     b. possibly captured."
-  [{width :width height :height chains :chains lookup :lookup liberties :liberties :as board}
-   [column row :as point]
+  [{width :width height :height lookup :lookup liberties :liberties :as board}
+   point
    color]
   (if (lookup point)
     ;;illegal move, it's on the board already
