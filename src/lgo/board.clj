@@ -72,14 +72,12 @@
 (defn add-chain
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
-  2. associating the set of liberties with the chain
-  3. registering it in the lookup"
-  [board chain liberties]
+  2. registering it in the lookup
+  Associating the set of liberties with the chain can be done later."
+  [board chain]
   (-> board
       ;;adding it to the vector of chains
       (update :chains #(conj % chain))
-      ;;registering the liberties separately
-      (update :liberties #(conj % [chain liberties]))
       ;;updating the reverse lookup
       (register-chain chain)))
 
@@ -146,8 +144,9 @@
           (update :chains
                   (fn [chains] (vec-rm-all chains chain_indices))) ;;just remove
           ;; no need to register, since lookup entries  will be overwritten
-          (add-chain upd_chain (compute-liberties board upd_chain))
-          (register-chain upd_chain)))))
+          (add-chain upd_chain)
+          (register-chain upd_chain)
+          (recompute-liberties upd_chain)))))
 
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
@@ -178,14 +177,11 @@
           to_be_captured (set (filter #(= 1 (count (liberties %)))
                                       opponent_chains))
           to_be_deced (remove (set to_be_captured) opponent_chains)
-          liberties (set (filter #(or (nil? (lookup %)) ;;is this needed?
-                                      (to_be_captured (lookup %)))
-                                 adjpts))
           nchain (single-stone-chain  color point)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
-                            (add-chain nchain liberties)
+                            (add-chain nchain)
                             (merge-chains (concat friendly_chains [nchain]))
                             (recompute-liberties-by-point point))]
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
