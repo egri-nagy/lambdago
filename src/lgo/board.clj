@@ -1,8 +1,12 @@
 (ns lgo.board
-  "Functions for representing board state and its evolution.
+  "Functions for representing board state and its evolution, by adding stones
+  and capturing, or merging chains accordingly.
   The board position is stored as a vector of chains, in the order of creation.
-   A chain is represented by its oldest stone (first?).
-   When connecting the newer chain is merged to the older one."
+   A chain is represented by its oldest, first stone.
+   When connecting the newer chain is merged to the older one.
+  Liberties for chains are stored separately, as the set of liberties may change
+  even if the chain remains the same.
+  For quick access we also have a lookup table from points to chains."
   (:require
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
@@ -25,19 +29,17 @@
   {:width width
    :height height
    :chains [] ;; ordered by the age of the chains
-   :liberties {} ;; chains to liberties, since the liberties are more volatile
+   :liberties {} ;; chains to sets of liberties
    :lookup {}}) ;; points to chains
 
 (defn single-stone-chain
-  "Creates a single stone chain.
-  A chain is a hash-map , the stones' order is not guaranteed since merging
-  will happen."
+  "Creates a single stone chain. Liberties not considered here."
   [color point]
   {:color color
    :stones [point]})
 
 (defn register-chain
-  "updating the lookup table of the board by registering a given chain"
+  "Updating the lookup table of the board by registering a given chain"
   [board chain]
   (update board :lookup
           (fn [m] (into m (map (fn [pt] [pt chain])
@@ -49,28 +51,32 @@
   (let [e (envelope (:stones chain) width height)]
     (set (remove lookup e))))
 
-
 (defn recompute-liberties
-  "Recomputes liberties of a chain."
+  "Recomputes liberties of an existing chain on a board."
   [board chain]
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
 
 (defn recompute-liberties-by-point
-  "Recomputes liberties of a chain specified by one of its points."
+  "Recomputes liberties of a chain specified by one of its points.
+  Just to automate lookup."
   [board point]
   (recompute-liberties board ((:lookup board) point)))
 
 (defn update-liberties
-  "Recomputes liberties for the set of chains given."
+  "Recomputes liberties for the set of chains given.
+  Only for compatibility with threading macro."
   [board chains]
   (reduce recompute-liberties board chains))
 
 (defn add-chain
-  "Adding a new chain to a board."
+  "Adding a new chain to a board. This involves:
+  1. adding a chain at the end of the chains vector
+  2. associating the set of liberties with the chain
+  3. registering it in the lookup"
   [board chain liberties]
   (-> board
-      ;;adding it to the list of chains
+      ;;adding it to the vector of chains
       (update :chains #(conj % chain))
       ;;registering the liberties separately
       (update :liberties #(conj % [chain liberties]))
@@ -78,6 +84,7 @@
       (register-chain chain)))
 
 (defn remove-chain
+  "The opposite of add-chain, same order of steps."
   [board chain]
   (-> board
       (update :chains
@@ -89,6 +96,8 @@
                 (apply dissoc m (:stones chain))))))
 
 (defn capture-chain
+  "Capturing a chain involves updating the liberties of neighbouring
+  chains of opposite color."
   [{lookup :lookup width :width height :height :as board}
    {stones :stones color :color :as chain}]
   (let [opp (opposite color)
@@ -105,64 +114,19 @@
   (reduce capture-chain board ochains))
 
 (defn dec-liberties
+  "Decrementing the liberties of some affected chains by removing a point."
   [board ochains point]
   (reduce (fn [brd chn]
             (update-in brd [:liberties chn] #(difference % #{point})))
           board
           ochains))
 
-(defn put-stone
-  "Places a single stone  on the board, updating the chain list.
-  For now this is used only for chain analysis, will not check legality of the
-  move fully.
-  The following things can happen to adjacent points:
-  1. if it's empty, it becomes a liberty
-  2. when occupied by enemy stones,
-    a. its chain captured if the point is its last liberty
-    b. needs to be updated by removing the point from its liberties
-  3. when occupied by a friendly stone, chains
-    a. get merged
-    b. possibly captured."
-  [{width :width height :height lookup :lookup liberties :liberties :as board}
-   point
-   color]
-  (if (lookup point)
-    ;;illegal move, it's on the board already
-    (do
-      (println point " already on board")
-      board)
-    ;;otherwise the stone is not on the board yet
-    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
-          ;; adjacent chains, no duplicates, nils removed
-          adj_chains (remove nil? (distinct (map lookup adjpts)))
-          grouped_chains (group-by :color adj_chains)
-          friendly_chains (grouped_chains color)
-          opponent_chains (grouped_chains (opposite color))
-          to_be_captured (set (filter #(= 1 (count (liberties %)))
-                                      opponent_chains))
-          to_be_deced (remove (set to_be_captured) opponent_chains)
-          liberties (set (filter #(or (nil? (lookup %))
-                                      (to_be_captured (lookup %)))
-                                 adjpts))
-          nchain (single-stone-chain  color point)
-          updated_board (-> board
-                            (capture-chains to_be_captured)
-                            (dec-liberties to_be_deced point)
-                            (add-chain nchain liberties)
-                            (merge-chains (concat friendly_chains [nchain]))
-                            (recompute-liberties-by-point point))]
-      (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
-        (do
-          (println "self-capture")
-          board)
-        updated_board))))
-
 (defn merge-chains
   "merging chains to the first one, heavy processing due to the
   high-maintenance data structure
   at this point we assume it is not a self-capture
   merging to the first"
-  [{chains :chains lookup :lookup :as board}
+  [{chains :chains :as board}
    cs]
   (if (= 1 (count cs)) ;;nothing to merge
     board
@@ -180,15 +144,58 @@
           (update-in [:chains  chain_index]
                      (constantly upd_chain))
           (update :chains
-                  (fn [chains] (vec-rm-all chains chain_indices)))
+                  (fn [chains] (vec-rm-all chains chain_indices))) ;;just remove
+          ;; no need to register, since lookup entries  will be overwritten
           (add-chain upd_chain (compute-liberties board upd_chain))
           (register-chain upd_chain)))))
 
-(def ponnuki
-  (reduce (fn [board point]
-            (put-stone board point :b))
-          (empty-board 19 19)
-          [[1 2] [2 1] [3 2] [2 3]]))
+(defn put-stone
+  "Places a single stone  on the board, updating the chain list.
+  For now this is used only for chain analysis, will not check legality of the
+  move fully.
+  The following things can happen to adjacent points:
+  1. if it's empty, it becomes a liberty
+  2. when occupied by enemy stones,
+    a. its chain captured if the point is its last liberty
+    b. needs to be updated by removing the point from its liberties
+  3. when occupied by a friendly stone, chains
+    a. get merged
+    b. possibly captured."
+  [{width :width height :height lookup :lookup liberties :liberties :as board}
+   point
+   color]
+  (if (lookup point)
+    ;;illegal move, it's on the board already, just return the same state
+    board
+    ;;otherwise the stone is not on the board yet, we do the full change and
+    ;;rollback it's a self-capture
+    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
+          ;; adjacent chains, no duplicates, nils removed
+          adj_chains (remove nil? (distinct (map lookup adjpts)))
+          grouped_chains (group-by :color adj_chains)
+          friendly_chains (grouped_chains color)
+          opponent_chains (grouped_chains (opposite color))
+          to_be_captured (set (filter #(= 1 (count (liberties %)))
+                                      opponent_chains))
+          to_be_deced (remove (set to_be_captured) opponent_chains)
+          liberties (set (filter #(or (nil? (lookup %)) ;;is this needed?
+                                      (to_be_captured (lookup %)))
+                                 adjpts))
+          nchain (single-stone-chain  color point)
+          updated_board (-> board
+                            (capture-chains to_be_captured)
+                            (dec-liberties to_be_deced point)
+                            (add-chain nchain liberties)
+                            (merge-chains (concat friendly_chains [nchain]))
+                            (recompute-liberties-by-point point))]
+      (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
+        board ;;self-capture
+        updated_board))))
+
+(defn legal-move?
+  "It's legal if we can put it on the board."
+  [board point color]
+  (= board (put-stone board point color)))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
