@@ -43,12 +43,6 @@
           (fn [m] (into m (map (fn [pt] [pt chain])
                                (:stones chain))))))
 
-(defn register-chain-by-index
-  "Calls register-chain. It is useful when we have the index of the chain to be
-  registered but not the chain itself."
-  [board n]
-  (register-chain board ((:chains board) n)))
-
 (defn compute-liberties
   "Computes liberties of a chain. Removing occupied points from its envelope."
   [{width :width height :height lookup :lookup :as board} chain]
@@ -58,15 +52,9 @@
 
 (defn recompute-liberties
   "Recomputes liberties of a chain."
-  [{width :width height :height lookup :lookup :as board} chain]
-  (let [e (envelope (:stones chain) width height)
-                                        ;chain_index (position (partial chain_eq_by_stones chain) chains)
-        ]
-    (-> board
-     (update-in [:liberties  chain]
-                (fn [l] (union l (set (remove lookup e)))))
-     ;(register-chain-by-index chain_index)
-     ))) ;; why do we have to do this?
+  [board chain]
+  (update-in board [:liberties  chain]
+             (constantly (compute-liberties board chain))))
 
 (defn recompute-liberties-by-point
   "Recomputes liberties of a chain specified by one of its points."
@@ -117,14 +105,9 @@
   (reduce capture-chain board ochains))
 
 (defn dec-liberties
-  [{chains :chains :as board} ochains point]
+  [board ochains point]
   (reduce (fn [brd chn]
-            (let [chn_index (index chains chn)]
-              (-> brd
-                  (update-in [:liberties chn]
-                             #(difference % #{point}))
-                  (register-chain-by-index  chn_index) ;; we need to register since liberties change
-                  )))
+            (update-in brd [:liberties chn] #(difference % #{point})))
           board
           ochains))
 
