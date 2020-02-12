@@ -113,7 +113,8 @@
               (-> brd
                   (update-in [:chains chn_index :liberties]
                              #(difference % #{point}))
-                  (register-chain-by-index  chn_index))))
+                  (register-chain-by-index  chn_index) ;; we need to register since liberties change
+                  )))
           board
           ochains))
 
