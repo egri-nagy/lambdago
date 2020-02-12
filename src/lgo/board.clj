@@ -6,7 +6,7 @@
   (:require
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
-   [kigen.position :refer [index position]]
+   [kigen.position :refer [index]]
    [clojure.set :refer [union difference]]
    [clojure.string :as string]))
 
@@ -18,13 +18,6 @@
          legal-move? ;;decides whether the is legal or not on a given board
          merge-chains ;;merging friendly chains
          board-string) ;; traditional ASCII rendering of the board
-
-(defn chain_eq_by_stones
-  "Deciding equality of chains by the contained stones only. During putting a
-  stone the liberties might be out of sync for instances of the same chain.
-  This fixes an error, but may not be the best way to do it."
-  [chain1 chain2]
-  (= (:stones chain1) (:stones chain2)))
 
 (defn empty-board
   "Creates an empty board with the given dimensions."
@@ -190,7 +183,7 @@
    cs]
   (if (= 1 (count cs)) ;;nothing to merge
     board
-    (let [chain_indices (map (fn [c] (position (partial chain_eq_by_stones c) chains)) cs)
+    (let [chain_indices (map (partial index chains) cs)
           chain_index (first chain_indices)
           the_chain (first cs)
           upd_chain (reduce
