@@ -34,7 +34,7 @@
 
 (defn handicap-pairings
   "Cuts the players into an upper and loewr part and pairs them systematically
-  for handicap games."
+  by folding for handicap games."
   [players missing]
   (let [names (map first players)
         present (remove (set missing) names)
