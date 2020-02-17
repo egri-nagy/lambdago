@@ -16,7 +16,6 @@
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
-   [clojure.set :refer [union difference]]
    [clojure.string :as string]))
 
 ;;for switching between the colors
@@ -124,7 +123,7 @@
   "Decrementing the liberties of some affected chains by removing a point."
   [board chains point]
   (reduce (fn [brd chn]
-            (update-in brd [:liberties chn] #(difference % #{point})))
+            (update-in brd [:liberties chn] #(disj % point)))
           board
           chains))
 
