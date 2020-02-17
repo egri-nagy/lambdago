@@ -54,7 +54,12 @@
 
 (def SGFcoords->points (zipmap "abcdefghijklmnopqrstuvwxyz" (range 1 27)))
 
+(defn SGF-game-moves->lgo
+  [SGF-moves]
+  (map (fn [p] [({"B" :b "W" :w} (first p)) (mapv SGFcoords->points (second p))])
+       SGF-moves))
 
+;;(sgf/SGF-game-moves->lgo (sgf/extract-game-moves (slurp "example.sgf")))
 
 ;; (require '[clojure.java.io :as io :refer :all])
 ;;  (require '[lgo.sgf :refer :all])
