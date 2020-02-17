@@ -128,10 +128,7 @@
           chains))
 
 (defn merge-chains
-  "merging chains to the first one, heavy processing due to the
-  high-maintenance data structure
-  at this point we assume it is not a self-capture
-  merging to the first"
+  "Merging chains to the first one and updating the board."
   [{chains :chains :as board}
    cs]
   (if (= 1 (count cs)) ;;nothing to merge
@@ -147,19 +144,17 @@
                      (rest cs))]
 
       (-> board
+          ;; updating the oldest chain
           (update-in [:chains  chain_index]
                      (constantly upd_chain))
+          ;;removing all the merged ones
           (update :chains
-                  (fn [chains] (vec-rm-all chains chain_indices))) ;;just remove
-          ;; no need to register, since lookup entries  will be overwritten
-          (add-chain upd_chain)
-          (register-chain upd_chain)
+                  (fn [chains] (vec-rm-all chains (rest chain_indices))))
+          (register-chain upd_chain) ;; the merged stones have wrong lookup
           (recompute-liberties upd_chain)))))
 
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
-  For now this is used only for chain analysis, will not check legality of the
-  move fully.
   The following things can happen to adjacent points:
   1. if it's empty, it becomes a liberty
   2. when occupied by enemy stones,
@@ -184,12 +179,12 @@
           opponent_chains (grouped_chains (opposite color))
           to_be_captured (set (filter #(= 1 (count (liberties %)))
                                       opponent_chains))
-          to_be_deced (remove (set to_be_captured) opponent_chains)
-          nchain (single-stone-chain  color point)
+          to_be_deced (remove to_be_captured opponent_chains)
+          nchain (single-stone-chain color point)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
-                            (add-chain nchain)
+                            (add-chain nchain) ;;adding then removing?
                             (merge-chains (concat friendly_chains [nchain]))
                             (recompute-liberties-by-point point))]
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
