@@ -2,11 +2,16 @@
   "Functions for representing board state and its evolution, by adding stones
   and capturing, or merging chains accordingly.
   The board position is stored as a vector of chains, in the order of creation.
-   A chain is represented by its oldest, first stone.
-   When connecting the newer chain is merged to the older one.
+  A chain has a color and a set of stones.
+  When connecting friendly chains the newer chain is merged to the older one.
   Liberties for chains are stored separately, as the set of liberties may change
   even if the chain remains the same.
-  For quick access we also have a lookup table from points to chains."
+  For quick access we also have a lookup table from points to chains.
+
+  The evolution of the board is traced by creating newer versions of the
+  immutable data structure representing the board. Several of the functions
+  below produce a changed version of the board. These are 'updating' functions
+  in this sense."
   (:require
    [lgo.grid :refer [neighbours envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
@@ -24,7 +29,8 @@
          board-string) ;; traditional ASCII rendering of the board
 
 (defn empty-board
-  "Creates an empty board with the given dimensions."
+  "Creates an empty board with the given dimensions. It returns a hash-map with
+  an empty vector of chains, and two hash-maps for lookup and liberties."
   [width height]
   {:width width
    :height height
@@ -33,33 +39,35 @@
    :lookup {}}) ;; points to chains
 
 (defn single-stone-chain
-  "Creates a single stone chain. Liberties not considered here."
+  "Creates a single stone chain given a point and color of the stone."
   [color point]
   {:color color
    :stones [point]})
 
 (defn register-chain
-  "Updating the lookup table of the board by registering a given chain"
+  "Updating the lookup table of the board by registering a given chain."
   [board chain]
   (update board :lookup
           (fn [m] (into m (map (fn [pt] [pt chain])
                                (:stones chain))))))
 
 (defn compute-liberties
-  "Computes liberties of a chain. Removing occupied points from its envelope."
-  [{width :width height :height lookup :lookup :as board} chain]
+  "Computes liberties of a chain. This is a fresh calculation (not incremental)
+  by removing the points of the chain from its envelope."
+  [{width :width height :height lookup :lookup} ;; board
+   chain]
   (let [e (envelope (:stones chain) width height)]
     (set (remove lookup e))))
 
 (defn recompute-liberties
-  "Recomputes liberties of an existing chain on a board."
+  "Updates a board by recomputing liberties of an existing chain."
   [board chain]
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
 
 (defn recompute-liberties-by-point
   "Recomputes liberties of a chain specified by one of its points.
-  Just to automate lookup."
+  Just to automate lookup in threading macros."
   [board point]
   (recompute-liberties board ((:lookup board) point)))
 
@@ -82,7 +90,7 @@
       (register-chain chain)))
 
 (defn remove-chain
-  "The opposite of add-chain, same order of steps."
+  "The opposite of add-chain, same order of steps, also removing liberties."
   [board chain]
   (-> board
       (update :chains
@@ -108,16 +116,17 @@
         (update-liberties affected_chains))))
 
 (defn capture-chains
-  [board ochains]
-  (reduce capture-chain board ochains))
+  "Just capturing several chains in one go."
+  [board chains]
+  (reduce capture-chain board chains))
 
 (defn dec-liberties
   "Decrementing the liberties of some affected chains by removing a point."
-  [board ochains point]
+  [board chains point]
   (reduce (fn [brd chn]
             (update-in brd [:liberties chn] #(difference % #{point})))
           board
-          ochains))
+          chains))
 
 (defn merge-chains
   "merging chains to the first one, heavy processing due to the
