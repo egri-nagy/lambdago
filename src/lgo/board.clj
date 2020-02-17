@@ -164,8 +164,8 @@
     a. get merged
     b. possibly captured."
   [{width :width height :height lookup :lookup liberties :liberties :as board}
-   point
-   color]
+   color
+   point]
   (if (lookup point)
     ;;illegal move, it's on the board already, just return the same state
     board
@@ -193,8 +193,8 @@
 
 (defn legal-move?
   "It's legal if we can put it on the board."
-  [board point color]
-  (= board (put-stone board point color)))
+  [board color point]
+  (= board (put-stone board color point)))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})

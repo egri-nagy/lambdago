@@ -52,6 +52,10 @@
          " \\gobanplace{white}{" white-stones "}\n"
          "\\gobanshowfull")))
 
+(def SGFcoords->points (zipmap "abcdefghijklmnopqrstuvwxyz" (range 1 27)))
+
+
+
 ;; (require '[clojure.java.io :as io :refer :all])
 ;;  (require '[lgo.sgf :refer :all])
 ;;  (def fs (.list (io/file "/home/dersu/igomath/PROBLEMS/IGOPUZZLE/")))
