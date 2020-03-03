@@ -16,6 +16,22 @@
           players
           games))
 
+(defn process-team-games
+  "Batch processing game results played by teams, pair go, rengo."
+  [players games K]
+  (reduce (fn [teams {b :b w :w r :r}]
+            (let [
+                  Rb (plyrs b)
+                  Rw (plyrs w)
+                  S (if ( = (first r) \b) 1.0 0.0)
+                  Db (rating-adjustment S (EA Rb Rw) K)]
+              (-> plyrs
+                  (update-in [b] + Db)
+                  (update-in [w] - Db))))
+          players
+          games))
+
+
 (defn print-ratings
   "Prints the names and the ratings to the console."
   [players]
