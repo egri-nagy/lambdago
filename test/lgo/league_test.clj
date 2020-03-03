@@ -14,4 +14,4 @@
 (deftest team-games-test
   (testing "Testing team games."
     (is (= (process-team-games players pair-go-games 32)
-           [[2 1] [1 2]] ))))
+           {"A" 1220, "B" 1280, "C" 1420, "D" 1480} ))))
