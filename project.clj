@@ -10,6 +10,7 @@
                  [instaparse "1.4.10"]
                  [rhizome "0.2.9"]
                  [org.clojure/math.numeric-tower "0.0.4"]
+                 [net.mikera/core.matrix "0.62.0"]
                  [kigen "19.08.05"]]
   :plugins [[lein-cloverage "1.1.2"]
             [lein-kibit "0.1.8"]

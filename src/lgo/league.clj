@@ -1,6 +1,7 @@
 (ns lgo.league
   "Function for managing a league."
-  (:require [lgo.elo :refer [rating-adjustment EA]]))
+  (:require [lgo.elo :refer [rating-adjustment EA]]
+            [clojure.core.matrix.stats :refer [mean]]))
 
 (defn process-games
   "Batch processing game results."
@@ -19,15 +20,18 @@
 (defn process-team-games
   "Batch processing game results played by teams, pair go, rengo."
   [players games K]
-  (reduce (fn [teams {b :b w :w r :r}]
-            (let [
-                  Rb (plyrs b)
-                  Rw (plyrs w)
+  (reduce (fn [plyrs {b :b w :w r :r}]
+            (let [Rb (mean (map plyrs b))
+                  Rw (mean (map plyrs w))
                   S (if ( = (first r) \b) 1.0 0.0)
-                  Db (rating-adjustment S (EA Rb Rw) K)]
+                  Db (rating-adjustment S (EA Rb Rw) K)
+                  rfn (fn [plyrs team delta op]
+                        (reduce (fn [m x] (update-in m [x] op delta))
+                                plyrs
+                                team))]
               (-> plyrs
-                  (update-in [b] + Db)
-                  (update-in [w] - Db))))
+                  (rfn b Db +)
+                  (rfn w Db -))))
           players
           games))
 
