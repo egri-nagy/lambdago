@@ -128,20 +128,22 @@
           chains))
 
 (defn merge-chains
-  "Merging chains to the first one and updating the board."
+  "Merging chains to the first one and updating the board through a new
+  connecting single-stone chain, the newly placed stone."
   [{chains :chains :as board}
-   cs]
-  (if (= 1 (count cs)) ;;nothing to merge
-    board
-    (let [chain_indices (map (partial index chains) cs)
+   friendly_chains
+   connector]
+  (if (empty? friendly_chains)
+    (add-chain board connector) ;;nothing to merge, just add the connector chain
+    (let [chain_indices (map (partial index chains) friendly_chains)
           chain_index (first chain_indices)
-          the_chain (first cs)
+          the_chain (first friendly_chains)
           upd_chain (reduce
                      (fn [ch1 ch2]
                        {:color (:color ch1)
                         :stones (into (:stones ch1) (:stones ch2))})
                      the_chain
-                     (rest cs))]
+                     (concat (rest friendly_chains) [connector]))]
 
       (-> board
           ;; updating the oldest chain
@@ -180,12 +182,11 @@
           to_be_captured (set (filter #(= 1 (count (liberties %)))
                                       opponent_chains))
           to_be_deced (remove to_be_captured opponent_chains)
-          nchain (single-stone-chain color point)
           updated_board (-> board
                             (capture-chains to_be_captured)
                             (dec-liberties to_be_deced point)
-                            (add-chain nchain) ;;adding then removing?
-                            (merge-chains (concat friendly_chains [nchain]))
+                            (merge-chains friendly_chains
+                                          (single-stone-chain color point))
                             (recompute-liberties-by-point point))]
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
         board ;;self-capture
