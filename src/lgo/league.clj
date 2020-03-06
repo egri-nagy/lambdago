@@ -1,10 +1,14 @@
 (ns lgo.league
-  "Function for managing a league."
+  "Function for managing a league. Calculating updates in ranking for players."
   (:require [lgo.elo :refer [rating-adjustment EA]]
             [clojure.core.matrix.stats :refer [mean]]))
 
 (defn process-games
-  "Batch processing game results."
+  "Batch processing game results. Games should be stored in a sequence.
+  The players' database is a hash-map of names (strings) to ratings.
+  Each game is recorded as a hash-map, e.g.
+  {:b \"Alice\" :w \"Bob\" :r \"b+1.5\"}.
+  K - the factor for Elo calculation."
   [players games K]
   (reduce (fn [plyrs {b :b w :w r :r}]
             (let [Rb (plyrs b)
