@@ -195,7 +195,7 @@
 (defn legal-move?
   "It's legal if we can put it on the board."
   [board color point]
-  (= board (put-stone board color point)))
+  (not (= board (put-stone board color point))))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
