@@ -6,11 +6,12 @@
 
 (defn genmove
   [{lookup :lookup width :width height :height :as board}
-   color]
+   color
+   history]
   (let [pts (points width height)
         empty_pts (filter (comp nil? lookup) pts)
         candidates (shuffle empty_pts)
-        move (first (filter (partial legal-move? board color) candidates))]
+        move (first (filter (partial legal-move? board color history) candidates))]
     (if (nil? move)
       :pass
       move)))

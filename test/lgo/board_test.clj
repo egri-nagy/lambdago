@@ -12,10 +12,9 @@
                              (put-stone :b [1 1])
                              (put-stone :w [2 1])))
            ".O\n"))
-    (is (= (board-string (-> (empty-board 2 1)
-                             (put-stone :b [1 1])
-                             (put-stone :w [1 1])))
-           "X.\n"))))
+    (is (nil? (-> (empty-board 2 1)
+                  (put-stone :b [1 1])
+                  (put-stone :w [1 1]))))))
 
 (deftest board-2x2-tests
   (testing "Testing sequences of moves on the 2x2."

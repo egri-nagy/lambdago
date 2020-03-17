@@ -169,8 +169,8 @@
    color
    point]
   (if (lookup point)
-    ;;illegal move, it's on the board already, just return the same state
-    board
+    ;;illegal move, it's on the board already, no new state
+    nil
     ;;otherwise the stone is not on the board yet, we do the full change and
     ;;rollback it's a self-capture
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
@@ -194,8 +194,10 @@
 
 (defn legal-move?
   "It's legal if we can put it on the board."
-  [board color point]
-  (not (= board (put-stone board color point))))
+  [board color history point]
+  (let [nboard (put-stone board color point)]
+    (and (not (= board nboard))
+         (not (contains? history [(opposite color) nboard])))))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
