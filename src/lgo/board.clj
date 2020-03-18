@@ -155,6 +155,24 @@
           (register-chain upd_chain) ;; the merged stones have wrong lookup
           (recompute-liberties upd_chain)))))
 
+(defn self-capture?
+  "Returns true if putting stone at the point would be a self-capture."
+  [{width :width height :height lookup :lookup liberties :liberties :as board}
+   color
+   point]
+  (let [ngbs (neighbours point width height)]
+    (when (not-any? nil? ngbs) ;; there is no liberty for stone
+      (let [ch (reduce into
+                       #{point}
+                       (map :stones
+                            (filter #(= color (:color %))
+                                    ngbs)))
+            env (envelope ch width height)
+            ochs (map lookup envelope)]
+        (when (not-any? nil? ochs) ;; no liberty for merged chain
+          ;; only enemy chains now, none of the should be captured by stone
+          (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
+
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
   The following things can happen to adjacent points:
