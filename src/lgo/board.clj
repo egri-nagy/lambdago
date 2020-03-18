@@ -214,8 +214,8 @@
   "It's legal if we can put it on the board."
   [board color history point]
   (let [nboard (put-stone board color point)]
-    (and (not (= board nboard))
-         (not (contains? history [(opposite color) nboard])))))
+    (and (not (nil? nboard))
+         (not (contains? history [(opposite color) (board-string nboard)])))))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
