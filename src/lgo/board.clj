@@ -207,7 +207,7 @@
                                           (single-stone-chain color point))
                             (recompute-liberties-by-point point))]
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
-        board ;;self-capture
+        (remove-chain updated_board ((:lookup updated_board) point)) ;;self-capture
         updated_board))))
 
 (defn legal-move?

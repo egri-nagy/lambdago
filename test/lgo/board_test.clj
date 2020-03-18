@@ -7,7 +7,7 @@
     (is (= (board-string (-> (empty-board 2 1)
                              (put-stone :b [1 1])
                              (put-stone :b [2 1])))
-           "X.\n"))
+           "..\n"))
     (is (= (board-string (-> (empty-board 2 1)
                              (put-stone :b [1 1])
                              (put-stone :w [2 1])))
