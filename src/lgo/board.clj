@@ -168,7 +168,7 @@
                             (filter #(= color (:color %))
                                     ngbs)))
             env (envelope ch width height)
-            ochs (map lookup envelope)]
+            ochs (map lookup env)]
         (when (not-any? nil? ochs) ;; no liberty for merged chain
           ;; only enemy chains now, none of the should be captured by stone
           (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
