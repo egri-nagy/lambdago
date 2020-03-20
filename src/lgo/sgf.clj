@@ -53,11 +53,14 @@
          "\\gobanshowfull")))
 
 (def SGFcoords->points (zipmap "abcdefghijklmnopqrstuvwxyz" (range 1 27)))
+(def points->SGFcoords (zipmap (range 1 27) "abcdefghijklmnopqrstuvwxyz"))
 
 (defn SGF-game-moves->lgo
   [SGF-moves]
   (map (fn [p] [({"B" :b "W" :w} (first p)) (mapv SGFcoords->points (second p))])
        SGF-moves))
+
+;;(apply str (map (fn [x y] (str ";" ({:b "B" :w "W"} x) "[" (points->SGFcoords (y 0)) (points->SGFcoords (y 1)) "]")) (cycle [:b :w]) (random-game 9)))
 
 ;;(sgf/SGF-game-moves->lgo (sgf/extract-game-moves (slurp "example.sgf")))
 
