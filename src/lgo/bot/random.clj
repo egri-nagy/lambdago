@@ -11,6 +11,7 @@
   (let [pts (points width height)
         empty_pts (filter (comp nil? lookup) pts)
         candidates (shuffle empty_pts)]
+    (println (count history) history "\n")
     (loop [cands candidates]
       (if (empty? cands)
         [:pass board]
