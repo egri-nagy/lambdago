@@ -23,7 +23,7 @@
 
 (declare empty-board ;; data structure for an empty board
          put-stone ;; this puts a stone on a board position
-         legal-move? ;;decides whether the is legal or not on a given board
+         self-capture? ;;is a move self-capture?
          merge-chains ;;merging friendly chains
          board-string) ;; traditional ASCII rendering of the board
 
@@ -209,13 +209,6 @@
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
         (remove-chain updated_board ((:lookup updated_board) point)) ;;self-capture
         updated_board))))
-
-(defn legal-move?
-  "It's legal if we can put it on the board."
-  [board color history point]
-  (let [nboard (put-stone board color point)]
-    (and (not (nil? nboard))
-         (not (contains? history [(opposite color) (board-string nboard)])))))
 
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})

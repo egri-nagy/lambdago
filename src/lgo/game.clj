@@ -12,12 +12,9 @@
          history #{}]
     (if (and (= :pass (last moves))
              (= :pass (last (butlast moves))))
-    moves;;  [board moves]
+      moves;;  [board moves]
       (let [color (first turns)
-            move (genmove board color history)
-            nboard (if (= :pass move)
-                     board
-                     (put-stone board color move ))]
+            [move nboard] (genmove board color history)]
         (print (count history) " ")
         (recur nboard
                (rest turns)
