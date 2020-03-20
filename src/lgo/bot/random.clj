@@ -15,9 +15,9 @@
       (if (empty? cands)
         [:pass board]
         (let [move (first cands)]
-          (if (not (self-capture? board color move))
+          (if (self-capture? board color move)
+            (recur (rest cands))
             (let [nboard (put-stone board color move)]
-              (if (not (contains? history [(opposite color) (board-string nboard)]))
-                [move nboard]
-                (recur (rest cands))))
-            (recur (rest cands))))))))
+              (if (contains? history [(opposite color) (board-string nboard)])
+                (recur (rest cands))
+                [move nboard]))))))))

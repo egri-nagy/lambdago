@@ -15,7 +15,6 @@
       moves;;  [board moves]
       (let [color (first turns)
             [move nboard] (genmove board color history)]
-        (print (count history) " ")
         (recur nboard
                (rest turns)
                (conj moves move)
