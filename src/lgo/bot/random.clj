@@ -2,7 +2,7 @@
   "A simple bot playing random moves."
   (:require
    [lgo.board :refer [self-capture? put-stone opposite
-                      board-string empty-points]]))
+                      board-string empty-points eye-fill?]]))
 
 (defn genmove
   [board color history]
@@ -10,7 +10,8 @@
     (if (empty? cands)
       [:pass board]
       (let [move (first cands)]
-        (if (self-capture? board color move)
+        (if (or (eye-fill? board color move)
+                (self-capture? board color move))
           (recur (rest cands))
           (let [nboard (put-stone board color move)]
             (if (contains? history [(opposite color) (board-string nboard)])

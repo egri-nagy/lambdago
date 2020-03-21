@@ -174,6 +174,17 @@
           ;; only enemy chains now, none of the should be captured by stone
           (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
 
+(defn eye-fill?
+  "Returns true if putting stone there is filling up an eye."
+  [{width :width height :height lookup :lookup liberties :liberties :as board}
+   color
+   point]
+  (let [ngbs (neighbours point width height)]
+    (every?
+     (fn [ch] (and (not (nil? ch))
+                   (= color (:color ch))))
+     (map lookup ngbs))))
+
 (defn put-stone
   "Places a single stone  on the board, updating the chain list.
   The following things can happen to adjacent points:
