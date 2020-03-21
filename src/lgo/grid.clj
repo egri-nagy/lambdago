@@ -57,6 +57,6 @@
 (defn points
   "Returns all the points of the board of the given dimensions."
   [width height]
-  (for [x (range 1 (inc width))
-        y (range 1 (inc height))]
-    [x y]))
+  (for [row (range 1 (inc height))
+        col (range 1 (inc width))]
+    [col row]))
