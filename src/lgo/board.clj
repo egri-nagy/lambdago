@@ -162,17 +162,15 @@
    point]
   (let [ngbs (neighbours point width height)]
     (when (not-any? nil? ngbs) ;; there is no liberty for stone
-      (let [ch (reduce into
+      (let [chs (distinct (map lookup ngbs))
+            ch (reduce into
                        #{point}
                        (map :stones
                             (filter #(= color (:color %))
-                                    ngbs)))
+                                    chs)))
             env (envelope ch width height)
             ochs (map lookup env)]
-        (print ngbs)
-        (when (and
-               (not (empty? ochs))
-               (not-any? nil? ochs)) ;; no liberty for merged chain
+        (when (not-any? nil? ochs) ;; no liberty for merged chain
           ;; only enemy chains now, none of the should be captured by stone
           (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
 
