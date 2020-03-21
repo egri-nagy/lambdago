@@ -224,3 +224,11 @@
              (for [c (range 1 (inc width))]
                (symbols (:color (lookup [c r]))))
              '(\newline))))))
+
+(defn build-position
+  [rows]
+  (let [w (count (first rows))
+        h (count rows)
+        b (empty-board w h)
+        v (concat rows)]
+    ))
