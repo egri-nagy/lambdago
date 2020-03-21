@@ -210,6 +210,11 @@
         (remove-chain updated_board ((:lookup updated_board) point)) ;;self-capture
         updated_board))))
 
+(defn empty-points
+  [{lookup :lookup width :width height :height}]
+  (filter (comp nil? lookup)
+          (points width height)))
+
 ;;for the ASCII rendering of a board
 (def symbols {:b \X :w \O nil \.})
 
