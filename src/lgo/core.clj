@@ -2,7 +2,8 @@
   (:gen-class)
   (:require [lgo.board :refer :all] ;;for repl convenience
             [lgo.game :refer :all]
-            [lgo.sgf :refer :all]))
+            [lgo.sgf :refer :all]
+            [lgo.grid :refer :all]))
 
 ;; to save compile time property into a runtime one
 (defmacro get-version []

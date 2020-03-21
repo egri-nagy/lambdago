@@ -13,7 +13,7 @@
   below produce a changed version of the board. These are 'updating' functions
   in this sense."
   (:require
-   [lgo.grid :refer [neighbours envelope]]
+   [lgo.grid :refer [neighbours envelope points]]
    [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
    [clojure.string :as string]))
@@ -225,10 +225,22 @@
                (symbols (:color (lookup [c r]))))
              '(\newline))))))
 
+;;
+(def colors {\X :b \x :b \O :w \o :w})
+
 (defn build-position
+  "Creates the position from the string representation of a board.
+  It doesn't check whether the position is legal or not."
   [rows]
-  (let [w (count (first rows))
-        h (count rows)
-        b (empty-board w h)
-        v (concat rows)]
-    ))
+  (let [w (count (first rows)) ;;width
+        h (count rows) ;;height
+        ;;pairing colors (indicating whose turn is it) and points
+        paired (map vector
+                    (map colors (apply concat rows)) ;converting chars to colors
+                    (points w h))
+        ;;empty points we don't need to worry
+        moves (remove (comp nil? first) paired)]
+    (reduce
+     (partial apply put-stone)
+     (empty-board w h)
+     moves)))
