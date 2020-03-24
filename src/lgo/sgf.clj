@@ -36,6 +36,16 @@
   (extract-properties (flattened-parse-tree sgf)
                       #(or (= % "B") (= % "W"))))
 
+;; this will get the move and first scoreMean out of lizzie analysis
+(defn extract-LZ
+  [sgf]
+  (extract-properties (flattened-parse-tree sgf)
+                      #(or (= % "B") (= % "W") (= % "LZ"))))
+
+;(map #(if (= 1 (count (first %))) (first %)(nth (clojure.string/split (second %) #" ") 9) ) (lgo.sgf/extract-LZ (slurp "x.sgf")))
+                                        ; (remove #(= 1 (count %)) *1)
+                                        ;(map #(* %2 (read-string %1)) *1 (cycle [1.0 -1.0]))
+
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
   "Converts SGF board positions to goban (LaTeX) format."
