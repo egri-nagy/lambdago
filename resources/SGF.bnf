@@ -4,4 +4,4 @@ Sequence   = Node { Node }
 Node       = <";"> { Property }
 Property   = Identifier Value { Value }
 Identifier  = #'[A-Z]+'
-Value  = <"["> #"[()<>A-Za-z0-9-.:+\s,=?\"/'!~_]*" <"]">
+Value  = <"["> #"[^\]]*" <"]">
