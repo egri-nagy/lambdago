@@ -46,8 +46,8 @@
   [sgf]
   (let [x  (map #(if (= 1 (count (first %))) (first %) (nth (clojure.string/split (second %) #" ") 9) )
                 (lgo.sgf/extract-LZ sgf))
-        y (remove #(= 1 (count %)) x)]
-    (map #(* %2 (read-string %1)) y (cycle [1.0 -1.0]))))
+        y (partition 2 x)]
+    (map (fn [[player mean]] [player ((comp (partial format "%.2f") read-string) mean)]) y)))
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
