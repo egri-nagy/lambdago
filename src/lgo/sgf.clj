@@ -44,10 +44,14 @@
 
 (defn extract-score-means
   [sgf]
-  (let [x  (map #(if (= 1 (count (first %))) (first %) (nth (clojure.string/split (second %) #" ") 9) )
+  (let [x (map #(if (= 1 (count (first %)))
+                  (first %)
+                  (nth (string/split (second %) #" ") 9))
                 (lgo.sgf/extract-LZ sgf))
         y (partition 2 x)]
-    (map (fn [[player mean]] [player ((comp (partial format "%.2f") read-string) mean)]) y)))
+    (map (fn [[player mean]]
+           [player ((comp (partial format "%.2f") read-string) mean)])
+         y)))
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
