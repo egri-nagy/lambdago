@@ -31,10 +31,17 @@
   (filter #(and (vector? %) (p (first %)))
           (tree-seq vector? identity fpt)))
 
+(with-precision 10 :rounding FLOOR (/ 1 3M))
+
+
+
 (defn extract-game-moves
   [sgf]
   (extract-properties (flattened-parse-tree sgf)
                       #(or (= % "B") (= % "W"))))
+
+(defn round3 [f]
+  (float (/ (int (Math/round (* 1000 f))) 1000)))
 
 ;; this will get the move and first scoreMean out of lizzie analysis
 (defn extract-LZ
@@ -50,15 +57,17 @@
                 (lgo.sgf/extract-LZ sgf))
         y (partition 2 x)]
     (map (fn [[player mean]]
-           [player ((comp (partial format "%.2f") read-string) mean)])
+           [player (read-string mean)])
          y)))
 
 (defn effects
   [sgf]
-  (let [ms (map (fn [[c m]] (if (= c "B")  [c (* -1 (read-string m))] [c (read-string m)]) )
+  (let [ms (map (fn [[c m]] (if (= c "B")  [c (* -1 m)] [c m]) )
                 (extract-score-means sgf))
         ps (partition 2 1 ms)]
-    (map (fn [[[c1 m1] [c2 m2]]] (if (= c2 "W") [c2 (-(- m2 m1))] [c2 (- m2 m1)])) ps)))
+    (map (fn [[[c1 m1] [c2 m2]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1)))]
+                                     [c2 (round3 (- m2 m1))]))
+         ps)))
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
