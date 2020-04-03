@@ -53,6 +53,13 @@
            [player ((comp (partial format "%.2f") read-string) mean)])
          y)))
 
+(defn effects
+  [sgf]
+  (let [ms (map (fn [[c m]] (if (= c "B")  [c (* -1 (read-string m))] [c (read-string m)]) )
+                (extract-score-means sgf))
+        ps (partition 2 1 ms)]
+    (map (fn [[[c1 m1] [c2 m2]]] (if (= c2 "W") [c2 (-(- m2 m1))] [c2 (- m2 m1)])) ps)))
+
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
   "Converts SGF board positions to goban (LaTeX) format."
