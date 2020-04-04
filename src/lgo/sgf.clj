@@ -3,7 +3,8 @@
   Extracting positions and move sequences.
   Exporting to the (unreleased) goban LaTeX package."
   (:require [clojure.string :as string]
-            [instaparse.core :as insta]))
+            [instaparse.core :as insta]
+            [clojure.core.matrix.stats :refer [mean sd]]))
 
 ;; a crude parser for SGF files, mainly for extracting board positions and move
 ;; sequences
@@ -53,21 +54,29 @@
   [sgf]
   (let [x (map #(if (= 1 (count (first %)))
                   (first %)
-                  (nth (string/split (second %) #" ") 9))
+                  (read-string (nth (string/split (second %) #" ") 9)))
                 (lgo.sgf/extract-LZ sgf))
         y (partition 2 x)]
-    (map (fn [[player mean]]
-           [player (read-string mean)])
-         y)))
+    (map (fn [[player mean] move]
+           [player mean move])
+         y (range 1 1000))))
 
 (defn effects
   [sgf]
-  (let [ms (map (fn [[c m]] (if (= c "B")  [c (* -1 m)] [c m]) )
+  (let [ms (map (fn [[c m v]] (if (= c "B")  [c (* -1 m) v] [c m v]) )
                 (extract-score-means sgf))
         ps (partition 2 1 ms)]
-    (map (fn [[[c1 m1] [c2 m2]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1)))]
-                                     [c2 (round3 (- m2 m1))]))
+    (map (fn [[[c1 m1 v] [c2 m2 v]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1))) v]
+                                     [c2 (round3 (- m2 m1)) v]))
          ps)))
+
+(defn analysis
+  [sgf]
+  (let [effs (effects sgf)
+        Beffs (map second (filter (comp (partial = "B") first) effs))
+        Weffs (map second (filter (comp (partial = "W") first) effs))]
+    (println "Black avg sd " ((juxt mean sd) Beffs))
+    (println "White avg sd " ((juxt mean sd) Weffs))))
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
