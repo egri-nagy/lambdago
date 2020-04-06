@@ -75,8 +75,31 @@
   (let [effs (effects sgf)
         Beffs (map second (filter (comp (partial = "B") first) effs))
         Weffs (map second (filter (comp (partial = "W") first) effs))]
-    (println "Black avg sd " ((juxt mean sd) Beffs))
-    (println "White avg sd " ((juxt mean sd) Weffs))))
+    (println "Black avg sd total " ((juxt mean sd) Beffs) (reduce + Beffs))
+    (println "White avg sd total " ((juxt mean sd) Weffs) (reduce + Weffs))))
+
+(defn effects-data-for-one-color
+  [sgf color]
+  (let [dat (filter (comp (partial = color) first)
+                     (effects sgf))
+        effs (map second dat)
+        moves (map #(nth % 2) dat)
+        cumsum (reductions + effs)]
+    (map (fn [m e s] {:move m :color color :effect e :cumsum s})
+         moves effs cumsum)))
+
+(defn effects-data
+  [sgf]
+  (concat (effects-data-for-one-color sgf "W")
+          (effects-data-for-one-color sgf "B")))
+
+(defn oz-effects
+  [sgf]
+  {:data {:values (effects-data sgf)}
+   :width 1200
+   :encoding {:x {:field "move" :type "quantitative"}
+              :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
+   :mark "bar"})
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
