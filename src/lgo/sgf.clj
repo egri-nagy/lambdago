@@ -96,10 +96,30 @@
 (defn oz-effects
   [sgf]
   {:data {:values (effects-data sgf)}
-   :width 1200
-   :encoding {:x {:field "move" :type "quantitative"}
-              :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
-   :mark "bar"})
+
+   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
+                      :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
+             :mark "bar" :width 1200}
+            {:encoding {:x {:field "move" :type "quantitative"}
+                        :y {:field "effect" :type "quantitative"} :color {:field "color" :type "nominal"}}
+             :mark "bar" :width 1200}
+            {:encoding {:x {:field "color" :type "nominal"}
+                        :y {:aggregate "mean" :field "effect" :type "quantitative"}
+                        }
+             :mark "bar"}
+            {:encoding {:x {:field "color" :type "nominal"}
+                        :y {:aggregate "stdev" :field "effect" :type "quantitative"}
+                        }
+             :mark "bar"}
+
+            {:layer [{:encoding {:x {:field "color" :type "nominal"}
+                        :y {:aggregate "max" :field "effect" :type "quantitative"}
+                        }
+             :mark "bar"}
+            {:encoding {:x {:field "color" :type "nominal"}
+                        :y {:aggregate "min" :field "effect" :type "quantitative"}
+                        }
+             :mark "bar"}]}]})
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
