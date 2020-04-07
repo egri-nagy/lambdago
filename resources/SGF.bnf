@@ -1,7 +1,0 @@
-GameRecord = GameTree { GameTree }
-GameTree   = <"("> Sequence { GameTree } <")">
-Sequence   = Node { Node }
-Node       = <";"> { Property }
-Property   = Identifier Value { Value }
-Identifier  = #'[A-Z]+'
-Value  = <"["> #"[^\]]*" <"]">

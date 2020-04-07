@@ -6,9 +6,15 @@
             [instaparse.core :as insta]
             [clojure.core.matrix.stats :refer [mean sd]]))
 
-;; a crude parser for SGF files, mainly for extracting board positions and move
-;; sequences
-(def SGFparser (insta/parser "GameRecord = GameTree { GameTree };\nGameTree   = <\"(\"> Sequence { GameTree } <\")\">;\nSequence   = Node { Node };\nNode = <\";\"> { Property };\nProperty   = Identifier Value { Value };\nIdentifier  = #'[A-Z]+';\nValue  = <\"[\"> #\"[^\\]]*\" <\"]\">"))
+;; a crude parser for SGF files for extracting property values
+(def SGFparser (insta/parser
+                (str "GameRecord = GameTree { GameTree };\n"
+                     "GameTree   = <\"(\"> Sequence { GameTree } <\")\">;\n"
+                     "Sequence   = Node { Node };\n"
+                     "Node = <\";\"> { Property };\n"
+                     "Property   = Identifier Value { Value };\n"
+                     "Identifier  = #'[A-Z]+';\n"
+                     "Value  = <\"[\"> #\"[^\\]]*\" <\"]\">")))
 
 ;; transform function for instaparse, turning properties really into pairs
 (def flatten-properties
