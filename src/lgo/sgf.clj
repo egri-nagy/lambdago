@@ -66,8 +66,8 @@
   (let [ms (map (fn [[c m v]] (if (= c "B")  [c (* -1 m) v] [c m v]) )
                 (extract-score-means sgf))
         ps (partition 2 1 ms)]
-    (map (fn [[[c1 m1 v] [c2 m2 v]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1))) v]
-                                     [c2 (round3 (- m2 m1)) v]))
+    (map (fn [[[c1 m1 v1] [c2 m2 v2]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1))) v2]
+                                     [c2 (round3 (- m2 m1)) v2]))
          ps)))
 
 (defn analysis
