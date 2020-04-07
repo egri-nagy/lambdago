@@ -4,7 +4,8 @@
             [lgo.game :refer :all]
             [lgo.sgf :refer :all]
             [lgo.grid :refer :all]
-            [lgo.gtp :refer :all]))
+            [lgo.gtp :refer :all]
+            [oz.core :as oz]))
 
 ;; to save compile time property into a runtime one
 (defmacro get-version []
@@ -14,8 +15,14 @@
   "The first argument is a name of a file containing Clojure source code.
   This main method evaluates the forms contained."
   [& args]
-  (println "LambdaGo"
-           (get-version))
+  (let [command (first args)]
+    (case command
+      "gtp" (do
+              (println "LambdaGo"
+                       (get-version))
                                         ;(load-file (first args))
-  (gtp-loop)
-  (shutdown-agents))
+              (gtp-loop))
+      "lizzie" (do
+                 (oz/start-server!)
+                 (oz/view! (oz-effects (slurp (second args))) :mode :vega)))
+    (shutdown-agents)))

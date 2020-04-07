@@ -8,7 +8,7 @@
 
 ;; a crude parser for SGF files, mainly for extracting board positions and move
 ;; sequences
-(def SGFparser (insta/parser (slurp "resources/SGF.bnf")))
+(def SGFparser (insta/parser "GameRecord = GameTree { GameTree };\nGameTree   = <\"(\"> Sequence { GameTree } <\")\">;\nSequence   = Node { Node };\nNode = <\";\"> { Property };\nProperty   = Identifier Value { Value };\nIdentifier  = #'[A-Z]+';\nValue  = <\"[\"> #\"[^\\]]*\" <\"]\">"))
 
 ;; transform function for instaparse, turning properties really into pairs
 (def flatten-properties
