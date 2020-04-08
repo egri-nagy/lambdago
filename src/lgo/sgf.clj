@@ -13,7 +13,7 @@
                      "Node = <\";\"> Property*                       \n"
                      "Property   = Identifier Value*                 \n"
                      "Identifier  = #'[A-Z]+'                        \n"
-                     "Value  = <\"[\"> #\"([^\\\\\\]]*|\\\\.)*\" <\"]\">")))
+                     "Value  = <\"[\"> #\"(\\\\.|[^\\\\\\]]*)*\" <\"]\">")))
 
 ;; transform function for instaparse, turning properties really into pairs
 (def flatten-properties
