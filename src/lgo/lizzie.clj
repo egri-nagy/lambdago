@@ -12,14 +12,21 @@
 (defn extract-LZ
   [sgf]
   (extract-properties (flattened-parse-tree sgf)
-                      #(or (= % "B") (= % "W") (= % "LZ"))))
+                      #{"B" "W" "LZ"}))
 
 (defn extract-score-means
   [sgf]
-  (let [x (map #(if (= 1 (count (first %)))
-                  (first %)
-                  (read-string (nth (string/split (second %) #" ") 9)))
-                (extract-LZ sgf))
+  (let [x (map
+           (fn [[id val]]
+             (if (#{"B" "W"} id)
+               id
+               (read-string
+                (first
+                 (map second
+                      (filter #(= "scoreMean" (first %))
+                              (partition 2 1
+                                         (clojure.string/split val #" "))))))))
+           (extract-LZ sgf))
         y (partition 2 x)]
     (map (fn [[player mean] move]
            [player mean move])

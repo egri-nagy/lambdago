@@ -7,14 +7,13 @@
             [clojure.core.matrix.stats :refer [mean sd]]))
 
 ;; a crude parser for SGF files for extracting property values
-(def SGFparser (insta/parser
-                (str "GameRecord = GameTree { GameTree };\n"
-                     "GameTree   = <\"(\"> Sequence { GameTree } <\")\">;\n"
-                     "Sequence   = Node { Node };\n"
-                     "Node = <\";\"> { Property };\n"
-                     "Property   = Identifier Value { Value };\n"
-                     "Identifier  = #'[A-Z]+';\n"
-                     "Value  = <\"[\"> #\"[^\\]]*\" <\"]\">")))
+(def SGFparser
+  (insta/parser (str "GameRecord = GameTree+                         \n"
+                     "GameTree   = <\"(\"> Node* GameTree* <\")\">   \n"
+                     "Node = <\";\"> Property*                       \n"
+                     "Property   = Identifier Value*                 \n"
+                     "Identifier  = #'[A-Z]+'                        \n"
+                     "Value  = <\"[\"> #\"([^\\\\\\]]|\\\\.)*\" <\"]\">")))
 
 ;; transform function for instaparse, turning properties really into pairs
 (def flatten-properties
@@ -34,7 +33,10 @@
         fpt (insta/transform flatten-properties pt)]
     fpt))
 
-(defn extract-properties [fpt p]
+(defn extract-properties
+  "Extracting values of properties matching a predicate function from a
+  flattened parse tree of an SGF file."
+  [fpt p]
   (filter #(and (vector? %) (p (first %)))
           (tree-seq vector? identity fpt)))
 
