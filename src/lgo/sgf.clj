@@ -7,6 +7,8 @@
             [clojure.core.matrix.stats :refer [mean sd]]))
 
 ;; a crude parser for SGF files for extracting property values
+;; to see the grammar, just print SGFparser, it is a bit unreadable due to
+;; double escapes
 (def SGFparser
   (insta/parser (str "GameRecord = GameTree+                         \n"
                      "GameTree   = <\"(\"> Node* GameTree* <\")\">   \n"
@@ -26,7 +28,8 @@
 (defn flattened-parse-tree
   "It returns the flattened parse tree ready for property value extraction of a
   given SGF string.
-  It has to remove returns and newlines (or can we modify the grammar?)"
+  This removes newlines before parsing the SGF, which seems to acceptable.
+  The grammar is way simpler this way."
   [sgfstring]
   (let [sgf (string/join (remove #{\newline \return} sgfstring))
         pt (SGFparser sgf)
