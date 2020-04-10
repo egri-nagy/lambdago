@@ -91,3 +91,14 @@
                         :y {:aggregate "min" :field "effect" :type "quantitative"}
                         }
              :mark "bar"}]}]})
+
+(defn sgf-report
+  [sgf]
+  [:div
+   [:h1 "Look ye and behold"]
+   [:p "A couple of small charts"]
+   [:div {:style {:display "flex" :flex-direction "row"}}
+    [:vega-lite (oz-effects sgf)]]
+   [:p "A wider, more expansive chart"]
+   [:h2 "If ever, oh ever a viz there was, the vizard of oz is one because, because, because..."]
+   [:p "Because of the wonderful things it does"]])

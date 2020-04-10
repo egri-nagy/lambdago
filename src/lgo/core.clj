@@ -25,5 +25,5 @@
               (gtp-loop))
       "lizzie" (do
                  (oz/start-server!)
-                 (oz/view! (oz-effects (slurp (second args))) :mode :vega)))
+                 (oz/view! (sgf-report (slurp (second args))) :mode :vega)))
     (shutdown-agents)))
