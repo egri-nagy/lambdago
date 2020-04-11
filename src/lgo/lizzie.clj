@@ -3,7 +3,9 @@
   (:require [clojure.string :as string]
             [instaparse.core :as insta]
             [clojure.core.matrix.stats :refer [mean sd]]
-            [lgo.sgf :refer [flat-list-properties extract-properties]]))
+            [lgo.sgf :refer [flat-list-properties
+                             extract-properties
+                             extract-property]]))
 
 (defn round3 [f]
   (float (/ (int (Math/round (* 1000 f))) 1000)))
@@ -31,6 +33,20 @@
     (map (fn [[player mean] move]
            [player mean move])
          y (range 1 1000))))
+
+(defn extract-all-score-means
+  [flp]
+  (let [LZs (extract-property flp "LZ")
+        x (mapv
+           (fn [[id val]]
+             (map (comp read-string second)
+                  (filter #(= "scoreMean" (first %))
+                          (partition 2 1
+                                     (clojure.string/split val #" ")))))
+           LZs)]
+    (for [m (range 0 (count x))
+          v (x m)]
+      {:move m :scoremean v})))
 
 (defn effects
   [sgf]
@@ -92,13 +108,20 @@
                         }
              :mark "bar"}]}]})
 
+(defn oz-scoremeans
+  [sgf]
+  {:data {:values (extract-all-score-means (flat-list-properties sgf))}
+
+   :encoding {:x {:field "move" :type "quantitative"}
+                :y {:field "scoremean" :type "quantitative"}}
+   :mark "point" :width 1200
+   })
+
 (defn sgf-report
   [sgf]
   [:div
-   [:h1 "Look ye and behold"]
-   [:p "A couple of small charts"]
+   [:h1 "Work in progress!!!"]
+   [:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
+   [:vega-lite (oz-scoremeans sgf)]
    [:div {:style {:display "flex" :flex-direction "row"}}
-    [:vega-lite (oz-effects sgf)]]
-   [:p "A wider, more expansive chart"]
-   [:h2 "If ever, oh ever a viz there was, the vizard of oz is one because, because, because..."]
-   [:p "Because of the wonderful things it does"]])
+    [:vega-lite (oz-effects sgf)]]])
