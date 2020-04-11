@@ -17,42 +17,59 @@
                      "Identifier  = #'[A-Z]+'                        \n"
                      "Value  = <\"[\"> #\"(\\\\.|[^\\\\\\]]*)*\" <\"]\">")))
 
-;; transform function for instaparse, turning properties really into pairs
-(def flatten-properties
-  {:Property (comp (fn [l] (mapv second l)) list)})
+;; transform functions for instaparse, turning properties really into pairs,
+;; other nodes just returned or grouped into a sequence
+(def flatteners
+  (let [f (fn [& args] (if (= 1 (count args))
+                         (first args)
+                         args))]
+    {:Property (comp (fn [l] (mapv second l)) list)
+     :GameRecord f
+     :Node f
+     :GameTree f}))
 
-(defn extract-property [fpt ID];;flattened-parse-tree
-  (filter #(and (vector? %) (= ID (first %)))
-          (tree-seq vector? identity fpt)))
+(defn flatten-to-vectors
+  "Flattens a nested collection but stops at vectors.
+  Modified version of clojure.core's flatten.
+  It assumes that the tree structures is in lists, not in vectors."
+  [coll]
+  (filter vector?
+          (rest (tree-seq (complement vector?)
+                          seq
+                          coll))))
 
-(defn flattened-parse-tree
-  "It returns the flattened parse tree ready for property value extraction of a
-  given SGF string.
+(defn flat-list-properties
+  "It returns a list of properties of given SGF string. A property is a vector
+  starting with and identifier followed by values.
   This removes newlines before parsing the SGF, which seems to acceptable.
   The grammar is way simpler this way."
   [sgfstring]
   (let [sgf (string/join (remove #{\newline \return} sgfstring))
         pt (SGFparser sgf)
-        fpt (insta/transform flatten-properties pt)]
-    fpt))
+        simplified-pt (insta/transform flatteners pt)]
+    (flatten-to-vectors simplified-pt)))
+
+
 
 (defn extract-properties
   "Extracting values of properties matching a predicate function from a
   flattened parse tree of an SGF file."
-  [fpt p]
-  (filter #(and (vector? %) (p (first %)))
-          (tree-seq vector? identity fpt)))
+  [flp p]
+  (filter (comp p first) flp))
+
+(defn extract-property [flp ID];;flattened-parse-tree
+  (extract-properties flp #{ID}))
 
 (defn extract-game-moves
   [sgf]
-  (extract-properties (flattened-parse-tree sgf)
+  (extract-properties (flat-list-properties sgf)
                       #(or (= % "B") (= % "W"))))
 
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
   "Converts SGF board positions to goban (LaTeX) format."
   [sgf]
-  (let [fpt (flattened-parse-tree sgf)
+  (let [fpt (flat-list-properties sgf)
         size (second (first (extract-property fpt "SZ")))
         white-stones (string/join ","
                                   (rest (first (extract-property fpt "AW"))))

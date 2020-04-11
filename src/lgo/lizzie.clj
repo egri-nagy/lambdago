@@ -3,7 +3,7 @@
   (:require [clojure.string :as string]
             [instaparse.core :as insta]
             [clojure.core.matrix.stats :refer [mean sd]]
-            [lgo.sgf :refer [flattened-parse-tree extract-properties]]))
+            [lgo.sgf :refer [flat-list-properties extract-properties]]))
 
 (defn round3 [f]
   (float (/ (int (Math/round (* 1000 f))) 1000)))
@@ -11,7 +11,7 @@
 ;; this will get the move and first scoreMean out of lizzie analysis
 (defn extract-LZ
   [sgf]
-  (extract-properties (flattened-parse-tree sgf)
+  (extract-properties (flat-list-properties sgf)
                       #{"B" "W" "LZ"}))
 
 (defn extract-score-means
