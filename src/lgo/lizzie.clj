@@ -37,16 +37,19 @@
 (defn extract-all-score-means
   [flp]
   (let [LZs (extract-property flp "LZ")
-        x (mapv
-           (fn [[id val]]
-             (map (comp read-string second)
-                  (filter #(= "scoreMean" (first %))
-                          (partition 2 1
-                                     (clojure.string/split val #" ")))))
-           LZs)]
-    (for [m (range 0 (count x))
-          v (x m)]
-      {:move m :scoremean v})))
+        raw (map
+             (fn [[id val]]
+               (map (comp read-string second)
+                    (filter #(= "scoreMean" (first %))
+                            (partition 2 1
+                                       (clojure.string/split val #" ")))))
+             LZs)
+        corrected (mapv (fn [vals f] (map f vals))
+                        raw
+                        (cycle [identity (partial * -1)]))]
+    (for [m (range 0 (count corrected))
+          v (corrected m)]
+      {:move (inc m) :scoremean v})))
 
 (defn effects
   [sgf]
@@ -100,28 +103,32 @@
              :mark "bar"}
 
             {:layer [{:encoding {:x {:field "color" :type "nominal"}
-                        :y {:aggregate "max" :field "effect" :type "quantitative"}
-                        }
-             :mark "bar"}
-            {:encoding {:x {:field "color" :type "nominal"}
-                        :y {:aggregate "min" :field "effect" :type "quantitative"}
-                        }
-             :mark "bar"}]}]})
+                                 :y {:aggregate "max" :field "effect" :type "quantitative"}
+                                 }
+                      :mark "bar"}
+                     {:encoding {:x {:field "color" :type "nominal"}
+                                 :y {:aggregate "min" :field "effect" :type "quantitative"}
+                                 }
+                      :mark "bar"}]}]})
 
 (defn oz-scoremeans
-  [sgf]
-  {:data {:values (extract-all-score-means (flat-list-properties sgf))}
-
-   :encoding {:x {:field "move" :type "quantitative"}
-                :y {:field "scoremean" :type "quantitative"}}
-   :mark "point" :width 1200
-   })
+  [flp]
+  {:data {:values (extract-all-score-means flp)}
+   :width 1200
+   :layer [{:encoding {:x {:field "move" :type "quantitative"}
+                        :y {:field "scoremean" :type "quantitative"}}
+             :mark "point"}
+           {:encoding {:x {:field "move" :type "quantitative"}
+                       :y {:field "scoremean" :type "quantitative"
+                           :aggregate "mean"}}
+            :mark {:type "line" :color "#ff0000"} }]})
 
 (defn sgf-report
   [sgf]
-  [:div
-   [:h1 "Work in progress!!!"]
-   [:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
-   [:vega-lite (oz-scoremeans sgf)]
-   [:div {:style {:display "flex" :flex-direction "row"}}
-    [:vega-lite (oz-effects sgf)]]])
+  (let [flp (flat-list-properties sgf)]
+    [:div
+     [:h1 "Work in progress!!!"]
+     [:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
+     [:vega-lite (oz-scoremeans flp)]
+     [:div {:style {:display "flex" :flex-direction "row"}}
+      [:vega-lite (oz-effects sgf)]]]))
