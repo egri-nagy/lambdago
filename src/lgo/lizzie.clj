@@ -84,37 +84,59 @@
           (effects-data-for-one-color flp "B")))
 
 (defn oz-effects
-  [e-d]
+  [e-d w]
   {:data {:values e-d}
 
    :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
-                      :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
-             :mark "bar" :width 1200}
-            {:encoding {:x {:field "move" :type "quantitative"}
                         :y {:field "effect" :type "quantitative"} :color {:field "color" :type "nominal"}}
-             :mark "bar" :width 1200}
-            {:encoding {:x {:field "color" :type "nominal"}
-                        :y {:aggregate "mean" :field "effect" :type "quantitative"}
-                        }
-             :mark "bar"}
-            {:encoding {:x {:field "color" :type "nominal"}
-                        :y {:aggregate "stdev" :field "effect" :type "quantitative"}
-                        }
-             :mark "bar"}
+             :mark "bar" :width w}
+            {:encoding {:x {:field "move" :type "quantitative"}
+                        :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
+             :mark "bar" :width w}]})
 
-            {:layer [{:encoding {:x {:field "color" :type "nominal"}
-                                 :y {:aggregate "max" :field "effect" :type "quantitative"}
-                                 }
-                      :mark "bar"}
-                     {:encoding {:x {:field "color" :type "nominal"}
-                                 :y {:aggregate "min" :field "effect" :type "quantitative"}
-                                 }
-                      :mark "bar"}]}]})
+(defn oz-normalized-effects
+  [e-d w]
+  (let [N (count e-d)
+        normalized (map
+                    (fn [m]
+                      (update m :cumsum (fn [e] (/ e N))))
+                    e-d)]
+    {:data {:values normalized}
+     :encoding {:x {:field "move" :type "quantitative"}
+                :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
+     :mark "bar" :width w}))
+
+(defn oz-average-effect
+  [e-d]
+  {:data {:values e-d}
+   :encoding {:x {:field "color" :type "nominal"}
+              :y {:aggregate "mean" :field "effect" :type "quantitative"}}
+   :mark "bar"})
+
+(defn oz-sd-effect
+  [e-d]
+  {:data {:values e-d}
+   :encoding {:x {:field "color" :type "nominal"}
+              :y {:aggregate "stdev" :field "effect" :type "quantitative"}}
+   :mark "bar"})
+
+(defn oz-min-max
+  [e-d]
+  {:data {:values e-d}
+   :layer [{:encoding {:x {:field "color" :type "nominal"}
+                       :y {:aggregate "max" :field "effect" :type "quantitative"}
+                       }
+            :mark "bar"}
+           {:encoding {:x {:field "color" :type "nominal"}
+                       :y {:aggregate "min" :field "effect" :type "quantitative"}
+                       }
+            :mark "bar"}]})
+
 
 (defn oz-scoremeans
-  [flp]
+  [flp w]
   {:data {:values (extract-all-score-means flp)}
-   :width 1200
+   :width w
    :layer [{:encoding {:x {:field "move" :type "quantitative"}
                         :y {:field "scoremean" :type "quantitative"}}
              :mark "point"}
@@ -129,10 +151,17 @@
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
-        effs-dat (effects-data flp)]
+        effs-dat (effects-data flp)
+        N (count effs-dat)
+        w (int (* 5.4 N))]
     [:div
      [:h1 (str "B: " black " W: " white) " R: " result]
-     ;[:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
-     [:vega-lite (oz-scoremeans flp)]
+     [:p "All scoreMean values for indicating volatility."]
+     [:vega-lite (oz-scoremeans flp w)]
+     [:vega-lite (oz-effects effs-dat w)]
+     [:p "Normalized by the number of moves."]
+     [:vega-lite (oz-normalized-effects effs-dat w)]
      [:div {:style {:display "flex" :flex-direction "row"}}
-      [:vega-lite (oz-effects effs-dat)]]]))
+      [:vega-lite (oz-average-effect effs-dat)]
+      [:vega-lite (oz-sd-effect effs-dat)]
+      [:vega-lite (oz-min-max effs-dat)]]]))
