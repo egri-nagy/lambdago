@@ -5,19 +5,19 @@
             [clojure.core.matrix.stats :refer [mean sd]]
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
-                             extract-property]]))
+                             extract-property
+                             extract-single-value]]))
 
 (defn round3 [f]
   (float (/ (int (Math/round (* 1000 f))) 1000)))
 
 ;; this will get the move and first scoreMean out of lizzie analysis
 (defn extract-LZ
-  [sgf]
-  (extract-properties (flat-list-properties sgf)
-                      #{"B" "W" "LZ"}))
+  [flp]
+  (extract-properties flp #{"B" "W" "LZ"}))
 
 (defn extract-score-means
-  [sgf]
+  [flp]
   (let [x (map
            (fn [[id val]]
              (if (#{"B" "W"} id)
@@ -28,7 +28,7 @@
                       (filter #(= "scoreMean" (first %))
                               (partition 2 1
                                          (clojure.string/split val #" "))))))))
-           (extract-LZ sgf))
+           (extract-LZ flp))
         y (partition 2 x)]
     (map (fn [[player mean] move]
            [player mean move])
@@ -52,12 +52,12 @@
       {:move (inc m) :scoremean v})))
 
 (defn effects
-  [sgf]
+  [flp]
   (let [ms (map (fn [[c m v]] (if (= c "B")  [c (* -1 m) v] [c m v]) )
-                (extract-score-means sgf))
+                (extract-score-means flp))
         ps (partition 2 1 ms)]
-    (map (fn [[[c1 m1 v1] [c2 m2 v2]]] (if (= c2 "W") [c2 (round3 (-(- m2 m1))) v2]
-                                     [c2 (round3 (- m2 m1)) v2]))
+    (map (fn [[[c1 m1 v1] [c2 m2 v2]]] (if (= c2 "W") [c2 (-(- m2 m1)) v2]
+                                           [c2 (- m2 m1) v2]))
          ps)))
 
 (defn analysis
@@ -69,9 +69,9 @@
     (println "White avg sd total " ((juxt mean sd) Weffs) (reduce + Weffs))))
 
 (defn effects-data-for-one-color
-  [sgf color]
+  [flp color]
   (let [dat (filter (comp (partial = color) first)
-                     (effects sgf))
+                    (effects flp))
         effs (map second dat)
         moves (map #(nth % 2) dat)
         cumsum (reductions + effs)]
@@ -79,13 +79,13 @@
          moves effs cumsum)))
 
 (defn effects-data
-  [sgf]
-  (concat (effects-data-for-one-color sgf "W")
-          (effects-data-for-one-color sgf "B")))
+  [flp]
+  (concat (effects-data-for-one-color flp "W")
+          (effects-data-for-one-color flp "B")))
 
 (defn oz-effects
-  [sgf]
-  {:data {:values (effects-data sgf)}
+  [e-d]
+  {:data {:values e-d}
 
    :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                       :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
@@ -121,14 +121,18 @@
            {:encoding {:x {:field "move" :type "quantitative"}
                        :y {:field "scoremean" :type "quantitative"
                            :aggregate "mean"}}
-            :mark {:type "line" :color "#ff0000"} }]})
+            :mark {:type "line" :color "orange"} }]})
 
 (defn sgf-report
   [sgf]
-  (let [flp (flat-list-properties sgf)]
+  (let [flp (flat-list-properties sgf)
+        black (extract-single-value flp "PB")
+        white (extract-single-value flp "PW")
+        result (extract-single-value flp "RE")
+        effs-dat (effects-data flp)]
     [:div
-     [:h1 "Work in progress!!!"]
-     [:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
+     [:h1 (str "B: " black " W: " white) " R: " result]
+     ;[:p "These are the extracted scoreMeans, not separated by color, hence the branches."]
      [:vega-lite (oz-scoremeans flp)]
      [:div {:style {:display "flex" :flex-direction "row"}}
-      [:vega-lite (oz-effects sgf)]]]))
+      [:vega-lite (oz-effects effs-dat)]]]))

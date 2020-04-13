@@ -57,6 +57,10 @@
   [flp p]
   (filter (comp p first) flp))
 
+(defn extract-single-value
+  [flp ID]
+  (second (first (extract-property flp ID))))
+
 (defn extract-property [flp ID];;flattened-parse-tree
   (extract-properties flp #{ID}))
 
