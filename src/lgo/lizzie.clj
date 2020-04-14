@@ -8,27 +8,24 @@
                              extract-property
                              extract-single-value]]))
 
-(defn round3 [f]
-  (float (/ (int (Math/round (* 1000 f))) 1000)))
-
-;; this will get the move and first scoreMean out of lizzie analysis
-(defn extract-LZ
-  [flp]
-  (extract-properties flp #{"B" "W" "LZ"}))
+(defn extract-from-LZ
+  "Simply extracts from LZ string s the values after the name.
+  Just he one after, so it is not good for extracting PV moves."
+  [s name]
+  (map second
+       (filter #(= name (first %))
+               (partition 2 1
+                          (clojure.string/split s #" ")))))
 
 (defn extract-score-means
   [flp]
-  (let [x (map
-           (fn [[id val]]
-             (if (#{"B" "W"} id)
-               id
-               (read-string
-                (first
-                 (map second
-                      (filter #(= "scoreMean" (first %))
-                              (partition 2 1
-                                         (clojure.string/split val #" "))))))))
-           (extract-LZ flp))
+  (let [x (map (fn [[id val]]
+                 (if (#{"B" "W"} id)
+                   id
+                   (read-string
+                    (first
+                     (extract-from-LZ val "scoreMean")))))
+               (extract-properties flp #{"B" "W" "LZ"}))
         y (partition 2 x)]
     (map (fn [[player mean] move]
            [player mean move])
@@ -39,10 +36,8 @@
   (let [LZs (extract-property flp "LZ")
         raw (map
              (fn [[id val]]
-               (map (comp read-string second)
-                    (filter #(= "scoreMean" (first %))
-                            (partition 2 1
-                                       (clojure.string/split val #" ")))))
+               (map read-string
+                    (extract-from-LZ val "scoreMean")))
              LZs)
         corrected (mapv (fn [vals f] (map f vals))
                         raw
@@ -83,6 +78,8 @@
   (concat (effects-data-for-one-color flp "W")
           (effects-data-for-one-color flp "B")))
 
+
+;; Oz visualization functions producing vega-lite specifications
 (defn oz-effects
   [e-d w]
   {:data {:values e-d}
