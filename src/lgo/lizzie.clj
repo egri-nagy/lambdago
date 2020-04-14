@@ -17,6 +17,19 @@
                (partition 2 1
                           (clojure.string/split s #" ")))))
 
+(defn raw-data
+  [flp]
+  (let [x (map (fn [[id val]]
+                 (if (#{"B" "W"} id)
+                   id
+                   (mapv read-string
+                        (extract-from-LZ val "scoreMean"))))
+               (extract-properties flp #{"B" "W" "LZ"}))
+        y (partition 2 x)]
+    (map (fn [[player mean] move]
+           [player move mean])
+         y (range 1 1000))))
+
 (defn extract-score-means
   [flp]
   (let [x (map (fn [[id val]]
