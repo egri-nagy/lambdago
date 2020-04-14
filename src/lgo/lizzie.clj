@@ -26,8 +26,8 @@
                         (extract-from-LZ val "scoreMean"))))
                (extract-properties flp #{"B" "W" "LZ"}))
         y (partition 2 x)]
-    (map (fn [[player mean] move]
-           [player move mean])
+    (map (fn [[player means] move]
+           {:move move :color player :mean (first means) :meanmean (mean means) :means means})
          y (range 1 1000))))
 
 (defn extract-score-means
