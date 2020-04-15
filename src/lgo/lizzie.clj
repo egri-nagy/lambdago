@@ -62,7 +62,6 @@
 (defn deviations
   [effs]
   (let [avg (mean (map :effect effs))]
-    (println avg)
     (map (fn [{e :effect :as d}]
            (into d [[:deviation (- e avg)]]))
          effs)))
@@ -87,16 +86,15 @@
              :mark "bar" :width w :title t}]})
 
 (defn oz-normalized-effects
-  [e-d w]
+  [e-d w t]
   (let [N (count e-d)
-        normalized (map
-                    (fn [m]
-                      (update m :cumsum (fn [e] (/ e N))))
-                    e-d)]
+        cmsm (reductions + (map :effect e-d))
+        normalized (map (fn [d v] (into d [[:cumsum (/ v N)]]))
+                     e-d cmsm)]
     {:data {:values normalized}
      :encoding {:x {:field "move" :type "quantitative"}
                 :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
-     :mark "bar" :width w}))
+     :mark "bar" :width w :title t}))
 
 (defn oz-aggregate-effect
   [e-d aggr]
@@ -117,7 +115,6 @@
                        }
             :mark "bar"}]})
 
-
 (defn oz-scoremeans
   [d w t]
   {:data {:values d}
@@ -125,29 +122,11 @@
    :title t
    :layer [{:encoding {:x {:field "move" :type "ordinal"}
                        :y {:field "mean" :type "quantitative"}}
-            :mark {
-                   :type "area",
-                   :line {
-                          :color "darkgreen"
-                              },
-                   :color {
-                           :x1 1,
-                           :y1 1,
-                           :x2 1,
-                           :y2 0,
-                           :gradient "linear",
-                           :stops [
-                                         {
-                                          :offset 0,
-                                          :color "white"
-                                          },
-                                         {
-                                          :offset 1,
-                                          :color "darkgreen"
-                                          }
-                                         ]
-                               }
-                     }}
+            :mark {:type "area",
+                   :line { :color "orange"},
+                   :color {:x1 1, :y1 1, :x2 1, :y2 0, :gradient "linear",
+                           :stops [{:offset 0, :color "white"}
+                                   {:offset 1, :color "orange"}]}}}
            {:encoding {:x {:field "move" :type "ordinal"}
                        :y {:field "meanmean" :type "quantitative"}}
             :mark "line"}]})
@@ -175,7 +154,7 @@
         w (int (* 5.4 N))]
     [:div
      [:h1 (str "B: " black " W: " white) " R: " result]
-     [:p "All scoreMean values for indicating volatility."]
+     ;[:p "All scoreMean values for indicating volatility."]
      [:vega-lite (oz-scoremeans
                   (filter #(= "B" (:color %)) raw)
                   w
@@ -197,9 +176,12 @@
      [:vega-lite (oz-effects (filter #(= "B" (:color %)) effs-dat) w "Effects of Black's moves")]
      [:vega-lite (oz-deviations (filter #(= "W" (:color %)) dev-dat) w "Deviations (distances from the mean) of White's moves")]
      [:vega-lite (oz-deviations (filter #(= "B" (:color %)) dev-dat) w "Deviations of Black's moves")]
-
-     [:p "Normalized by the number of moves."]
-     ;[:vega-lite (oz-normalized-effects effs-dat w)]
+     [:vega-lite
+      (oz-normalized-effects (filter #(= "W" (:color %)) effs-dat)  w
+                             "White's Cumulative sum of effects normalized by number of White moves")]
+     [:vega-lite
+      (oz-normalized-effects (filter #(= "B" (:color %)) effs-dat)  w
+                             "Black's Cumulative sum of effects normalized by number of Black moves")]
      [:div {:style {:display "flex" :flex-direction "row"}}
       [:vega-lite (oz-aggregate-effect effs-dat "mean")]
       [:vega-lite (oz-aggregate-effect effs-dat "stdev")]
