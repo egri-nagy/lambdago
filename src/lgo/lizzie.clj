@@ -34,7 +34,6 @@
             :means means})
          y (range 1 1000))))
 
-
 (defn extract-all-score-means
   [dat]
   (mapcat
@@ -46,49 +45,46 @@
    dat))
 
 (defn effects
-  [flp]
-  (let [ms (map (fn [[c m v]] (if (= c "B")  [c (* -1 m) v] [c m v]) )
-                (extract-score-means flp))
+  [dat]
+  (let [ms (map (fn [{c :color :as d}]
+                  (if (= c "B")
+                    (update d :mean (partial * -1))
+                    d))
+                dat)
         ps (partition 2 1 ms)]
-    (map (fn [[[c1 m1 v1] [c2 m2 v2]]] (if (= c2 "W") [c2 (-(- m2 m1)) v2]
-                                           [c2 (- m2 m1) v2]))
+    (map (fn [[{c1 :color m1 :mean v1 :move}
+               {c2 :color m2 :mean v2 :move}]]
+           (if (= c2 "W")
+             {:color c2 :effect (- (- m2 m1)) :move v2}
+             {:color c2 :effect (- m2 m1) :move v2}))
          ps)))
 
-(defn analysis
-  [sgf]
-  (let [effs (effects sgf)
-        Beffs (map second (filter (comp (partial = "B") first) effs))
-        Weffs (map second (filter (comp (partial = "W") first) effs))]
-    (println "Black avg sd total " ((juxt mean sd) Beffs) (reduce + Beffs))
-    (println "White avg sd total " ((juxt mean sd) Weffs) (reduce + Weffs))))
-
-(defn effects-data-for-one-color
-  [flp color]
-  (let [dat (filter (comp (partial = color) first)
-                    (effects flp))
-        effs (map second dat)
-        moves (map #(nth % 2) dat)
-        cumsum (reductions + effs)]
-    (map (fn [m e s] {:move m :color color :effect e :cumsum s})
-         moves effs cumsum)))
-
-(defn effects-data
-  [flp]
-  (concat (effects-data-for-one-color flp "W")
-          (effects-data-for-one-color flp "B")))
-
+(defn deviations
+  [effs]
+  (let [avg (mean (map :effect effs))]
+    (println avg)
+    (map (fn [{e :effect :as d}]
+           (into d [[:deviation (- e avg)]]))
+         effs)))
 
 ;; Oz visualization functions producing vega-lite specifications
 (defn oz-effects
-  [e-d w]
+  [e-d w t]
   {:data {:values e-d}
-
-   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
+   :layer[{:encoding {:x {:field "move" :type "ordinal"}
                         :y {:field "effect" :type "quantitative"} :color {:field "color" :type "nominal"}}
-             :mark "bar" :width w}
-            {:encoding {:x {:field "move" :type "quantitative"}
-                        :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
-             :mark "bar" :width w}]})
+             :mark "bar" :width w :title t}
+          {:encoding {
+                        :y {:field "effect" :type "quantitative" :aggregate "mean"} :color {:field "color" :type "nominal"}}
+             :mark "rule"}
+            ]})
+
+(defn oz-deviations
+  [e-d w t]
+  {:data {:values e-d}
+   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
+                        :y {:field "deviation" :type "quantitative"}}
+             :mark "bar" :width w :title t}]})
 
 (defn oz-normalized-effects
   [e-d w]
@@ -102,18 +98,11 @@
                 :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
      :mark "bar" :width w}))
 
-(defn oz-average-effect
-  [e-d]
+(defn oz-aggregate-effect
+  [e-d aggr]
   {:data {:values e-d}
    :encoding {:x {:field "color" :type "nominal"}
-              :y {:aggregate "mean" :field "effect" :type "quantitative"}}
-   :mark "bar"})
-
-(defn oz-sd-effect
-  [e-d]
-  {:data {:values e-d}
-   :encoding {:x {:field "color" :type "nominal"}
-              :y {:aggregate "stdev" :field "effect" :type "quantitative"}}
+              :y {:aggregate aggr :field "effect" :type "quantitative"}}
    :mark "bar"})
 
 (defn oz-min-max
@@ -170,7 +159,7 @@
    :title t
    :encoding {:x {:field "move" :type "ordinal"}
               :y {:field "mean" :type "quantitative"}}
-   :mark "point"})
+   :mark {:type "point" :shape "circle" :size 3}})
 
 (defn sgf-report
   [sgf]
@@ -180,7 +169,8 @@
         result (extract-single-value flp "RE")
         raw (raw-data flp)
         all-sm (extract-all-score-means raw)
-        effs-dat (effects-data flp)
+        effs-dat (effects raw)
+        dev-dat (deviations effs-dat)
         N (count effs-dat)
         w (int (* 5.4 N))]
     [:div
@@ -202,10 +192,15 @@
                   (filter #(= "W" (:color %)) all-sm)
                   w
                   "White's all scoreMeans for variations")]
-     [:vega-lite (oz-effects effs-dat w)]
+     [:vega-lite (oz-effects effs-dat w "Effects of moves")]
+     [:vega-lite (oz-effects (filter #(= "W" (:color %)) effs-dat) w "Effects of White's moves")]
+     [:vega-lite (oz-effects (filter #(= "B" (:color %)) effs-dat) w "Effects of Black's moves")]
+     [:vega-lite (oz-deviations (filter #(= "W" (:color %)) dev-dat) w "Deviations (distances from the mean) of White's moves")]
+     [:vega-lite (oz-deviations (filter #(= "B" (:color %)) dev-dat) w "Deviations of Black's moves")]
+
      [:p "Normalized by the number of moves."]
-     [:vega-lite (oz-normalized-effects effs-dat w)]
+     ;[:vega-lite (oz-normalized-effects effs-dat w)]
      [:div {:style {:display "flex" :flex-direction "row"}}
-      [:vega-lite (oz-average-effect effs-dat)]
-      [:vega-lite (oz-sd-effect effs-dat)]
+      [:vega-lite (oz-aggregate-effect effs-dat "mean")]
+      [:vega-lite (oz-aggregate-effect effs-dat "stdev")]
       [:vega-lite (oz-min-max effs-dat)]]]))
