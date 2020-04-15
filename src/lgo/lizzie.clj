@@ -27,37 +27,23 @@
                (extract-properties flp #{"B" "W" "LZ"}))
         y (partition 2 x)]
     (map (fn [[player means] move]
-           {:move move :color player :mean (first means) :meanmean (mean means) :means means})
+           {:move move
+            :color player
+            :mean (first means)
+            :meanmean (mean means)
+            :means means})
          y (range 1 1000))))
 
-(defn extract-score-means
-  [flp]
-  (let [x (map (fn [[id val]]
-                 (if (#{"B" "W"} id)
-                   id
-                   (read-string
-                    (first
-                     (extract-from-LZ val "scoreMean")))))
-               (extract-properties flp #{"B" "W" "LZ"}))
-        y (partition 2 x)]
-    (map (fn [[player mean] move]
-           [player mean move])
-         y (range 1 1000))))
 
 (defn extract-all-score-means
-  [flp]
-  (let [LZs (extract-property flp "LZ")
-        raw (map
-             (fn [[id val]]
-               (map read-string
-                    (extract-from-LZ val "scoreMean")))
-             LZs)
-        corrected (mapv (fn [vals f] (map f vals))
-                        raw
-                        (cycle [identity (partial * -1)]))]
-    (for [m (range 0 (count corrected))
-          v (corrected m)]
-      {:move (inc m) :scoremean v})))
+  [dat]
+  (mapcat
+   (fn [d]
+     (for [m (:means d)]
+       {:color (:color d)
+        :move (:move d)
+        :mean m}))
+   dat))
 
 (defn effects
   [flp]
@@ -144,16 +130,47 @@
 
 
 (defn oz-scoremeans
-  [flp w]
-  {:data {:values (extract-all-score-means flp)}
+  [d w t]
+  {:data {:values d}
    :width w
-   :layer [{:encoding {:x {:field "move" :type "quantitative"}
-                        :y {:field "scoremean" :type "quantitative"}}
-             :mark "point"}
-           {:encoding {:x {:field "move" :type "quantitative"}
-                       :y {:field "scoremean" :type "quantitative"
-                           :aggregate "mean"}}
-            :mark {:type "line" :color "orange"} }]})
+   :title t
+   :layer [{:encoding {:x {:field "move" :type "ordinal"}
+                       :y {:field "mean" :type "quantitative"}}
+            :mark {
+                   :type "area",
+                   :line {
+                          :color "darkgreen"
+                              },
+                   :color {
+                           :x1 1,
+                           :y1 1,
+                           :x2 1,
+                           :y2 0,
+                           :gradient "linear",
+                           :stops [
+                                         {
+                                          :offset 0,
+                                          :color "white"
+                                          },
+                                         {
+                                          :offset 1,
+                                          :color "darkgreen"
+                                          }
+                                         ]
+                               }
+                     }}
+           {:encoding {:x {:field "move" :type "ordinal"}
+                       :y {:field "meanmean" :type "quantitative"}}
+            :mark "line"}]})
+
+(defn oz-all-scoremeans
+  [d w t]
+  {:data {:values d}
+   :width w
+   :title t
+   :encoding {:x {:field "move" :type "ordinal"}
+              :y {:field "mean" :type "quantitative"}}
+   :mark "point"})
 
 (defn sgf-report
   [sgf]
@@ -161,13 +178,30 @@
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
+        raw (raw-data flp)
+        all-sm (extract-all-score-means raw)
         effs-dat (effects-data flp)
         N (count effs-dat)
         w (int (* 5.4 N))]
     [:div
      [:h1 (str "B: " black " W: " white) " R: " result]
      [:p "All scoreMean values for indicating volatility."]
-     [:vega-lite (oz-scoremeans flp w)]
+     [:vega-lite (oz-scoremeans
+                  (filter #(= "B" (:color %)) raw)
+                  w
+                  "Black's scoreMean and averaged scoreMean for variations")]
+     [:vega-lite (oz-scoremeans
+                  (filter #(= "W" (:color %)) raw)
+                  w
+                  "White's scoreMean and averaged scoreMean for variations")]
+     [:vega-lite (oz-all-scoremeans
+                  (filter #(= "B" (:color %)) all-sm)
+                  w
+                  "Black's all scoreMeans for variations")]
+     [:vega-lite (oz-all-scoremeans
+                  (filter #(= "W" (:color %)) all-sm)
+                  w
+                  "White's all scoreMeans for variations")]
      [:vega-lite (oz-effects effs-dat w)]
      [:p "Normalized by the number of moves."]
      [:vega-lite (oz-normalized-effects effs-dat w)]
