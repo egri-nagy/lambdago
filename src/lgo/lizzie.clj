@@ -2,15 +2,14 @@
   "Functions for working with the output of Lizzie after doing KataGo analysis."
   (:require [clojure.string :as string]
             [instaparse.core :as insta]
-            [clojure.core.matrix.stats :refer [mean sd]]
+            [clojure.core.matrix.stats :refer [mean]]
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
-                             extract-property
                              extract-single-value]]))
 
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the name.
-  Just he one after, so it is not good for extracting PV moves."
+  Just the one after, so it is not good for extracting PV moves."
   [s name]
   (map second
        (filter #(= name (first %))
@@ -18,6 +17,7 @@
                           (clojure.string/split s #" ")))))
 
 (defn raw-data
+  "Extracts the score means and the color of the previous move."
   [flp]
   (let [x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
@@ -25,7 +25,7 @@
                    (mapv read-string
                         (extract-from-LZ val "scoreMean"))))
                (extract-properties flp #{"B" "W" "LZ"}))
-        y (partition 2 x)]
+        y (partition 2 x)] ;combining move and score name
     (map (fn [[player means] move]
            {:move move
             :color player
@@ -156,19 +156,19 @@
      [:h1 (str "B: " black " W: " white) " R: " result]
      ;[:p "All scoreMean values for indicating volatility."]
      [:vega-lite (oz-scoremeans
-                  (filter #(= "B" (:color %)) raw)
+                  (filter #(= "W" (:color %)) raw)
                   w
                   "Black's scoreMean and averaged scoreMean for variations")]
      [:vega-lite (oz-scoremeans
-                  (filter #(= "W" (:color %)) raw)
+                  (filter #(= "B" (:color %)) raw)
                   w
                   "White's scoreMean and averaged scoreMean for variations")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "B" (:color %)) all-sm)
+                  (filter #(= "W" (:color %)) all-sm)
                   w
                   "Black's all scoreMeans for variations")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "W" (:color %)) all-sm)
+                  (filter #(= "B" (:color %)) all-sm)
                   w
                   "White's all scoreMeans for variations")]
      [:vega-lite (oz-effects effs-dat w "Effects of moves")]
