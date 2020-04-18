@@ -7,6 +7,16 @@
                              extract-properties
                              extract-single-value]]))
 
+(defn median
+  [nums]
+  (let [ordered (vec (sort nums))
+        n (count nums)
+        h (dec (int (/ n 2)))
+        indices (if (odd? n)
+                  [(inc h)]
+                  [h (inc h)])]
+    (mean (map ordered indices))))
+
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the name.
   Just the one after, so it is not good for extracting PV moves."
@@ -31,6 +41,7 @@
             :color player
             :mean (first means)
             :meanmean (mean means)
+            :medianmean (median means)
             :means means})
          y (range 1 1000))))
 
