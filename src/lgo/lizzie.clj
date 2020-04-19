@@ -70,12 +70,38 @@
              {:color c2 :effect (- m2 m1) :move v2}))
          ps)))
 
+(defn choices
+  [dat]
+  (let [ms (map (fn [{c :color :as d}]
+                  (if (= c "B")
+                    (-> d
+                         (update :mean (partial * -1))
+                         (update :meanmean (partial * -1))
+                         (update :medianmean (partial * -1)))
+                    d))
+                dat)
+        ps (partition 2 1 ms)]
+    (map (fn [[{ m1 :mean mm :meanmean md :medianmean}
+               {c2 :color m2 :mean v2 :move}]]
+           {:color c2 :choice m2 :move v2 :average mm :median md :best m1})
+         ps)))
+
 (defn deviations
   [effs]
   (let [avg (mean (map :effect effs))]
     (map (fn [{e :effect :as d}]
            (into d [[:deviation (- e avg)]]))
          effs)))
+
+
+(defn data-transform
+  [db fixedkeys varkeys kw]
+  (mapcat (fn [row]
+            (let [fixedvals (into {} (map (fn [k] [k (k row)]) fixedkeys))]
+              (map (fn [k] (into fixedvals
+                                 [[:name (name k)] [kw (k row)]]))
+                   varkeys)))
+          db))
 
 ;; Oz visualization functions producing vega-lite specifications
 (defn oz-effects
@@ -151,6 +177,15 @@
               :y {:field "mean" :type "quantitative"}}
    :mark {:type "point" :shape "circle" :size 3}})
 
+
+(defn oz-choices
+  [c w t]
+  {:data {:values c}
+   :encoding {:x {:field "move" :type "ordinal"}
+              :y {:field "scoreMean" :type "quantitative"}
+              :color {:field "name" :type "nominal"}}
+   :mark {:type "line" :size 1}  :width w :title t })
+
 (defn sgf-report
   [sgf]
   (let [flp (flat-list-properties sgf)
@@ -161,11 +196,22 @@
         all-sm (extract-all-score-means raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
+        cs (choices raw)
+        tcs (data-transform cs [:color :move]
+                            [:choice :median :best :average] :scoreMean)
         N (count effs-dat)
         w (int (* 5.4 N))]
     [:div
      [:h1 (str "B: " black " W: " white) " R: " result]
      ;[:p "All scoreMean values for indicating volatility."]
+     [:vega-lite (oz-choices
+                  (filter #(= "B" (:color %)) tcs)
+                  w
+                  "Black's")]
+     [:vega-lite (oz-choices
+                  (filter #(= "W" (:color %)) tcs)
+                  w
+                  "White's")]
      [:vega-lite (oz-scoremeans
                   (filter #(= "W" (:color %)) raw)
                   w
