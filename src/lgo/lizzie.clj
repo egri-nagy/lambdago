@@ -80,10 +80,10 @@
                          (update :medianmean (partial * -1)))
                     d))
                 dat)
-        ps (partition 2 1 ms)]
+        ps (partition 2 1 dat)]
     (map (fn [[{ m1 :mean mm :meanmean md :medianmean}
                {c2 :color m2 :mean v2 :move}]]
-           {:color c2 :choice m2 :move v2 :average mm :median md :best m1})
+           {:color c2 :choice (- m2) :move v2 :average mm :median md :best m1})
          ps)))
 
 (defn deviations
@@ -149,7 +149,7 @@
             :mark "bar"}
            {:encoding {:x {:field "color" :type "nominal"}
                        :y {:aggregate "min" :field "effect" :type "quantitative"}
-                       }
+                      }
             :mark "bar"}]})
 
 (defn oz-scoremeans
