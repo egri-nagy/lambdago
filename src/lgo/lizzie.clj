@@ -1,7 +1,6 @@
 (ns lgo.lizzie
   "Functions for working with the output of Lizzie after doing KataGo analysis."
   (:require [clojure.string :as string]
-            [instaparse.core :as insta]
             [clojure.core.matrix.stats :refer [mean]]
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
