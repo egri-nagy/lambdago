@@ -62,7 +62,7 @@
                     d))
                 dat)
         ps (partition 2 1 ms)]
-    (map (fn [[{c1 :color m1 :mean v1 :move}
+    (map (fn [[{m1 :mean}
                {c2 :color m2 :mean v2 :move}]]
            (if (= c2 "W")
              {:color c2 :effect (- (- m2 m1)) :move v2}

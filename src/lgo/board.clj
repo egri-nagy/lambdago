@@ -157,7 +157,7 @@
 
 (defn self-capture?
   "Returns true if putting stone at the point would be a self-capture."
-  [{width :width height :height lookup :lookup liberties :liberties :as board}
+  [{width :width height :height lookup :lookup liberties :liberties}
    color
    point]
   (let [ngbs (neighbours point width height)]
@@ -176,7 +176,7 @@
 
 (defn eye-fill?
   "Returns true if putting stone there is filling up an eye."
-  [{width :width height :height lookup :lookup liberties :liberties :as board}
+  [{width :width height :height lookup :lookup}
    color
    point]
   (let [ngbs (neighbours point width height)]

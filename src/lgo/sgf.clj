@@ -3,8 +3,7 @@
   Extracting positions and move sequences.
   Exporting to the (unreleased) goban LaTeX package."
   (:require [clojure.string :as string]
-            [instaparse.core :as insta]
-            [clojure.core.matrix.stats :refer [mean sd]]))
+            [instaparse.core :as insta]))
 
 ;; a crude parser for SGF files for extracting property values
 ;; to see the grammar, just print SGFparser, it is a bit unreadable due to
