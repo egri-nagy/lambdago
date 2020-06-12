@@ -17,11 +17,11 @@
     (mean (map ordered indices))))
 
 (defn extract-from-LZ
-  "Simply extracts from LZ string s the values after the name.
+  "Simply extracts from LZ string s the values after the tag.
   Just the one after, so it is not good for extracting PV moves."
-  [s name]
+  [s tag]
   (map second
-       (filter #(= name (first %))
+       (filter #(= tag (first %))
                (partition 2 1
                           (clojure.string/split s #" ")))))
 
