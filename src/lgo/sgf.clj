@@ -97,13 +97,14 @@
   (str
    "(;GM[1]FF[4]CA[UTF-8]AP[LambdaGo]KM[0]SZ["
    size "]DT[2020-03-20]"
-   (apply str  (map (fn [x y]
-                      (str ";" ({:b "B" :w "W"} x)
-                           "["
-                           (points->SGFcoords (y 0)) (points->SGFcoords (y 1))
-                           "]"))
-                    (cycle [:b :w])
-                    lgomoves))
+   (string/join
+    (map (fn [x y]
+           (str ";" ({:b "B" :w "W"} x)
+                "["
+                (points->SGFcoords (y 0)) (points->SGFcoords (y 1))
+                "]"))
+         (cycle [:b :w])
+         lgomoves))
    ")"))
 
 ;;

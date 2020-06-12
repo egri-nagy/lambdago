@@ -71,15 +71,7 @@
 
 (defn choices
   [dat]
-  (let [ms (map (fn [{c :color :as d}]
-                  (if (= c "B")
-                    (-> d
-                         (update :mean (partial * -1))
-                         (update :meanmean (partial * -1))
-                         (update :medianmean (partial * -1)))
-                    d))
-                dat)
-        ps (partition 2 1 dat)]
+  (let [ps (partition 2 1 dat)]
     (map (fn [[{ m1 :mean mm :meanmean md :medianmean}
                {c2 :color m2 :mean v2 :move}]]
            {:color c2 :choice (- m2) :move v2 :average mm :median md :best m1})

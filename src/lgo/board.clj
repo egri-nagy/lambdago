@@ -198,11 +198,9 @@
   [{width :width height :height lookup :lookup liberties :liberties :as board}
    color
    point]
-  (if (lookup point)
-    ;;illegal move, it's on the board already, no new state
-    nil
+  (when-not (lookup point)
     ;;otherwise the stone is not on the board yet, we do the full change and
-    ;;rollback it's a self-capture
+    ;;rollback it's a self-capture; if stone is on board, return nil
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
           ;; adjacent chains, no duplicates, nils removed
           adj_chains (remove nil? (distinct (map lookup adjpts)))
