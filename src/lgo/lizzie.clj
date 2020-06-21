@@ -19,7 +19,7 @@
 
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the tag.
-  Just the one after, so it is not good for extracting PV moves."
+  If the tag has more values (like PV), this gets only the first."
   [s tag]
   (map second
        (filter #(= tag (first %))
@@ -47,6 +47,8 @@
          y (range))))
 
 (defn extract-all-score-means
+  "All score means from raw data. This is just unrolling the means vector
+  into separate rows."
   [dat]
   (mapcat
    (fn [d]
@@ -88,6 +90,8 @@
 
 
 (defn data-transform
+  "Prepares database for plotting in the same diagram. Fixed keys are copied,
+  then the variable ones are added as 'name' and its value under kw."
   [db fixedkeys varkeys kw]
   (mapcat (fn [row]
             (let [fixedvals (into {} (map (fn [k] [k (k row)]) fixedkeys))]
