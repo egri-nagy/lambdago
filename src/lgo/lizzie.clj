@@ -44,7 +44,7 @@
             :meanmean (mean means)
             :medianmean (median means)
             :means means})
-         y (range))))
+         y (iterate inc 1)))) ;counting the moves from 1
 
 (defn extract-all-score-means
   "All score means from raw data. This is just unrolling the means vector
