@@ -7,6 +7,7 @@
                              extract-single-value]]))
 
 (defn median
+  "Calculating the median for a collection of numerical values."
   [nums]
   (let [ordered (vec (sort nums))
         n (count nums)
@@ -26,7 +27,8 @@
                           (clojure.string/split s #" ")))))
 
 (defn raw-data
-  "Extracts the score means and the color of the previous move."
+  "Extracts the score means and the color of the previous move from
+  Katago-Lizzie output."
   [flp]
   (let [x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
@@ -34,7 +36,7 @@
                    (mapv read-string
                         (extract-from-LZ val "scoreMean"))))
                (extract-properties flp #{"B" "W" "LZ"}))
-        y (partition 2 x)] ;combining move and score name
+        y (partition 2 x)] ;combining move and score mean
     (map (fn [[player means] move]
            {:move move
             :color player
@@ -42,7 +44,7 @@
             :meanmean (mean means)
             :medianmean (median means)
             :means means})
-         y (range 1 1000))))
+         y (range))))
 
 (defn extract-all-score-means
   [dat]

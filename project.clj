@@ -8,7 +8,6 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.10"]
-                 [rhizome "0.2.9"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [net.mikera/core.matrix "0.62.0"]
                  [kigen "19.08.05"]
