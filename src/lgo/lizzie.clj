@@ -33,7 +33,7 @@
   (let [x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
                    id
-                   (mapv read-string
+                   (mapv (comp (partial * -1) read-string)
                         (extract-from-LZ val "scoreMean"))))
                (extract-properties flp #{"B" "W" "LZ"}))
         y (partition 2 x)] ;combining move and score mean
@@ -76,9 +76,9 @@
 (defn choices
   [dat]
   (let [ps (partition 2 1 dat)]
-    (map (fn [[{ m1 :mean mm :meanmean md :medianmean}
+    (map (fn [[{c1 :color  m1 :mean mm :meanmean md :medianmean v1 :move}
                {c2 :color m2 :mean v2 :move}]]
-           {:color c2 :choice (- m2) :move v2 :average mm :median md :best m1})
+           {:color c1 :choice (- m2) :move v1 :average mm :median md :best m1})
          ps)))
 
 (defn deviations
@@ -210,19 +210,19 @@
                   w
                   "White's")]
      [:vega-lite (oz-scoremeans
-                  (filter #(= "W" (:color %)) raw)
+                  (filter #(= "B" (:color %)) raw)
                   w
                   "Black's scoreMean and averaged scoreMean for variations")]
      [:vega-lite (oz-scoremeans
-                  (filter #(= "B" (:color %)) raw)
+                  (filter #(= "W" (:color %)) raw)
                   w
                   "White's scoreMean and averaged scoreMean for variations")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "W" (:color %)) all-sm)
+                  (filter #(= "B" (:color %)) all-sm)
                   w
                   "Black's all scoreMeans for variations")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "B" (:color %)) all-sm)
+                  (filter #(= "W" (:color %)) all-sm)
                   w
                   "White's all scoreMeans for variations")]
      [:vega-lite (oz-effects effs-dat w "Effects of moves")]
