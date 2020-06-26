@@ -1,5 +1,10 @@
 (ns lgo.lizzie
-  "Functions for working with the output of Lizzie after doing KataGo analysis."
+  "Functions for working with the output of Lizzie after doing KataGo analysis.
+
+  Desgin decisions:
+  Internally all score values are from Black's perspective: positive means Black
+  win, negative means White win.
+  "
   (:require [clojure.string :as string]
             [clojure.core.matrix.stats :refer [mean]]
             [lgo.sgf :refer [flat-list-properties
@@ -33,20 +38,23 @@
   (let [x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
                    id
-                   (mapv (comp (partial * -1) read-string)
+                   (mapv read-string ;(comp (partial * -1) read-string)
                         (extract-from-LZ val "scoreMean"))))
                (extract-properties flp #{"B" "W" "LZ"}))
         y (partition 2 x)] ;combining move and score mean
     (map (fn [[player means] move]
-           {:move move
-            :color player
-            :mean (first means)
-            :meanmean (mean means)
-            :medianmean (median means)
-            :means means})
+           (let [meanz (if (= player "W")  ;all values form Black's perspective
+                         means
+                         (map (partial * -1) means))]
+             {:move move
+              :color player
+              :mean (first meanz)
+              :meanmean (mean meanz)
+              :medianmean (median meanz)
+              :means meanz}))
          y (iterate inc 1)))) ;counting the moves from 1
 
-(defn extract-all-score-means
+(defn unroll-scoremeans
   "All score means from raw data. This is just unrolling the means vector
   into separate rows."
   [dat]
@@ -59,19 +67,15 @@
    dat))
 
 (defn effects
+  "The score mean differences caused by the moves."
   [dat]
-  (let [ms (map (fn [{c :color :as d}]
-                  (if (= c "B")
-                    (update d :mean (partial * -1))
-                    d))
-                dat)
-        ps (partition 2 1 ms)]
-    (map (fn [[{m1 :mean}
-               {c2 :color m2 :mean v2 :move}]]
-           (if (= c2 "W")
-             {:color c2 :effect (- (- m2 m1)) :move v2}
-             {:color c2 :effect (- m2 m1) :move v2}))
-         ps)))
+  (map (fn [[{m1 :mean}
+             {c2 :color m2 :mean v2 :move}]]
+         (let [eff (if (= c2 "B") ; need to negate for White
+                     (- m2 m1)
+                     (- (- m2 m1)))]
+           {:color c2 :effect eff :move v2}))
+       (partition 2 1 dat)))
 
 (defn choices
   [dat]
@@ -190,7 +194,7 @@
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
         raw (raw-data flp)
-        all-sm (extract-all-score-means raw)
+        all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
         cs (choices raw)
