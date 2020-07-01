@@ -176,7 +176,7 @@
    :title t
    :encoding {:x {:field "move" :type "ordinal"}
               :y {:field "mean" :type "quantitative"}}
-   :mark {:type "point" :shape "circle" :size 3}})
+   :mark {:type "boxplot" :extent "min-max" :size 5}})
 
 
 (defn oz-choices
