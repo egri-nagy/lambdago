@@ -1,15 +1,18 @@
 (ns lgo.lizzie
   "Functions for working with the output of Lizzie after doing KataGo analysis.
 
-  Desgin decisions:
+  Design decisions:
   Internally all score values are from Black's perspective: positive means Black
   win, negative means White win.
+  Move counter tells how many moves were made. Color tells whose turn is it.
   "
   (:require [clojure.string :as string]
             [clojure.core.matrix.stats :refer [mean]]
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
                              extract-single-value]]))
+
+(def B<->W {"B" "W", "W" "B"})
 
 (defn median
   "Calculating the median for a collection of numerical values."
@@ -47,7 +50,7 @@
                          means
                          (map (partial * -1) means))]
              {:move move
-              :color player
+              :color (B<->W player)
               :mean (first meanz)
               :meanmean (mean meanz)
               :medianmean (median meanz)
@@ -63,7 +66,9 @@
      (for [m (:means d)]
        {:color (:color d)
         :move (:move d)
-        :mean m}))
+        :mean (if (= "B" (:color d))
+                m
+                (- m))}))
    dat))
 
 (defn effects
@@ -71,7 +76,7 @@
   [dat]
   (map (fn [[{m1 :mean}
              {c2 :color m2 :mean v2 :move}]]
-         (let [eff (if (= c2 "B") ; need to negate for White
+         (let [eff (if (= c2 "W") ; need to negate for White
                      (- m2 m1)
                      (- (- m2 m1)))]
            {:color c2 :effect eff :move v2}))
@@ -82,7 +87,10 @@
   (let [ps (partition 2 1 dat)]
     (map (fn [[{c1 :color  m1 :mean mm :meanmean md :medianmean v1 :move}
                {c2 :color m2 :mean v2 :move}]]
-           {:color c1 :choice (- m2) :move v1 :average mm :median md :best m1})
+           (if (= "B" c1)
+             {:color c1 :choice m2 :move v1 :average mm :median md :AI m1}
+             {:color c1 :choice (- m2) :move v1 :average (- mm) :median (- md) :AI (- m1)}
+             ))
          ps)))
 
 (defn deviations
@@ -199,7 +207,7 @@
         dev-dat (deviations effs-dat)
         cs (choices raw)
         tcs (data-transform cs [:color :move]
-                            [:choice :median :best :average] :scoreMean)
+                            [:choice :median :AI :average] :scoreMean)
         N (count effs-dat)
         w (int (* 5.4 N))]
     [:div
