@@ -74,12 +74,12 @@
 (defn effects
   "The score mean differences caused by the moves."
   [dat]
-  (map (fn [[{m1 :mean}
-             {c2 :color m2 :mean v2 :move}]]
-         (let [eff (if (= c2 "W") ; need to negate for White
+  (map (fn [[{c1 :color m1 :mean}
+             {m2 :mean v2 :move}]]
+         (let [eff (if (= c1 "B") ; need to negate for White
                      (- m2 m1)
                      (- (- m2 m1)))]
-           {:color c2 :effect eff :move v2}))
+           {:color c1 :effect eff :move v2}))
        (partition 2 1 dat)))
 
 (defn choices
@@ -142,40 +142,13 @@
                 :y {:field "cumsum" :type "quantitative"} :color {:field "color" :type "nominal"}}
      :mark "bar" :width w :title t}))
 
-(defn oz-aggregate-effect
-  [e-d aggr]
-  {:data {:values e-d}
-   :encoding {:x {:field "color" :type "nominal"}
-              :y {:aggregate aggr :field "effect" :type "quantitative"}}
-   :mark "bar"})
-
-(defn oz-min-max
+(defn oz-effects-summary
   [e-d]
   {:data {:values e-d}
-   :layer [{:encoding {:x {:field "color" :type "nominal"}
-                       :y {:aggregate "max" :field "effect" :type "quantitative"}
-                       }
-            :mark "bar"}
-           {:encoding {:x {:field "color" :type "nominal"}
-                       :y {:aggregate "min" :field "effect" :type "quantitative"}
-                      }
-            :mark "bar"}]})
-
-(defn oz-scoremeans
-  [d w t]
-  {:data {:values d}
-   :width w
-   :title t
-   :layer [{:encoding {:x {:field "move" :type "ordinal"}
-                       :y {:field "mean" :type "quantitative"}}
-            :mark {:type "area",
-                   :line { :color "orange"},
-                   :color {:x1 1, :y1 1, :x2 1, :y2 0, :gradient "linear",
-                           :stops [{:offset 0, :color "white"}
-                                   {:offset 1, :color "orange"}]}}}
-           {:encoding {:x {:field "move" :type "ordinal"}
-                       :y {:field "meanmean" :type "quantitative"}}
-            :mark "line"}]})
+   :title "Summary of effects"
+   :encoding {:x {:field "color" :type "nominal"}
+              :y {:field "effect" :type "quantitative"}}
+   :mark {:type "boxplot" :extent "min-max"}})
 
 (defn oz-all-scoremeans
   [d w t]
@@ -216,19 +189,11 @@
      [:vega-lite (oz-choices
                   (filter #(= "B" (:color %)) tcs)
                   w
-                  "Black's")]
+                  "Black's scoremean values")]
      [:vega-lite (oz-choices
                   (filter #(= "W" (:color %)) tcs)
                   w
-                  "White's")]
-     [:vega-lite (oz-scoremeans
-                  (filter #(= "B" (:color %)) raw)
-                  w
-                  "Black's scoreMean and averaged scoreMean for variations")]
-     [:vega-lite (oz-scoremeans
-                  (filter #(= "W" (:color %)) raw)
-                  w
-                  "White's scoreMean and averaged scoreMean for variations")]
+                  "White's scoremean values")]
      [:vega-lite (oz-all-scoremeans
                   (filter #(= "B" (:color %)) all-sm)
                   w
@@ -249,6 +214,4 @@
       (oz-normalized-effects (filter #(= "B" (:color %)) effs-dat)  w
                              "Black's Cumulative sum of effects normalized by number of Black moves")]
      [:div {:style {:display "flex" :flex-direction "row"}}
-      [:vega-lite (oz-aggregate-effect effs-dat "mean")]
-      [:vega-lite (oz-aggregate-effect effs-dat "stdev")]
-      [:vega-lite (oz-min-max effs-dat)]]]))
+      [:vega-lite (oz-effects-summary effs-dat)]]]))
