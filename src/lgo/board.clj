@@ -58,23 +58,23 @@
   (let [e (envelope (:stones chain) width height)]
     (set (remove lookup e))))
 
-(defn recompute-liberties
+(defn update-liberties
   "Updates a board by recomputing liberties of an existing chain."
   [board chain]
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
 
-(defn recompute-liberties-by-point
-  "Recomputes liberties of a chain specified by one of its points.
+(defn update-liberties-by-point
+  "Updates the liberties of a chain specified by one of its points.
   Just to automate lookup in threading macros."
   [board point]
-  (recompute-liberties board ((:lookup board) point)))
+  (update-liberties board ((:lookup board) point)))
 
-(defn update-liberties
-  "Recomputes liberties for the set of chains given.
+(defn bulk-update-liberties
+  "Updates liberties for the set of chains given.
   Only for compatibility with threading macro."
   [board chains]
-  (reduce recompute-liberties board chains))
+  (reduce update-liberties board chains))
 
 (defn add-chain
   "Adding a new chain to a board. This involves:
@@ -112,7 +112,7 @@
                                       (envelope stones width height))))]
     (-> board
         (remove-chain chain)
-        (update-liberties affected_chains))))
+        (bulk-update-liberties affected_chains))))
 
 (defn capture-chains
   "Just capturing several chains in one go."
@@ -153,7 +153,7 @@
           (update :chains
                   (fn [chains] (vec-rm-all chains (rest chain_indices))))
           (register-chain upd_chain) ;; the merged stones have wrong lookup
-          (recompute-liberties upd_chain)))))
+          (update-liberties upd_chain)))))
 
 (defn self-capture?
   "Returns true if putting stone at the point would be a self-capture."
@@ -215,7 +215,7 @@
                             (dec-liberties to_be_deced point)
                             (merge-chains friendly_chains
                                           (single-stone-chain color point))
-                            (recompute-liberties-by-point point))]
+                            (update-liberties-by-point point))]
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
         (remove-chain updated_board ((:lookup updated_board) point)) ;;self-capture
         updated_board))))
