@@ -1,4 +1,4 @@
-(defproject lambdago "2020.06.12"
+(defproject lambdago "2020.07.02"
   :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
   :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
