@@ -1,4 +1,4 @@
-(ns lgo.lizzie
+(ns lgo.analysis.lizzie
   "Functions for working with the output of Lizzie after doing KataGo analysis.
 
   Design decisions:
