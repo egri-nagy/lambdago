@@ -171,7 +171,7 @@
             env (envelope ch width height)
             ochs (map lookup env)]
         (when (not-any? nil? ochs) ;; no liberty for merged chain
-          ;; only enemy chains now, none of the should be captured by stone
+          ;; only enemy chains now, and none of them can be captured by stone
           (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
 
 (defn eye-fill?
@@ -221,6 +221,7 @@
         updated_board))))
 
 (defn empty-points
+  "Returns the empty points of a board position."
   [{lookup :lookup width :width height :height}]
   (filter (comp nil? lookup)
           (points width height)))
