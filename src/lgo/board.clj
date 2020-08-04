@@ -3,7 +3,7 @@
   and capturing, or merging chains accordingly.
   The board position is stored as a vector of chains, in the order of creation.
   A chain has a color and a set of stones.
-  When connecting friendly chains the newer chain is merged to the older one.
+  When connecting friendly chains newer chains are merged to the oldest one.
   Liberties for chains are stored separately, as the set of liberties may change
   even if the chain remains the same.
   For quick access we also have a lookup table from points to chains.
@@ -51,8 +51,8 @@
                                (:stones chain))))))
 
 (defn compute-liberties
-  "Computes liberties of a chain. This is a fresh calculation (not incremental)
-  by removing the points of the chain from its envelope."
+  "Computes liberties of a chain. This is a fresh calculation (not incremental).
+  The algorithm works by removing the points of the chain from its envelope."
   [{width :width height :height lookup :lookup} ;; board
    chain]
   (let [e (envelope (:stones chain) width height)]
