@@ -86,6 +86,13 @@
 
 (def SGFcoords->points (zipmap "abcdefghijklmnopqrstuvwxyz" (range 1 27)))
 (def points->SGFcoords (zipmap (range 1 27) "abcdefghijklmnopqrstuvwxyz"))
+(def points->GTPcoords (zipmap (range 1 27) "ABCDEFGHJKLMNOPQRST"))
+
+(defn SGFcoord->GTPcoord
+  [[col row]]
+  (str (points->GTPcoords (SGFcoords->points col))
+       (- 20 (SGFcoords->points row))))
+
 
 (defn SGF-game-moves->lgo
   [SGF-moves]
