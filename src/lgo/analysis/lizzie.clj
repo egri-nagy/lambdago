@@ -5,6 +5,9 @@
   Internally all score values are from Black's perspective: positive means Black
   win, negative means White win.
   Move counter tells how many moves were made. Color tells whose turn is it.
+
+  The raw data is a hash-map with keys color, move, mean, meanmean, medianmean,
+  means.
   "
   (:require [clojure.string :as string]
             [clojure.core.matrix.stats :refer [mean]]
