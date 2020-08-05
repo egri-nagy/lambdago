@@ -14,8 +14,8 @@
     :komi 6
     :boardXSize 19
     :boardYSize 19
-    :analyzeturns [100]
-    :maxvisits 20000
+    :analyzeTurns [100]
+    :maxVisits 20000
     :moves
     (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
          (extract-game-moves sgf))}))
