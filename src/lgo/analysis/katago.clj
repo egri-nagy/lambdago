@@ -7,15 +7,15 @@
                              SGFcoord->GTPcoord]]))
 
 (defn game-moves
-  [sgf]
-  (json/write-str
-   {:id "foo"
-    :rules "japanese"
-    :komi 6
-    :boardXSize 19
-    :boardYSize 19
-    :analyzeTurns [100]
-    :maxVisits 20000
-    :moves
-    (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
-         (extract-game-moves sgf))}))
+  [sgf maxvisits]
+  (let [moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
+                   (extract-game-moves sgf))]
+    (json/write-str
+     {:id "foo"
+      :rules "japanese"
+      :komi 6
+      :boardXSize 19
+      :boardYSize 19
+      :analyzeTurns (range (inc (count moves)))
+      :maxVisits maxvisits
+      :moves moves})))
