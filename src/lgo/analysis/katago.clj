@@ -3,6 +3,7 @@
   "
   (:require [clojure.string :as string]
             [clojure.data.json :as json]
+            [lgo.stats :refer [normalize KL-divergence]]
             [lgo.sgf :refer [extract-game-moves
                              SGFcoord->GTPcoord]]))
 
@@ -35,3 +36,34 @@
   (let
    [rdr (clojure.java.io/reader filename)]
     (map turn-data (line-seq rdr))))
+
+;; set it to zero to disable it
+(def THRESHOLD 0)
+
+(defn policy->probdist
+  [P]
+  (let [P_ (map (fn [x] (+ (/ x 2) 0.5))
+                P)
+        P__ (map (fn [x] (if (< x THRESHOLD)
+                           THRESHOLD
+                           x))
+                 P_)
+        sum (apply + P__)]
+    (map
+     (fn [x] (/ x sum))
+     P__)))
+
+(defn policy-comparison
+  "Compares the earlier policy P with the later policy Q.
+  It takes the top N moves from policy Q, finds the corresponding policy
+  values from P. Assuming that these policy values are all positive, we
+  normalize them, then calculate the KL-divergence."
+  [P Q N]
+  (let [indexedQ (map vector Q (range))
+        sortedQ (sort-by first > indexedQ)
+        topN (take N sortedQ)
+        topNindices (map second topN)
+        vP (vec P)
+        Pdist (normalize (map vP topNindices))
+        Qdist (normalize(map first topN))]
+    (KL-divergence Pdist Qdist)))

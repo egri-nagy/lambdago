@@ -18,6 +18,12 @@
                   [h (inc h)])]
     (mean (map ordered indices))))
 
+(defn normalize
+  [nums]
+  (let [sum (apply + nums)]
+    (map (fn [x] (/ x sum))
+         nums)))
+
 (defn KL-divergence
   "The Kullback-Leibler divergence of probability distributions P and Q.
   The information gain when using Q instead of P."
