@@ -2,6 +2,7 @@
   "Statistical functions.")
 
 (defn mean
+  "Calculating the average."
   [nums]
   (/ (apply + nums)
      (count nums)))
@@ -18,7 +19,8 @@
     (mean (map ordered indices))))
 
 (defn KL-divergence
-  "The Kullback-Leibler divergence of probability distributions P and Q."
+  "The Kullback-Leibler divergence of probability distributions P and Q.
+  The information gain when using Q instead of P."
   [P Q]
   (apply +
          (map
