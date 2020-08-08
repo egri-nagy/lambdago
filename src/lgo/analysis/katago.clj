@@ -37,22 +37,6 @@
    [rdr (clojure.java.io/reader filename)]
     (map turn-data (line-seq rdr))))
 
-;; set it to zero to disable it
-(def THRESHOLD 0)
-
-(defn policy->probdist
-  [P]
-  (let [P_ (map (fn [x] (+ (/ x 2) 0.5))
-                P)
-        P__ (map (fn [x] (if (< x THRESHOLD)
-                           THRESHOLD
-                           x))
-                 P_)
-        sum (apply + P__)]
-    (map
-     (fn [x] (/ x sum))
-     P__)))
-
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
   It takes the top N moves from policy Q, finds the corresponding policy
