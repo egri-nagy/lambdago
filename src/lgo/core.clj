@@ -5,7 +5,9 @@
             [lgo.sgf :refer :all]
             [lgo.grid :refer :all]
             [lgo.gtp :refer :all]
+            [lgo.stats :refer :all]
             [lgo.analysis.lizzie :refer :all]
+            [lgo.analysis.katago :refer :all]
             [oz.core :as oz]))
 
 ;; to save compile time property into a runtime one

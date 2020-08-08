@@ -9,7 +9,6 @@
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.10"]
                  [org.clojure/math.numeric-tower "0.0.4"]
-                 [net.mikera/core.matrix "0.62.0"]
                  [kigen "19.08.05"]
                  [metasoarous/oz "1.6.0-alpha6"]
                  [org.clojure/data.json "1.0.0"]]

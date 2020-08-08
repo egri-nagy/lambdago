@@ -10,23 +10,12 @@
   means.
   "
   (:require [clojure.string :as string]
-            [clojure.core.matrix.stats :refer [mean]]
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
-                             extract-single-value]]))
+                             extract-single-value]]
+            [lgo.stats :refer [median mean]]))
 
 (def B<->W {"B" "W", "W" "B"})
-
-(defn median
-  "Calculating the median for a collection of numerical values."
-  [nums]
-  (let [ordered (vec (sort nums))
-        n (count nums)
-        h (dec (int (/ n 2)))
-        indices (if (odd? n)
-                  [(inc h)]
-                  [h (inc h)])]
-    (mean (map ordered indices))))
 
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the tag.

@@ -1,7 +1,7 @@
 (ns lgo.league
   "Function for managing a league. Calculating updates in ranking for players."
   (:require [lgo.elo :refer [rating-adjustment EA]]
-            [clojure.core.matrix.stats :refer [mean]]))
+            [lgo.stats :refer [mean]]))
 
 (defn process-games
   "Batch processing game results. Games should be stored in a sequence.

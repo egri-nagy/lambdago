@@ -14,8 +14,24 @@
      {:id "foo"
       :rules "japanese"
       :komi 6
+      :intitialPlayer "black"
       :boardXSize 19
       :boardYSize 19
       :analyzeTurns (range (inc (count moves)))
       :maxVisits maxvisits
-      :moves moves})))
+      :moves moves
+      :includePolicy true})))
+
+
+(defn turn-data
+  [js]
+  (let [d (json/read-str js :key-fn keyword)]
+    {:move (:turnNumber d)
+     :mean (:scoreLead (:rootInfo d))
+     :means (map (juxt :scoreMean :order) (:moveInfos d))} ))
+
+(defn read-json
+  [filename]
+  (let
+   [rdr (clojure.java.io/reader filename)]
+    (map turn-data (line-seq rdr))))
