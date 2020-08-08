@@ -1,6 +1,5 @@
 (ns lgo.stats
-  "Statistical functions."
-  (:require [clojure.math.numeric-tower :as math]))
+  "Statistical functions.")
 
 (defn mean
   [nums]
@@ -17,3 +16,12 @@
                   [(inc h)]
                   [h (inc h)])]
     (mean (map ordered indices))))
+
+(defn KL-divergence
+  "The Kullback-Leibler divergence of probability distributions P and Q."
+  [P Q]
+  (apply +
+         (map
+          (fn [p q]
+            (* p (Math/log (/ p q))))
+          P Q)))
