@@ -3,21 +3,25 @@
   "
   (:require [clojure.string :as string]
             [clojure.data.json :as json]
-            [lgo.stats :refer [normalize KL-divergence]]
+            [lgo.stats :refer [normalize KL-divergence median mean]]
             [lgo.sgf :refer [extract-game-moves
-                             SGFcoord->GTPcoord]]))
+                             SGFcoord->GTPcoord
+                             flat-list-properties
+                             extract-single-value]]))
 
 (defn game-moves
   [sgf maxvisits]
   (let [moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
-                   (extract-game-moves sgf))]
+                   (extract-game-moves sgf))
+        flp (flat-list-properties sgf)
+        m {"B" "black", "W" "white"}]
     (json/write-str
      {:id "foo"
-      :rules "japanese"
-      :komi 6
-      :intitialPlayer "black"
-      :boardXSize 19
-      :boardYSize 19
+      :rules (extract-single-value flp "RU")
+      :komi (read-string (extract-single-value flp "KM"))
+      :initialPlayer "black"
+      :boardXSize (read-string (extract-single-value flp "SZ"))
+      :boardYSize (read-string (extract-single-value flp "SZ"))
       :analyzeTurns (range (inc (count moves)))
       :maxVisits maxvisits
       :moves moves
@@ -26,14 +30,17 @@
 
 (defn turn-data
   [js]
-  (let [d (json/read-str js :key-fn keyword)]
+  (let [d (json/read-str js :key-fn keyword)
+        means (map :scoreMean (:moveInfos d))]
     {:move (:turnNumber d)
      :mean (:scoreLead (:rootInfo d))
-     :means (map (juxt :scoreMean :order) (:moveInfos d))} ))
+     :means means
+     :meanmean (mean means)
+     :medianmean (median means)} ))
 
 (defn read-json
   [filename]
-  (let
+  (let ;todo: what's wrong with with-open?
    [rdr (clojure.java.io/reader filename)]
     (map turn-data (line-seq rdr))))
 
