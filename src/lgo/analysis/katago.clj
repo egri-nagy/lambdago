@@ -18,7 +18,7 @@
         col (first (first moves))
         first-player (m col)]
     (json/write-str
-     {:id col ; a hack to put the  first player in id
+     {:id col ; a hack to put the first player in id, we analyze only one game
       :rules (lower-case (:rules gd))
       :komi (:komi gd)
       :initialPlayer first-player
@@ -30,6 +30,7 @@
       :includePolicy true})))
 
 (defn katago-turn-data
+  "Processing one line of the KataGo output."
   [js]
   (let [d (json/read-str js :key-fn keyword)
         means (map :scoreMean (:moveInfos d))
@@ -46,6 +47,7 @@
      :medianmean (median means)} ))
 
 (defn katago-output
+  "Processing a whole game analyzed by KataGo."
   [filename]
   (let ;todo: what's wrong with with-open?
       [rdr (clojure.java.io/reader filename)
