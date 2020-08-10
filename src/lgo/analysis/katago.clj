@@ -15,9 +15,10 @@
         moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
                    (:moves gd))
         m {"B" "black", "W" "white"}
-        first-player (m (first (first moves)))]
+        col (first (first moves))
+        first-player (m col)]
     (json/write-str
-     {:id first-player ; a hack to put the  first player in id
+     {:id col ; a hack to put the  first player in id
       :rules (lower-case (:rules gd))
       :komi (:komi gd)
       :initialPlayer first-player
@@ -47,8 +48,9 @@
 (defn katago-output
   [filename]
   (let ;todo: what's wrong with with-open?
-   [rdr (clojure.java.io/reader filename)]
-    (map katago-turn-data (line-seq rdr))))
+      [rdr (clojure.java.io/reader filename)
+       d (map katago-turn-data (line-seq rdr))]
+    (sort-by :move d)))
 
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.

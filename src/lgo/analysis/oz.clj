@@ -7,8 +7,7 @@
   Move counter tells how many moves were made. Color tells whose turn is it.
 
   The raw data is a hash-map with keys color, move, mean, meanmean, medianmean,
-  means.
-  "
+  means. This is the input of the oz visualization."
   (:require [clojure.string :as string]
             [lgo.stats :refer [median mean]]))
 
@@ -90,7 +89,12 @@
   [e-d w t]
   (let [N (count e-d)
         cmsm (reductions + (map :effect e-d))
-        normalized (map (fn [d v] (into d [[:cumsum (/ v (/ (:move d) 2))]]))
+        normalized (map (fn [d v]
+                          (into d
+                                [[:cumsum
+                                  (if (> (:move d) 1)
+                                    (/ v (/ (:move d) 2))
+                                    v)]]))
                      e-d cmsm)]
     {:data {:values normalized}
      :encoding {:x {:field "move" :type "quantitative"}
