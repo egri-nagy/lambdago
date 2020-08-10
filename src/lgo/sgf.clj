@@ -68,6 +68,19 @@
   (extract-properties (flat-list-properties sgf)
                       #(or (= % "B") (= % "W"))))
 
+(defn game-data
+  "Returns a hash-map containing game information extracted from
+  the SGF string."
+  [sgf]
+  (let [flp (flat-list-properties sgf)]
+    {:rules (extract-single-value flp "RU")
+     :black (extract-single-value flp "PB")
+     :white (extract-single-value flp "PW")
+     :result (extract-single-value flp "RE")
+     :komi (read-string (extract-single-value flp "KM"))
+     :size (read-string (extract-single-value flp "SZ"))
+     :moves (extract-properties flp #(or (= % "B") (= % "W")))}))
+
 ;; LaTeX export to the goban package
 (defn positionsgf->goban
   "Converts SGF board positions to goban (LaTeX) format."
