@@ -3,46 +3,52 @@
   "
   (:require [clojure.string :as string]
             [clojure.data.json :as json]
+            [clojure.string :refer [lower-case]]
             [lgo.stats :refer [normalize KL-divergence median mean]]
-            [lgo.sgf :refer [extract-game-moves
-                             SGFcoord->GTPcoord
-                             flat-list-properties
-                             extract-single-value]]))
+            [lgo.sgf :refer [game-data
+                             SGFcoord->GTPcoord]]))
 
-(defn game-moves
+(defn katago-input
+  "Produces a JSON string containing input for the KataGo analysis engine."
   [sgf maxvisits]
-  (let [moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
-                   (extract-game-moves sgf))
-        flp (flat-list-properties sgf)
-        m {"B" "black", "W" "white"}]
+  (let [gd (game-data sgf)
+        moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
+                   (:moves gd))
+        m {"B" "black", "W" "white"}
+        first-player (m (first (first moves)))]
     (json/write-str
-     {:id "foo"
-      :rules (extract-single-value flp "RU")
-      :komi (read-string (extract-single-value flp "KM"))
-      :initialPlayer "black"
-      :boardXSize (read-string (extract-single-value flp "SZ"))
-      :boardYSize (read-string (extract-single-value flp "SZ"))
+     {:id first-player ; a hack to put the  first player in id
+      :rules (lower-case (:rules gd))
+      :komi (:komi gd)
+      :initialPlayer first-player
+      :boardXSize (:size gd)
+      :boardYSize (:size gd)
       :analyzeTurns (range (inc (count moves)))
       :maxVisits maxvisits
       :moves moves
       :includePolicy true})))
 
-
-(defn turn-data
+(defn katago-turn-data
   [js]
   (let [d (json/read-str js :key-fn keyword)
-        means (map :scoreMean (:moveInfos d))]
-    {:move (:turnNumber d)
+        means (map :scoreMean (:moveInfos d))
+        first-player (:id d) ;0th
+        B<->W {"B" "W", "W" "B"}
+        move (:turnNumber d)]
+    {:move move
+     :color (if (even? move)
+              first-player
+              (B<->W first-player))
      :mean (:scoreLead (:rootInfo d))
      :means means
      :meanmean (mean means)
      :medianmean (median means)} ))
 
-(defn read-json
+(defn katago-output
   [filename]
   (let ;todo: what's wrong with with-open?
    [rdr (clojure.java.io/reader filename)]
-    (map turn-data (line-seq rdr))))
+    (map katago-turn-data (line-seq rdr))))
 
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
