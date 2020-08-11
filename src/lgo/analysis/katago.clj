@@ -4,6 +4,7 @@
   (:require [clojure.string :as string]
             [clojure.data.json :as json]
             [clojure.string :refer [lower-case]]
+            [clojure.math.numeric-tower :as math]
             [lgo.stats :refer [normalize KL-divergence median mean]]
             [lgo.sgf :refer [game-data
                              SGFcoord->GTPcoord]]))
@@ -68,3 +69,11 @@
         Pdist (normalize (map vP topNindices))
         Qdist (normalize(map first topN))]
     (KL-divergence Pdist Qdist)))
+
+(defn exp-visit-count
+  "The move selection mechanism in AlphaGo Zero with temperature control."
+  [visitcounts tau]
+  (let
+      [expd (map (fn [x] (math/expt x (/ 1 tau) )) visitcounts)
+       expdsum (apply + expd)]
+    (map (fn [x] (float (/ x expdsum))) expd)))
