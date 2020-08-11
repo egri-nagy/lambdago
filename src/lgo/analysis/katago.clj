@@ -35,6 +35,7 @@
   [js]
   (let [d (json/read-str js :key-fn keyword)
         means (map :scoreMean (:moveInfos d))
+        visits (map (juxt :move :visits :order) (:moveInfos d))
         first-player (:id d) ;0th
         B<->W {"B" "W", "W" "B"}
         move (:turnNumber d)]
@@ -42,6 +43,9 @@
      :color (if (even? move)
               first-player
               (B<->W first-player))
+     :winrate (:winrate (:rootInfo d))
+     :visits visits
+     :policy (:policy d)
      :mean (:scoreLead (:rootInfo d))
      :means means
      :meanmean (mean means)
@@ -69,6 +73,15 @@
         Pdist (normalize (map vP topNindices))
         Qdist (normalize(map first topN))]
     (KL-divergence Pdist Qdist)))
+
+(defn policy-table-index
+  [move]
+  (let [m (zipmap "ABCDEFGHJKLMNOPQRST" (range))
+        letter (first move)
+        num (read-string (apply str (rest move)))]
+    (if (= "pass" move)
+      361
+      (+ (m letter) (* 19 (- 19 num))))))
 
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."

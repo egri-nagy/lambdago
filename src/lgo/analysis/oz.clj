@@ -140,6 +140,10 @@
         w (int (* 5.4 N))]
     [:div
      [:h1 title]
+     [:vega-lite {:data {:values raw}
+                  :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
+                                       :y {:field "winrate" :type "quantitative"}}
+                            :mark "line" :width w :title "winrate"}]}]
      [:p "Move numbers for score means indicate how many moves made before."]
      [:vega-lite (oz-choices
                   (filter #(= "B" (:color %)) tcs)
