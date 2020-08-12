@@ -93,6 +93,14 @@
         top (first (first candidates))] ; cause it's sorted
     (= raw-best (policy-table-index top))))
 
+(defn check-hits
+  [outfile]
+  (let [ko (katago-output outfile)
+        hits (count (filter true?
+                            (map (partial apply hit?)
+                                 (map (juxt :candidates :policy) ko))))]
+    (float (/ hits (count ko)))))
+
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."
   [visitcounts tau]
