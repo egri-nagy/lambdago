@@ -90,7 +90,7 @@
 (defn hit?
   [candidates policy]
   (let [raw-best (first (apply max-key second (map-indexed vector policy)))
-        top (first (first (filter #(= 0 (last %)) candidates)))]
+        top (first (first candidates))] ; cause it's sorted
     (= raw-best (policy-table-index top))))
 
 (defn exp-visit-count

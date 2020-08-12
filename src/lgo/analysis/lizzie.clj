@@ -31,23 +31,30 @@
   "Extracts the score means and the color of the previous move from
   Katago-Lizzie output."
   [flp]
-  (let [x (map (fn [[id val]]
+  (let [props (extract-properties flp #{"B" "W" "LZ"})
+        x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
                    id
-                   (mapv read-string ;(comp (partial * -1) read-string)
-                        (extract-from-LZ val "scoreMean"))))
-               (extract-properties flp #{"B" "W" "LZ"}))
+                   (vector (mapv read-string
+                                 (extract-from-LZ val "scoreMean"))
+                           (mapv (comp #(/ % 100.0) read-string)
+                                 (extract-from-LZ val "winrate")))))
+               props)
         y (partition 2 x)] ;combining move and score mean
-    (map (fn [[player means] move]
+    (map (fn [[player [means winrates]] move]
            (let [meanz (if (= player "W")  ;all values form Black's perspective
                          means
-                         (map (partial * -1) means))]
+                         (map (partial * -1) means))
+                 wr (if (= player "W")
+                      (first winrates)
+                      (- 100 (first winrates)))]
              {:move move
               :color (B<->W player)
               :mean (first meanz)
               :meanmean (mean meanz)
               :medianmean (median meanz)
-              :means meanz}))
+              :means meanz
+              :winrate wr}))
          y (iterate inc 1)))) ;counting the moves from 1
 
 (defn sgf-report
