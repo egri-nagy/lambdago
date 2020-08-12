@@ -30,12 +30,20 @@
       :moves moves
       :includePolicy true})))
 
+(defn process-sgf
+  [sgf_file]
+  (let [name  (apply str (butlast (string/split sgf_file #"\.")))
+        output (str name ".in")]
+    (println output)
+    (spit output (katago-input (slurp sgf_file) 100000))))
+
 (defn katago-turn-data
   "Processing one line of the KataGo output."
   [js]
   (let [d (json/read-str js :key-fn keyword)
         means (map :scoreMean (:moveInfos d))
-        visits (map (juxt :move :visits :order) (:moveInfos d))
+        omv (map (juxt :order :move :visits) (:moveInfos d))
+        candidates (map (comp vec rest) (sort-by first omv))
         first-player (:id d) ;0th
         B<->W {"B" "W", "W" "B"}
         move (:turnNumber d)]
@@ -44,7 +52,7 @@
               first-player
               (B<->W first-player))
      :winrate (:winrate (:rootInfo d))
-     :visits visits
+     :candidates candidates
      :policy (:policy d)
      :mean (:scoreLead (:rootInfo d))
      :means means
@@ -73,11 +81,17 @@
   It takes the top N moves from policy Q, finds the corresponding policy
   values from P. Assuming that these policy values are all positive, we
   normalize them, then calculate the KL-divergence."
-  [visits policy]
-  (let [P (normalize (map second visits))
+  [candidates policy]
+  (let [P (normalize (map second candidates))
         PI (normalize (map (fn [move] (nth policy (policy-table-index move)))
-                           (map first visits)))]
+                           (map first candidates)))]
     (KL-divergence P PI)))
+
+(defn hit?
+  [candidates policy]
+  (let [raw-best (first (apply max-key second (map-indexed vector policy)))
+        top (first (first (filter #(= 0 (last %)) candidates)))]
+    (= raw-best (policy-table-index top))))
 
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."
