@@ -59,21 +59,6 @@
        d (map katago-turn-data (line-seq rdr))]
     (sort-by :move d)))
 
-(defn policy-comparison
-  "Compares the earlier policy P with the later policy Q.
-  It takes the top N moves from policy Q, finds the corresponding policy
-  values from P. Assuming that these policy values are all positive, we
-  normalize them, then calculate the KL-divergence."
-  [P Q N]
-  (let [indexedQ (map vector Q (range))
-        sortedQ (sort-by first > indexedQ)
-        topN (take N sortedQ)
-        topNindices (map second topN)
-        vP (vec P)
-        Pdist (normalize (map vP topNindices))
-        Qdist (normalize(map first topN))]
-    (KL-divergence Pdist Qdist)))
-
 (defn policy-table-index
   [move]
   (let [m (zipmap "ABCDEFGHJKLMNOPQRST" (range))
@@ -82,6 +67,17 @@
     (if (= "pass" move)
       361
       (+ (m letter) (* 19 (- 19 num))))))
+
+(defn policy-comparison
+  "Compares the earlier policy P with the later policy Q.
+  It takes the top N moves from policy Q, finds the corresponding policy
+  values from P. Assuming that these policy values are all positive, we
+  normalize them, then calculate the KL-divergence."
+  [visits policy]
+  (let [P (normalize (map second visits))
+        PI (normalize (map (fn [move] (nth policy (policy-table-index move)))
+                           (map first visits)))]
+    (KL-divergence P PI)))
 
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."
