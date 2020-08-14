@@ -8,11 +8,9 @@
             [lgo.stats :refer :all]
             [lgo.analysis.lizzie :refer :all]
             [lgo.analysis.katago :refer :all]
-            [oz.core :as oz]))
-
-;; to save compile time property into a runtime one
-(defmacro get-version []
-  (System/getProperty "lambdago.version"))
+            [lgo.analysis.oz :refer :all]
+            [oz.core :as oz]
+            [trptcolin.versioneer.core :as version]))
 
 (defn -main
   "The first argument is a name of a file containing Clojure source code.
@@ -21,11 +19,16 @@
   (let [command (first args)]
     (case command
       "gtp" (do
-              (println "LambdaGo"
-                       (get-version))
+              (println (str "LambdaGo v"
+                        (version/get-version "lambdago" "lambdago")))
                                         ;(load-file (first args))
               (gtp-loop))
       "lizzie" (do
                  (oz/start-server!)
-                 (oz/view! (sgf-report (slurp (second args))) :mode :vega)))
+                 (oz/view! (sgf-report (slurp (second args))) :mode :vega))
+      "katago" (do
+                 (oz/start-server!)
+                 (oz/view! (game-report (katago-output (second args))
+                                        (second args))
+                           :mode :vega)))
     (shutdown-agents)))
