@@ -60,6 +60,8 @@
   (extract-properties flp #{ID}))
 
 (defn extract-single-value
+  "Returns one value for the given ID. It's the first value if there
+  are many. Returns nil if there is no such value."
   [flp ID]
   (second (first (extract-property flp ID))))
 
@@ -73,10 +75,10 @@
   the SGF string."
   [sgf]
   (let [flp (flat-list-properties sgf)]
-    {:rules (extract-single-value flp "RU")
-     :black (extract-single-value flp "PB")
-     :white (extract-single-value flp "PW")
-     :result (extract-single-value flp "RE")
+    {:rules (or (extract-single-value flp "RU") "japanese")
+     :black (or (extract-single-value flp "PB") "BLACK")
+     :white (or (extract-single-value flp "PW") "WHITE")
+     :result (or (extract-single-value flp "RE") "unknown")
      :komi (read-string (extract-single-value flp "KM"))
      :size (read-string (extract-single-value flp "SZ"))
      :moves (extract-properties flp #(or (= % "B") (= % "W")))}))
