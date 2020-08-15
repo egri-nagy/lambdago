@@ -51,7 +51,7 @@
   (let [name  (apply str (butlast (string/split sgf_file #"\.")))
         output (str name ".in")]
     (println output)
-    (spit output (katago-input (slurp sgf_file) 100000))))
+    (spit output (katago-input-all-moves (slurp sgf_file) 100000))))
 
 (defn katago-turn-data
   "Processing one line of the KataGo output."
