@@ -9,26 +9,39 @@
             [lgo.sgf :refer [game-data
                              SGFcoord->GTPcoord]]))
 
-(defn katago-input
+(defn katago-game-data
   "Produces a JSON string containing input for the KataGo analysis engine."
-  [sgf maxvisits]
+  [sgf]
   (let [gd (game-data sgf)
         moves (map (fn [[col move]] [col (SGFcoord->GTPcoord move)])
                    (:moves gd))
         m {"B" "black", "W" "white"}
         col (first (first moves))
         first-player (m col)]
+    {:id col ; a hack to put the first player in id, we analyze only one game
+     :rules (lower-case (:rules gd))
+     :komi (:komi gd)
+     :initialPlayer first-player
+     :boardXSize (:size gd)
+     :boardYSize (:size gd)
+     :moves moves
+     :includePolicy true}))
+
+(defn katago-input-all-moves
+  [sgf maxvisits]
+  (let [kdg (katago-game-data sgf)]
     (json/write-str
-     {:id col ; a hack to put the first player in id, we analyze only one game
-      :rules (lower-case (:rules gd))
-      :komi (:komi gd)
-      :initialPlayer first-player
-      :boardXSize (:size gd)
-      :boardYSize (:size gd)
-      :analyzeTurns (range (inc (count moves)))
-      :maxVisits maxvisits
-      :moves moves
-      :includePolicy true})))
+     (conj kdg
+           [:maxVisits maxvisits]
+           [:analyzeTurns (range (inc (count(:moves kdg))))]))))
+
+(defn katago-input-random-move
+  [sgf maxvisits]
+  (let [kdg (katago-game-data sgf)]
+    (json/write-str
+     (conj kdg
+           [:maxVisits maxvisits]
+           [:analyzeTurns [(rand-int (inc (count (:moves kdg))))]]))))
 
 (defn process-sgf
   [sgf_file]
@@ -82,10 +95,18 @@
   values from P. Assuming that these policy values are all positive, we
   normalize them, then calculate the KL-divergence."
   [candidates policy]
-  (let [P (normalize (map second candidates))
+  (let [cands (filter (fn [[_ visits]] (> visits 0)) ; shall we do this or not?
+                      candidates)
+        P (normalize (map second cands))
         PI (normalize (map (fn [move] (nth policy (policy-table-index move)))
-                           (map first candidates)))]
+                           (map first cands)))]
     (KL-divergence P PI)))
+
+(defn check-updated-policy
+  [outfile]
+  (let [ko (katago-output outfile)]
+    (map (partial apply policy-comparison)
+         (map (juxt :candidates :policy) ko))))
 
 (defn hit?
   [candidates policy]
