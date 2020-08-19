@@ -15,7 +15,7 @@
   (let [gd (game-data sgf)
         moves (map (fn [[col move]]
                      (if (empty? move)
-                       "pass"
+                       [col "pass"]
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
         m {"B" "black", "W" "white"}
