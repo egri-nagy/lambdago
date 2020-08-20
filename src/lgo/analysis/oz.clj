@@ -1,5 +1,6 @@
 (ns lgo.analysis.oz
-  "Functions for working with the output of Lizzie after doing KataGo analysis.
+  "Functions for visualization of  the output of a KataGo analysis, either
+  through Lizzie or by the KataGo Analysis Engine directly.
 
   Design decisions:
   Internally all score values are from Black's perspective: positive means Black
@@ -185,3 +186,16 @@
    :encoding {:x {:field xlabel :type "quantitative"}
               :y {:field ylabel :type "quantitative"}}
    :mark "point" :width 1000 :height 1000})
+
+(defn boxplots
+  [data category measurement]
+  {:data {:values data},
+   :mark {:type "boxplot",
+          :extent "min-max"},
+   :encoding {
+              :y {:field category, :type "nominal"},
+              :x {
+                  :field measurement,
+                  :type "quantitative",
+                  ;:scale: {:zero  false}
+                  }}})
