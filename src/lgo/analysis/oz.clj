@@ -191,7 +191,7 @@
   [data category measurement]
   {:data {:values data},
    :mark {:type "boxplot",
-          :extent "min-max"},
+          :extent 1.5},
    :encoding {
               :y {:field category, :type "nominal"},
               :x {

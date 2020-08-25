@@ -7,6 +7,7 @@
             [clojure.math.numeric-tower :as math]
             [lgo.stats :refer [normalize KL-divergence median mean]]
             [lgo.sgf :refer [game-data
+                             filename
                              SGFcoord->GTPcoord]]))
 
 (defn katago-game-data
@@ -30,15 +31,21 @@
      :moves moves
      :includePolicy true}))
 
+;; Generating input files for the KataGo Analysis Engine
+
 (defn katago-input-all-moves
+  "Producse a JSON input file for the KataGo Analysis Engine
+  for analyzing all the moves of the game."
   [sgf maxvisits]
-  (let [kdg (katago-game-data sgf)]
+  (let [kgd (katago-game-data sgf)]
     (json/write-str
-     (conj kdg
+     (conj kgd
            [:maxVisits maxvisits]
-           [:analyzeTurns (range (inc (count(:moves kdg))))]))))
+           [:analyzeTurns (range (inc (count(:moves kgd))))]))))
 
 (defn katago-input-random-move
+  "Producse a JSON input file for the KataGo Analysis Engine
+  for analyzing a single random move of the game."
   [sgf maxvisits]
   (let [kdg (katago-game-data sgf)]
     (json/write-str
@@ -46,12 +53,24 @@
            [:maxVisits maxvisits]
            [:analyzeTurns [(rand-int (inc (count (:moves kdg))))]]))))
 
+(defn katago-input-given-moves
+  "Producse a JSON input file for the KataGo Analysis Engine
+  for analyzing the given moves of the game."
+  [sgf maxvisits moves]
+  (let [kdg (katago-game-data sgf)]
+    (json/write-str
+     (conj kdg
+           [:maxVisits maxvisits]
+           [:analyzeTurns moves]))))
+
 (defn process-sgf
   [sgf_file]
-  (let [name  (apply str (butlast (string/split sgf_file #"\.")))
+  (let [name (filename sgf_file)
         output (str name ".in")]
     (println output)
     (spit output (katago-input-all-moves (slurp sgf_file) 100000))))
+
+;; Processing the output  of the analysi engine.
 
 (defn katago-turn-data
   "Processing one line of the KataGo output."
@@ -83,7 +102,11 @@
        d (map katago-turn-data (line-seq rdr))]
     (sort-by :move d)))
 
+;;higher level analysis
+;;policy comparison
+
 (defn policy-table-index
+  "Converting a GTP? move to a policy table index."
   [move]
   (let [m (zipmap "ABCDEFGHJKLMNOPQRST" (range))
         letter (first move)
@@ -106,10 +129,13 @@
     (KL-divergence P PI)))
 
 (defn check-updated-policy
+  "Batch policy comparison."
   [outfile]
   (let [ko (katago-output outfile)]
     (map (partial apply policy-comparison)
          (map (juxt :candidates :policy) ko))))
+
+;;hitrate
 
 (defn hit?
   [candidates policy]

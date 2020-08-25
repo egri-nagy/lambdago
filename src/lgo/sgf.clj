@@ -129,6 +129,12 @@
          lgomoves))
    ")"))
 
+
+(defn filename
+  "Cuts the extension of the filename."
+  [sgf_file]
+  (apply str (butlast (string/split sgf_file #"\."))))
+
 ;;
 
 ;;(sgf/SGF-game-moves->lgo (sgf/extract-game-moves (slurp "example.sgf")))
