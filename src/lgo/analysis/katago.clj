@@ -123,7 +123,7 @@
         hits (count (filter true?
                             (map (partial apply hit?)
                                  (map (juxt :candidates :policy) ko))))]
-    (float (/ hits (count ko)))))
+    [hits (float (/ hits (count ko)))]))
 
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."
