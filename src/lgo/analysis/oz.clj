@@ -185,15 +185,15 @@
      [:vega-lite (oz-deviations (filter #(= "B" (:color %)) dev-dat) w "Deviations of Black's moves")]
      [:vega-lite
       (oz-normalized-effects (filter #(= "W" (:color %)) effs-dat)  w
-                             "White's Cumulative sum of effects normalized by number of moves made")]
+                             "White's cumulative moving average of effects")]
      [:vega-lite
       (oz-normalized-effects (filter #(= "B" (:color %)) effs-dat)  w
-                             "Black's Cumulative sum of effects normalized by number of moves made")]
+                             "Black's cumulative moving average of effects")]
      [:vega-lite
       (oz-normalized-effects2 (concat (normalize-effects (filter #(= "W" (:color %)) effs-dat))
                                       (normalize-effects (filter #(= "B" (:color %)) effs-dat)))
                               w
-                             "Rolling average of effects")]
+                             "Cumulative moving average of effects")]
 
      [:div {:style {:display "flex" :flex-direction "row"}}
       [:vega-lite (oz-effects-summary effs-dat)]]
