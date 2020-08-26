@@ -135,6 +135,8 @@
     (map (partial apply policy-comparison)
          (map (juxt :candidates :policy) ko))))
 
+;; (def b40 (apply concat (map check-updated-policy (filter (fn [f] (string/ends-with? (.getName f) ".out")) (file-seq (clojure.java.io/file "/media/dersu/PRINT/b40/"))))))
+
 ;;hitrate
 
 (defn hit?
