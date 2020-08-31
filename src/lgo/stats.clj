@@ -7,6 +7,15 @@
   (/ (apply + nums)
      (count nums)))
 
+(defn cmas
+  "Cumulative moving averages."
+  [nums]
+  (rest ;to drop the starting zero
+   (reductions (fn [cma [x n]]
+                 (+ cma (/ (- x cma) n)))
+               0
+               (map vector nums (rest (range))))))
+
 (defn median
   "Calculating the median for a collection of numerical values."
   [nums]
