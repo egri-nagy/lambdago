@@ -11,7 +11,7 @@
   means. This is the input of the oz visualization."
   (:require [clojure.string :as string]
             [trptcolin.versioneer.core :as version]
-            [lgo.stats :refer [median mean]]))
+            [lgo.stats :refer [median mean cmas]]))
 
 (defn unroll-scoremeans
   "All score means from raw data. This is just unrolling the means vector
@@ -90,16 +90,10 @@
 (defn normalize-effects
  "assuming that it is from one player"
  [e-d]
- (let [N (count e-d)
-       cmsm (reductions + (map :effect e-d))
-       normalized (map (fn [d v]
-                         (into d
-                               [[:cumsum
-                                 (if (> (:move d) 1)
-                                   (/ v (/ (:move d) 2))
-                                   v)]]))
-                       e-d cmsm)]
-   normalized))
+  (let [avgs (cmas (map :effect e-d))]
+    (map (fn [d v]
+           (conj d [:cumsum v]))
+         e-d avgs)))
 
 (defn oz-normalized-effects
   [e-d w t]
