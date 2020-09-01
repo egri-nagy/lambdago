@@ -22,6 +22,13 @@
     (is (= (median [38, 10, 21, 23, 23, 38, 2]) 23))
     (is (== (median [38, 10, 21, 23, 22, 38, 2, 1]) 21.5))))
 
+(deftest normalize-test
+  (testing "Testing normalization."
+    (is (= (normalize [1 0 0 0 0]) [1 0 0 0 0]))
+    (is (= (normalize [1000 1000]) [1/2 1/2]))
+    (is (= (normalize [1 0 0 0 2]) [1/3 0 0 0 2/3]))))
+
+
 (deftest KL-divergence-test
   (testing "Testing Kullback-Leibler divergence."
     (let [P [0.36 0.48 0.16] ; Wikipedia example
