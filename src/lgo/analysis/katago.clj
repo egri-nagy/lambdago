@@ -1,6 +1,6 @@
 (ns lgo.analysis.katago
   "Functions for doing KataGo analysis directly.
-  "
+  Preparing input files for the analysis engine directly."
   (:require [clojure.string :as string]
             [clojure.data.json :as json]
             [clojure.string :refer [lower-case]]
@@ -10,8 +10,11 @@
                              filename
                              SGFcoord->GTPcoord]]))
 
+;; Generating input files for the KataGo Analysis Engine
+
 (defn katago-game-data
-  "Produces a JSON string containing input for the KataGo analysis engine."
+  "Produces a JSON string containing input data extracted from a game
+  for the KataGo analysis engine."
   [sgf]
   (let [gd (game-data sgf)
         moves (map (fn [[col move]]
@@ -31,10 +34,8 @@
      :moves moves
      :includePolicy true}))
 
-;; Generating input files for the KataGo Analysis Engine
-
 (defn katago-input-all-moves
-  "Producse a JSON input file for the KataGo Analysis Engine
+  "Produces a JSON input file for the KataGo Analysis Engine
   for analyzing all the moves of the game."
   [sgf maxvisits]
   (let [kgd (katago-game-data sgf)]
@@ -44,7 +45,7 @@
            [:analyzeTurns (range (inc (count(:moves kgd))))]))))
 
 (defn katago-input-random-move
-  "Producse a JSON input file for the KataGo Analysis Engine
+  "Produces a JSON input file for the KataGo Analysis Engine
   for analyzing a single random move of the game."
   [sgf maxvisits]
   (let [kdg (katago-game-data sgf)]
@@ -54,7 +55,7 @@
            [:analyzeTurns [(rand-int (inc (count (:moves kdg))))]]))))
 
 (defn katago-input-given-moves
-  "Producse a JSON input file for the KataGo Analysis Engine
+  "Produces a JSON input file for the KataGo Analysis Engine
   for analyzing the given moves of the game."
   [sgf maxvisits moves]
   (let [kdg (katago-game-data sgf)]
@@ -70,7 +71,7 @@
     (println output)
     (spit output (katago-input-all-moves (slurp sgf_file) 100000))))
 
-;; Processing the output  of the analysi engine.
+;; Processing the output  of the analysis engine.
 
 (defn katago-turn-data
   "Processing one line of the KataGo output."
