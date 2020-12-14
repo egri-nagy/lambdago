@@ -30,5 +30,6 @@
                  (oz/start-server!)
                  (oz/view! (game-report (katago-output (second args))
                                         (second args))
-                           :mode :vega)))
+                           :mode :vega))
+      "script" (load-file (second args)))
     (shutdown-agents)))

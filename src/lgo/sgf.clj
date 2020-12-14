@@ -138,8 +138,3 @@
 ;;
 
 ;;(sgf/SGF-game-moves->lgo (sgf/extract-game-moves (slurp "example.sgf")))
-
-;; (require '[clojure.java.io :as io :refer :all])
-;;  (require '[lgo.sgf :refer :all])
-;;  (def fs (.list (io/file "/home/dersu/igomath/PROBLEMS/IGOPUZZLE/")))
-;; (doseq [f (sort fs)] (println "%" f) (println (positionsgf->goban (slurp (str "/home/dersu/igomath/PROBLEMS/IGOPUZZLE/" f)))))
