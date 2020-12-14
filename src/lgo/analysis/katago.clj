@@ -80,7 +80,7 @@
         means (map :scoreMean (:moveInfos d))
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv))
-        first-player (:id d) ;0th
+        first-player (:id d) ;0th move is for empty board
         B<->W {"B" "W", "W" "B"}
         move (:turnNumber d)]
     {:move move
