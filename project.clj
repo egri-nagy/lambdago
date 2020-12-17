@@ -17,7 +17,7 @@
             [lein-kibit "0.1.8"]
             [lein-ancient "0.6.15"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "0.3.11"]]
+            [jonase/eastwood "0.3.12"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
