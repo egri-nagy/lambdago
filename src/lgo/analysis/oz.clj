@@ -9,9 +9,8 @@
 
   The raw data is a hash-map with keys color, move, mean, meanmean, medianmean,
   means. This is the input of the oz visualization."
-  (:require [clojure.string :as string]
-            [trptcolin.versioneer.core :as version]
-            [lgo.stats :refer [median mean cmas]]))
+  (:require [trptcolin.versioneer.core :as version]
+            [lgo.stats :refer [mean cmas]]))
 
 (defn unroll-scoremeans
   "All score means from raw data. This is just unrolling the means vector

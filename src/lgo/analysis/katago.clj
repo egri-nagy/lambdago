@@ -1,10 +1,10 @@
 (ns lgo.analysis.katago
   "Functions for doing KataGo analysis directly.
   Preparing input files for the analysis engine directly."
-  (:require [clojure.string :as string]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.string :refer [lower-case]]
             [clojure.math.numeric-tower :as math]
+            [clojure.java.io :as io]
             [lgo.stats :refer [normalize KL-divergence median mean]]
             [lgo.sgf :refer [game-data
                              filename
@@ -99,7 +99,7 @@
   "Processing a whole game analyzed by KataGo."
   [filename]
   (let ;todo: what's wrong with with-open?
-      [rdr (clojure.java.io/reader filename)
+      [rdr (io/reader filename)
        d (map katago-turn-data (line-seq rdr))]
     (sort-by :move d)))
 
