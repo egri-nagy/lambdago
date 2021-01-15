@@ -100,7 +100,7 @@
              (let [player (if (even? (count mvs))
                             first-player
                             second-player)]
-         [{:id (str "real" (count mvs))
+         [{:id (str "real" " " (count mvs) " " player)
            :rules (lower-case (:rules gd))
            :komi (:komi gd)
            :initialPlayer player
@@ -109,7 +109,7 @@
            :moves mvs
            :includePolicy true
            :maxvisits 10000}
-          {:id (str "reversed" (count mvs))
+          {:id (str "reversed" " " (count mvs) " " player)
            :rules (lower-case (:rules gd))
            :komi (:komi gd)
            :initialPlayer (mm player)
