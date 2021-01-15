@@ -71,6 +71,39 @@
     (println output)
     (spit output (katago-input-all-moves (slurp sgf_file) 100000))))
 
+;; doing the moves separately
+
+(defn prefixes
+  "All prefixes of the given collection, starting from the empty to
+  the complete collection. Returns a sequence containing the prefixes
+  as vectors."
+  [coll]
+  (reductions conj [] coll))
+
+(defn katago-game-data2
+  "Produces a JSON string containing input data extracted from a game
+  for the KataGo analysis engine."
+  [sgf]
+  (let [gd (game-data sgf)
+        moves (map (fn [[col move]]
+                     (if (empty? move)
+                       [col "pass"]
+                       [col (SGFcoord->GTPcoord move)]))
+                   (:moves gd))
+        m {"B" "black", "W" "white"}
+        col (first (first moves))
+        first-player (m col)]
+    (for [mvs (prefixes moves)]
+      {:id col ; a hack to put the first player in id, we analyze only one game
+       :rules (lower-case (:rules gd))
+       :komi (:komi gd)
+       :initialPlayer first-player
+       :boardXSize (:size gd)
+       :boardYSize (:size gd)
+       :moves mvs
+       :includePolicy true})))
+
+
 ;; Processing the output  of the analysis engine.
 
 (defn katago-turn-data
