@@ -2,7 +2,7 @@
   "Functions for doing KataGo analysis directly.
   Preparing input files for the analysis engine directly."
   (:require [clojure.data.json :as json]
-            [clojure.string :refer [lower-case]]
+            [clojure.string :refer [lower-case join]]
             [clojure.math.numeric-tower :as math]
             [clojure.java.io :as io]
             [lgo.stats :refer [normalize KL-divergence median mean]]
@@ -91,17 +91,41 @@
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
         m {"B" "black", "W" "white"}
+        mm {"black" "white", "white" "black"}
         col (first (first moves))
-        first-player (m col)]
-    (for [mvs (prefixes moves)]
-      {:id col ; a hack to put the first player in id, we analyze only one game
-       :rules (lower-case (:rules gd))
-       :komi (:komi gd)
-       :initialPlayer first-player
-       :boardXSize (:size gd)
-       :boardYSize (:size gd)
-       :moves mvs
-       :includePolicy true})))
+        first-player (m col)
+        second-player (mm first-player)]
+    (apply concat
+           (for [mvs (prefixes moves)]
+             (let [player (if (even? (count mvs))
+                            first-player
+                            second-player)]
+         [{:id (str "real" (count mvs))
+           :rules (lower-case (:rules gd))
+           :komi (:komi gd)
+           :initialPlayer player
+           :boardXSize (:size gd)
+           :boardYSize (:size gd)
+           :moves mvs
+           :includePolicy true
+           :maxvisits 10000}
+          {:id (str "reversed" (count mvs))
+           :rules (lower-case (:rules gd))
+           :komi (:komi gd)
+           :initialPlayer (mm player)
+           :boardXSize (:size gd)
+           :boardYSize (:size gd)
+           :moves mvs
+           :includePolicy true
+           :maxvisits 10000}])))))
+
+(defn process-sgf2
+  [sgf_file]
+  (let [name (filename sgf_file)
+        output (str name ".in")]
+    (spit output (join "\n"
+                       (map json/write-str
+                            (katago-game-data2 (slurp sgf_file)))))))
 
 
 ;; Processing the output  of the analysis engine.
