@@ -10,3 +10,6 @@
 ;;code to color
 (def code->col {"B" "black", "W" "white"})
 
+;;color to code
+(def col->code {"black" "B", "white" "W"})
+

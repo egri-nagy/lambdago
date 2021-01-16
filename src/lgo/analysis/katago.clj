@@ -2,11 +2,11 @@
   "Functions for doing KataGo analysis directly.
   Preparing input files for the analysis engine directly."
   (:require [clojure.data.json :as json]
-            [clojure.string :refer [lower-case join]]
+            [clojure.string :refer [lower-case join split]]
             [clojure.math.numeric-tower :as math]
             [clojure.java.io :as io]
             [lgo.stats :refer [normalize KL-divergence median mean]]
-            [lgo.analysis.converters :refer [B<->W code->col black<->white]]
+            [lgo.analysis.converters :refer [B<->W code->col black<->white col->code]]
             [lgo.sgf :refer [game-data
                              filename
                              SGFcoord->GTPcoord]]))
@@ -98,7 +98,7 @@
              (let [player (if (even? (count mvs))
                             first-player
                             second-player)]
-         [{:id (str "real" " " (count mvs) " " player)
+         [{:id (str "game" " "  (col->code player))
            :rules (lower-case (:rules gd))
            :komi (:komi gd)
            :initialPlayer player
@@ -107,7 +107,7 @@
            :moves mvs
            :includePolicy true
            :maxvisits 10000}
-          {:id (str "reversed" " " (count mvs) " " player)
+          {:id (str "reversed" " " (col->code player))
            :rules (lower-case (:rules gd))
            :komi (:komi gd)
            :initialPlayer (black<->white player)
@@ -125,7 +125,6 @@
                        (map json/write-str
                             (katago-game-data2 (slurp sgf_file)))))))
 
-
 ;; Processing the output  of the analysis engine.
 
 (defn katago-turn-data
@@ -135,12 +134,10 @@
         means (map :scoreMean (:moveInfos d))
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv))
-        first-player (:id d) ;0th move is for empty board
+        [category color] (split (:id d) #" ") 
         move (:turnNumber d)]
     {:move move
-     :color (if (even? move)
-              first-player
-              (B<->W first-player))
+     :color color
      :winrate (:winrate (:rootInfo d))
      :candidates candidates
      :policy (:policy d)
