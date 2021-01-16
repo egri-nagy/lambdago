@@ -13,66 +13,6 @@
 
 ;; Generating input files for the KataGo Analysis Engine
 
-(defn katago-game-data
-  "Produces a JSON string containing input data extracted from a game
-  for the KataGo analysis engine."
-  [sgf]
-  (let [gd (game-data sgf)
-        moves (map (fn [[col move]]
-                     (if (empty? move)
-                       [col "pass"]
-                       [col (SGFcoord->GTPcoord move)]))
-                   (:moves gd))
-        code (first (first moves))
-        first-player (code->col code)]
-    {:id code ; a hack to put the first player in id, we analyze only one game
-     :rules (lower-case (:rules gd))
-     :komi (:komi gd)
-     :initialPlayer first-player
-     :boardXSize (:size gd)
-     :boardYSize (:size gd)
-     :moves moves
-     :includePolicy true}))
-
-(defn katago-input-all-moves
-  "Produces a JSON input file for the KataGo Analysis Engine
-  for analyzing all the moves of the game."
-  [sgf maxvisits]
-  (let [kgd (katago-game-data sgf)]
-    (json/write-str
-     (conj kgd
-           [:maxVisits maxvisits]
-           [:analyzeTurns (range (inc (count(:moves kgd))))]))))
-
-(defn katago-input-random-move
-  "Produces a JSON input file for the KataGo Analysis Engine
-  for analyzing a single random move of the game."
-  [sgf maxvisits]
-  (let [kdg (katago-game-data sgf)]
-    (json/write-str
-     (conj kdg
-           [:maxVisits maxvisits]
-           [:analyzeTurns [(rand-int (inc (count (:moves kdg))))]]))))
-
-(defn katago-input-given-moves
-  "Produces a JSON input file for the KataGo Analysis Engine
-  for analyzing the given moves of the game."
-  [sgf maxvisits moves]
-  (let [kdg (katago-game-data sgf)]
-    (json/write-str
-     (conj kdg
-           [:maxVisits maxvisits]
-           [:analyzeTurns moves]))))
-
-(defn process-sgf
-  [sgf_file]
-  (let [name (filename sgf_file)
-        output (str name ".in")]
-    (println output)
-    (spit output (katago-input-all-moves (slurp sgf_file) 100000))))
-
-;; doing the moves separately
-
 (defn prefixes
   "All prefixes of the given collection, starting from the empty to
   the complete collection. Returns a sequence containing the prefixes
@@ -80,8 +20,8 @@
   [coll]
   (reductions conj [] coll))
 
-(defn katago-game-data2
-  "Produces a JSON string containing input data extracted from a game
+(defn katago-input-data
+  "Produces maps containing input data extracted from a game
   for the KataGo analysis engine."
   [sgf]
   (let [gd (game-data sgf)
@@ -103,26 +43,28 @@
          :boardXSize (:size gd)
          :boardYSize (:size gd)
          :moves mvs
-         :includePolicy true
-         :maxvisits 10000}))))
+         :includePolicy true}))))
 
 (defn katago-passed-game-data
-  [kgd]
+  "Takes already prepared katago input data, and appends a pass."
+  [kid]
   (map
    (fn [d]
      (let [code (second (split (:id d) #" "))]
        (->
         d
         (update :moves #(conj % [code "pass"]))
+        ;;no policy details needed for imaginary pass
         (update :includePolicy (constantly false))
         (update :id (constantly (str "passed " code))))))
-   kgd))
+   kid))
 
-(defn process-sgf2
-  [sgf_file]
+(defn process-sgf
+  [sgf_file max-visits]
   (let [name (filename sgf_file)
         output (str name ".in")
-        kgd (katago-game-data2 (slurp sgf_file))]
+        kgd (map #(conj % [:maxVisits max-visits])
+                 (katago-input-data (slurp sgf_file)))]
     (spit output
           (join "\n"
                 (map json/write-str
