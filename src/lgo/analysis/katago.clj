@@ -91,39 +91,43 @@
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
         col (first (first moves))
-        first-player (code->col col)
-        second-player (black<->white first-player)]
-    (apply concat
-           (for [mvs (prefixes moves)]
-             (let [player (if (even? (count mvs))
-                            first-player
-                            second-player)]
-         [{:id (str "game" " "  (col->code player))
-           :rules (lower-case (:rules gd))
-           :komi (:komi gd)
-           :initialPlayer player
-           :boardXSize (:size gd)
-           :boardYSize (:size gd)
-           :moves mvs
-           :includePolicy true
-           :maxvisits 10000}
-          {:id (str "reversed" " " (col->code player))
-           :rules (lower-case (:rules gd))
-           :komi (:komi gd)
-           :initialPlayer (black<->white player)
-           :boardXSize (:size gd)
-           :boardYSize (:size gd)
-           :moves mvs
-           :includePolicy true
-           :maxvisits 10000}])))))
+        initial-player (code->col col)]
+    (for [mvs (prefixes moves)]
+      (let [player (if (even? (count mvs))
+                     initial-player
+                     (black<->white initial-player))]
+        {:id (str "game" " "  (col->code player))
+         :rules (lower-case (:rules gd))
+         :komi (:komi gd)
+         :initialPlayer initial-player
+         :boardXSize (:size gd)
+         :boardYSize (:size gd)
+         :moves mvs
+         :includePolicy true
+         :maxvisits 10000}))))
+
+(defn katago-passed-game-data
+  [kgd]
+  (map
+   (fn [d]
+     (let [code (second (split (:id d) #" "))]
+       (->
+        d
+        (update :moves #(conj % [code "pass"]))
+        (update :includePolicy (constantly false))
+        (update :id (constantly (str "passed " code))))))
+   kgd))
 
 (defn process-sgf2
   [sgf_file]
   (let [name (filename sgf_file)
-        output (str name ".in")]
-    (spit output (join "\n"
-                       (map json/write-str
-                            (katago-game-data2 (slurp sgf_file)))))))
+        output (str name ".in")
+        kgd (katago-game-data2 (slurp sgf_file))]
+    (spit output
+          (join "\n"
+                (map json/write-str
+                     (concat kgd
+                             (katago-passed-game-data kgd)))))))
 
 ;; Processing the output  of the analysis engine.
 
@@ -134,7 +138,7 @@
         means (map :scoreMean (:moveInfos d))
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv))
-        [category color] (split (:id d) #" ") 
+        [category color] (split (:id d) #" ")
         move (:turnNumber d)]
     {:move move
      :color color
@@ -144,7 +148,8 @@
      :mean (:scoreLead (:rootInfo d))
      :means means
      :meanmean (mean means)
-     :medianmean (median means)} ))
+     :medianmean (median means)
+     :category category} ))
 
 (defn katago-output
   "Processing a whole game analyzed by KataGo."
