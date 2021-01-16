@@ -6,6 +6,7 @@
             [clojure.math.numeric-tower :as math]
             [clojure.java.io :as io]
             [lgo.stats :refer [normalize KL-divergence median mean]]
+            [lgo.analysis.converters :refer [B<->W code->col black<->white]]
             [lgo.sgf :refer [game-data
                              filename
                              SGFcoord->GTPcoord]]))
@@ -22,10 +23,9 @@
                        [col "pass"]
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
-        m {"B" "black", "W" "white"}
-        col (first (first moves))
-        first-player (m col)]
-    {:id col ; a hack to put the first player in id, we analyze only one game
+        code (first (first moves))
+        first-player (code->col code)]
+    {:id code ; a hack to put the first player in id, we analyze only one game
      :rules (lower-case (:rules gd))
      :komi (:komi gd)
      :initialPlayer first-player
@@ -90,11 +90,9 @@
                        [col "pass"]
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
-        m {"B" "black", "W" "white"}
-        mm {"black" "white", "white" "black"}
         col (first (first moves))
-        first-player (m col)
-        second-player (mm first-player)]
+        first-player (code->col col)
+        second-player (black<->white first-player)]
     (apply concat
            (for [mvs (prefixes moves)]
              (let [player (if (even? (count mvs))
@@ -112,7 +110,7 @@
           {:id (str "reversed" " " (count mvs) " " player)
            :rules (lower-case (:rules gd))
            :komi (:komi gd)
-           :initialPlayer (mm player)
+           :initialPlayer (black<->white player)
            :boardXSize (:size gd)
            :boardYSize (:size gd)
            :moves mvs
@@ -138,7 +136,6 @@
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv))
         first-player (:id d) ;0th move is for empty board
-        B<->W {"B" "W", "W" "B"}
         move (:turnNumber d)]
     {:move move
      :color (if (even? move)

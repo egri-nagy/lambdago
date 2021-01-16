@@ -14,9 +14,8 @@
                              extract-properties
                              extract-single-value]]
             [lgo.stats :refer [median mean]]
+            [lgo.analysis.converters :refer [B<->W]]
             [lgo.analysis.oz :refer [game-report]]))
-
-(def B<->W {"B" "W", "W" "B"})
 
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the tag.
