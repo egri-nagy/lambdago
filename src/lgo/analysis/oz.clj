@@ -12,6 +12,8 @@
   (:require [trptcolin.versioneer.core :as version]
             [lgo.stats :refer [mean cmas]]))
 
+(declare scatterplot)
+
 (defn unroll-scoremeans
   "All score means from raw data. This is just unrolling the means vector
   into separate rows."
@@ -141,6 +143,10 @@
 (defn game-report
   [RAW title]
   (let [raw (:game RAW)
+        passed (:passed RAW)
+        cop (map -
+                 ((comp (partial map :mean) :game) RAW)
+                 ((comp (partial map :mean) :passed) RAW))
         all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
@@ -151,6 +157,7 @@
         w (int (* 5.4 N))]
     [:div
      [:h1 title]
+     [:vega-lite (scatterplot (map :move raw) "moves"  cop "cop")]
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
                                        :y {:field "winrate" :type "quantitative"}}
