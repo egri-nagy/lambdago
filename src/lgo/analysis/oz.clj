@@ -139,8 +139,9 @@
 
 
 (defn game-report
-  [raw title]
-  (let [all-sm (unroll-scoremeans raw)
+  [RAW title]
+  (let [raw (:game RAW)
+        all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
         cs (choices raw)

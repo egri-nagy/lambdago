@@ -13,7 +13,7 @@
                  [metasoarous/oz "1.6.0-alpha6"]
                  [org.clojure/data.json "1.0.0"]
                  [trptcolin/versioneer "0.2.0"]]
-  :plugins [[lein-cloverage "1.2.1"]
+  :plugins [[lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.6.15"]
             [lein-bikeshed "0.5.2"]

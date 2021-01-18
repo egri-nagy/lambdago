@@ -11,7 +11,7 @@
                              filename
                              SGFcoord->GTPcoord]]))
 
-;; Generating input files for the KataGo Analysis Engine
+;; GENERATING INPUT files for the KataGo Analysis Engine
 
 (defn prefixes
   "All prefixes of the given collection, starting from the empty to
@@ -71,7 +71,7 @@
                      (concat kgd
                              (katago-passed-game-data kgd)))))))
 
-;; Processing the output  of the analysis engine.
+;; PROCESSING THE OUTPUT  of the analysis engine.
 
 (defn katago-turn-data
   "Processing one line of the KataGo output."
@@ -98,12 +98,14 @@
   [filename]
   (let ;todo: what's wrong with with-open?
       [rdr (io/reader filename)
-       d (map katago-turn-data (line-seq rdr))]
-    (sort-by :move d)))
+       d (map katago-turn-data (line-seq rdr))
+       cats (group-by :category d)]
+    (into {} (map (fn [[k v]] [(keyword k) (sort-by :move v)])
+                  cats))))
 
-;;higher level analysis
+;;HIGHER LEVEL ANALYSIS
+
 ;;policy comparison
-
 (defn policy-table-index
   "Converting a GTP? move to a policy table index."
   [move]
@@ -137,7 +139,6 @@
 ;; (def b40 (apply concat (map check-updated-policy (filter (fn [f] (string/ends-with? (.getName f) ".out")) (file-seq (clojure.java.io/file "/media/dersu/PRINT/b40/"))))))
 
 ;;hitrate
-
 (defn hit?
   [candidates policy]
   (let [raw-best (first (apply max-key second (map-indexed vector policy)))
