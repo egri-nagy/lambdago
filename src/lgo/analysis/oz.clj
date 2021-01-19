@@ -84,6 +84,27 @@
             :move move})
          triples)))
 
+(defn efficiency
+  [raw cops]
+  (let [triples (map vector
+                     ((comp (partial map :color) :game) raw)
+                     ((partial map :mean)  (rest (:game raw)))
+                     ((comp (partial map :mean) :passed) raw)
+                     ((partial map :move)  (rest (:game raw))))
+        realized (map (fn [[c m pm move]]
+                        [c
+                         (if (= "B" c)
+                                (- m pm)
+                                (- pm m))
+                         move])
+                      triples)]
+    (map (fn [[c v m] cop]
+           {:color c
+            :cop (* 100 (/ v cop))
+            :move m})
+         realized
+         (map :cop cops))))
+
 ;; Oz visualization functions producing vega-lite specifications
 (defn oz-cops
   [cops w t]
@@ -173,6 +194,7 @@
   (let [raw (:game RAW)
         passed (:passed RAW)
         copd (cop RAW)
+        effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
@@ -184,6 +206,7 @@
     [:div
      [:h1 title]
      [:vega-lite (oz-cops copd w "Cost of passing")]
+     [:vega-lite (oz-cops effcs w "Efficiency")]
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
                                        :y {:field "winrate" :type "quantitative"}}
