@@ -69,7 +69,35 @@
                    varkeys)))
           db))
 
+(defn cop
+  [raw]
+  (let [triples (map vector
+                     ((comp (partial map :color) :game) raw)
+                     ((comp (partial map :mean) :game) raw)
+                     ((comp (partial map :mean) :passed) raw)
+                     ((comp (partial map :move) :game) raw))]
+    (map (fn [[c m pm move]]
+           {:color c
+            :cop (if (= "B" c)
+              (- m pm)
+              (- pm m))
+            :move move})
+         triples)))
+
 ;; Oz visualization functions producing vega-lite specifications
+(defn oz-cops
+  [cops w t]
+  {:data {:values cops}
+   :layer[{:encoding {:x {:field "move" :type "ordinal"}
+                      :y {:field "cop" :type "quantitative"} :color {:field "color" :type "nominal"}}
+           :mark "bar" :width w :title t}
+          {:encoding {
+                      :y {:field "cop" :type "quantitative" :aggregate "mean"} :color {:field "color" :type "nominal"}}
+           :mark "rule"}
+          ]})
+
+
+
 (defn oz-effects
   [e-d w t]
   {:data {:values e-d}
@@ -144,9 +172,7 @@
   [RAW title]
   (let [raw (:game RAW)
         passed (:passed RAW)
-        cop (map -
-                 ((comp (partial map :mean) :game) RAW)
-                 ((comp (partial map :mean) :passed) RAW))
+        copd (cop RAW)
         all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
         dev-dat (deviations effs-dat)
@@ -157,7 +183,7 @@
         w (int (* 5.4 N))]
     [:div
      [:h1 title]
-     [:vega-lite (scatterplot (map :move raw) "moves"  cop "cop")]
+     [:vega-lite (oz-cops copd w "Cost of passing")]
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
                                        :y {:field "winrate" :type "quantitative"}}
