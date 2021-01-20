@@ -100,7 +100,7 @@
                       triples)]
     (map (fn [[c v m] cop]
            {:color c
-            :cop (* 100 (/ v cop))
+            :cop (- (* 100 (/ v cop)) 100)
             :move m})
          realized
          (map :cop cops))))
