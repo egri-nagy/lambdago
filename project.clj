@@ -1,11 +1,11 @@
-(defproject lambdago "2020.08.26"
+(defproject lambdago "2020.01.28"
   :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
   :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
             :url "none"
             :year 2019
             :key "mit"}
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.10.2"]
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.10"]
                  [org.clojure/math.numeric-tower "0.0.4"]
@@ -15,9 +15,9 @@
                  [trptcolin/versioneer "0.2.0"]]
   :plugins [[lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
-            [lein-ancient "0.6.15"]
+            [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "0.3.12"]]
+            [jonase/eastwood "0.3.13"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
