@@ -13,8 +13,7 @@
             [trptcolin.versioneer.core :as version]))
 
 (defn -main
-  "The first argument is a name of a file containing Clojure source code.
-  This main method evaluates the forms contained."
+  "The first argument is a command."
   [& args]
   (let [command (first args)]
     (case command
@@ -26,10 +25,14 @@
       "lizzie" (do
                  (oz/start-server!)
                  (oz/view! (sgf-report (slurp (second args))) :mode :vega))
+      "katago-input" (do
+                       (process-sgf (second args) (read-string (nth args 2))))
+      ;; for analyzing katago output
       "katago" (do
                  (oz/start-server!)
                  (oz/view! (game-report (katago-output (second args))
                                         (second args))
                            :mode :vega))
+      ;; for executing clojure code as a script
       "script" (load-file (second args)))
     (shutdown-agents)))
