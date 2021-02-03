@@ -53,28 +53,29 @@
            (into d [[:deviation (- e avg)]]))
          effs)))
 
-(defn cop
-  [raw]
-  (let [triples (map vector
-                     ((comp (partial map :color) :game) raw)
-                     ((comp (partial map :mean) :game) raw)
-                     ((comp (partial map :mean) :passed) raw)
-                     ((comp (partial map :move) :game) raw))]
+(defn cost-of-passing
+  [dat]
+  (let [tuples
+        (map vector
+             ((comp (partial map :color) :game) dat) ;color
+             ((comp (partial map :mean) :game) dat) ;mean
+             ((comp (partial map :mean) :passed) dat) ;hypothetical passed mean
+             ((comp (partial map :move) :game) dat))] ;move number
     (map (fn [[c m pm move]]
            {:color c
             :cop (if (= "B" c)
               (- m pm)
               (- pm m))
             :move move})
-         triples)))
+         tuples)))
 
 (defn efficiency
-  [raw cops]
+  [dat cops]
   (let [triples (map vector
-                     ((comp (partial map :color) :game) raw)
-                     ((partial map :mean)  (rest (:game raw)))
-                     ((comp (partial map :mean) :passed) raw)
-                     ((partial map :move)  (rest (:game raw))))
+                     ((comp (partial map :color) :game) dat)
+                     ((partial map :mean)  (rest (:game dat)))
+                     ((comp (partial map :mean) :passed) dat)
+                     ((partial map :move)  (rest (:game dat))))
         realized (map (fn [[c m pm move]]
                         [c
                          (if (= "B" c)
