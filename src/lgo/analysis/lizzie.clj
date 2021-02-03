@@ -53,7 +53,8 @@
               :meanmean (mean meanz)
               :medianmean (median meanz)
               :means meanz
-              :winrate wr}))
+              :winrate wr
+              :category "game"}))
          y (iterate inc 1)))) ;counting the moves from 1
 
 (defn sgf-report
@@ -62,6 +63,6 @@
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
-        raw (raw-data flp)
+        raw {:game (sort-by :move (raw-data flp))}
         title (str "B: " black " W: " white " R: " result)]
     (game-report raw title)))
