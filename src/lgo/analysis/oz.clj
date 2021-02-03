@@ -125,7 +125,7 @@
     [:div
      [:h1 title]
      [:vega-lite (oz-cops copd w "Cost of passing")]
-     [:vega-lite (oz-cops effcs w "Efficiency")]
+     [:vega-lite (oz-cops effcs w "Efficiency - how much percent of the score in cost of passing realized?")]
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
                                        :y {:field "winrate" :type "quantitative"}}
