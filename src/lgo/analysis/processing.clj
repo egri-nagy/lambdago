@@ -5,8 +5,10 @@
   Move counter tells how many moves were made. Color tells whose turn is it.
 
   The raw data is a hash-map with keys color, move, mean, meanmean, medianmean,
-  means. This is the input of the oz visualization."
+  means. The dat input refers to this database."
   (:require [lgo.stats :refer [mean]]))
+
+;;TODO we repeatedly switch sign for white, is there a better place to do that?
 
 (defn unroll-scoremeans
   "All score means from raw data. This is just unrolling the means vector
@@ -19,7 +21,7 @@
         :move (:move d)
         :mean (if (= "B" (:color d))
                 m
-                (- m))}))
+                (- m))})) ; to get the value form white's perspective
    dat))
 
 (defn effects
@@ -31,7 +33,7 @@
                      (- m2 m1)
                      (- (- m2 m1)))]
            {:color c1 :effect eff :move v2}))
-       (partition 2 1 dat)))
+       (partition 2 1 dat))) ; all pairs of the rows
 
 (defn choices
   [dat]
