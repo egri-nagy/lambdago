@@ -1,17 +1,26 @@
 (ns lgo.analysis.katago
   "Functions for doing KataGo analysis directly.
-  Preparing input files for the analysis engine directly."
+  Preparing input files for the analysis engine and parsing the
+  output into a map suitable for visualization."
   (:require [clojure.data.json :as json]
-            [clojure.string :refer [lower-case join split]]
+            [clojure.string :refer [lower-case
+                                    join
+                                    split]]
             [clojure.math.numeric-tower :as math]
             [clojure.java.io :as io]
-            [lgo.stats :refer [normalize KL-divergence median mean]]
-            [lgo.analysis.converters :refer [B<->W code->col black<->white col->code]]
+            [lgo.stats :refer [normalize
+                               KL-divergence
+                               median
+                               mean]]
+            [lgo.analysis.converters :refer [B<->W
+                                             code->col
+                                             black<->white
+                                             col->code]]
             [lgo.sgf :refer [game-data
                              filename
                              SGFcoord->GTPcoord]]))
 
-;; GENERATING INPUT files for the KataGo Analysis Engine
+;; GENERATING INPUT files for the KataGo Analysis Engine ;;;;;;;;;;;;;;;;;;;;;;
 
 (defn prefixes
   "All prefixes of the given collection, starting from the empty to
@@ -47,7 +56,7 @@
 
 (defn katago-passed-game-data
   "Takes already prepared katago input data, and appends a pass."
-  [kid]
+  [kid maxvisits]
   (map
    (fn [d]
      (let [code (second (split (:id d) #" "))]
@@ -56,11 +65,12 @@
         (update :moves #(conj % [code "pass"]))
         ;;no policy details needed for imaginary pass
         (update :includePolicy (constantly false))
-        (update :id (constantly (str "passed " code))))))
+        (update :id (constantly (str "passed " code)))
+        (update :maxVisits (constantly maxvisits)))))
    kid))
 
 (defn process-sgf
-  [sgf_file max-visits]
+  [sgf_file max-visits passed-max-visits]
   (let [name (filename sgf_file)
         output (str name ".in")
         kgd (map #(conj % [:maxVisits max-visits])
@@ -69,7 +79,8 @@
           (join "\n"
                 (map json/write-str
                      (concat kgd
-                             (katago-passed-game-data kgd)))))))
+                             (katago-passed-game-data kgd
+                                                      passed-max-visits)))))))
 
 ;; PROCESSING THE OUTPUT  of the analysis engine.
 
