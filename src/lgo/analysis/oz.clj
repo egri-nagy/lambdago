@@ -5,6 +5,7 @@
             [lgo.stats :refer [mean cmas]]
             [lgo.analysis.processing :refer [unroll-scoremeans
                                              effects
+                                             effects-with-cost-of-passing
                                              choices
                                              deviations
                                              cost-of-passing
@@ -147,6 +148,9 @@
                   w
                   "White's all scoreMeans for variations")]
      [:vega-lite (oz-effects effs-dat w "Effects of moves")]
+     [:vega-lite (oz-effects (effects-with-cost-of-passing  effs-dat copd)
+                             w
+                             "Effects of moves divided by cost of passing")]
      [:vega-lite (oz-effects (filter #(= "W" (:color %)) effs-dat) w "Effects of White's moves")]
      [:vega-lite (oz-effects (filter #(= "B" (:color %)) effs-dat) w "Effects of Black's moves")]
      [:vega-lite (oz-deviations (filter #(= "W" (:color %)) dev-dat) w "Deviations (distances from the mean) of White's moves")]

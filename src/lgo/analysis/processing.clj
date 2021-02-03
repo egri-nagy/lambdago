@@ -35,6 +35,15 @@
            {:color c1 :effect eff :move v2}))
        (partition 2 1 dat))) ; all pairs of the rows
 
+(defn effects-with-cost-of-passing
+  "The score mean differences caused by the moves."
+  [effs cops]
+  (map (fn [{c :color m :move e :effect }
+            {cop :cop}]
+         {:color c :effect (/ e cop) :move m})
+       effs
+       cops))
+
 (defn choices
   [dat]
   (let [ps (partition 2 1 dat)]
@@ -76,7 +85,7 @@
                      ((partial map :mean)  (rest (:game dat)))
                      ((comp (partial map :mean) :passed) dat)
                      ((partial map :move)  (rest (:game dat))))
-        realized (map (fn [[c m pm move]]
+        realized (map (fn [[c m pm move]] ; is this the effect?
                         [c
                          (if (= "B" c)
                                 (- m pm)
@@ -85,7 +94,7 @@
                       triples)]
     (map (fn [[c v m] cop]
            {:color c
-            :cop (- (* 100 (/ v cop)) 100)
+            :cop (* 100 (/ v cop))
             :move m})
          realized
          (map :cop cops))))
