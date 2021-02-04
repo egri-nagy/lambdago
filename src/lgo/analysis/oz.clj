@@ -113,51 +113,59 @@
         tcs (data-transform cs [:color :move]
                             [:choice :median :AI :average] :scoreMean)
         N (count effs-dat)
-        w (int (* 5.4 N))]
+        w (int (* 5.4 N))
+        white? #(= "W" (:color %))
+        black? #(= "B" (:color %))]
     [:div
      [:h1 title]
+     [:p "Move numbers for score means indicate how many moves made before."]
      [:vega-lite (oz-cops copd w "Cost of passing")]
-     [:vega-lite (oz-cops effcs w "Efficiency - how much percent of the score in cost of passing realized?")]
+     [:vega-lite (oz-cops effcs
+                          w
+                          "Efficiency - how much percent of the score in cost of passing realized?")]
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
                                        :y {:field "winrate" :type "quantitative"}}
                             :mark "line" :width w :title "winrate"}]}]
-     [:p "Move numbers for score means indicate how many moves made before."]
      [:vega-lite (oz-choices
-                  (filter #(= "B" (:color %)) tcs)
+                  (filter black? tcs)
                   w
                   "Black's scoremean values")]
      [:vega-lite (oz-choices
-                  (filter #(= "W" (:color %)) tcs)
+                  (filter white? tcs)
                   w
                   "White's scoremean values")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "B" (:color %)) all-sm)
+                  (filter black? all-sm)
                   w
                   "Black's all scoreMeans for variations")]
      [:vega-lite (oz-all-scoremeans
-                  (filter #(= "W" (:color %)) all-sm)
+                  (filter white? all-sm)
                   w
                   "White's all scoreMeans for variations")]
      [:vega-lite (oz-effects effs-dat w "Effects of moves")]
      [:vega-lite (oz-effects (effects-with-cost-of-passing  effs-dat copd)
                              w
                              "Effects of moves divided by cost of passing")]
-     [:vega-lite (oz-effects (filter #(= "W" (:color %)) effs-dat) w "Effects of White's moves")]
-     [:vega-lite (oz-effects (filter #(= "B" (:color %)) effs-dat) w "Effects of Black's moves")]
-     [:vega-lite (oz-deviations (filter #(= "W" (:color %)) dev-dat) w "Deviations (distances from the mean) of White's moves")]
-     [:vega-lite (oz-deviations (filter #(= "B" (:color %)) dev-dat) w "Deviations of Black's moves")]
+     [:vega-lite (oz-effects (filter white? effs-dat)
+                             w
+                             "Effects of White's moves")]
+     [:vega-lite (oz-effects (filter black? effs-dat)
+                             w
+                             "Effects of Black's moves")]
+     [:vega-lite (oz-deviations (filter white?  dev-dat) w "Deviations (distances from the mean) of White's moves")]
+     [:vega-lite (oz-deviations (filter black? dev-dat) w "Deviations of Black's moves")]
      [:vega-lite
-      (oz-normalized-effects (normalize-effects (filter #(= "W" (:color %)) effs-dat))  w
+      (oz-normalized-effects (normalize-effects (filter white? effs-dat))  w
                              "White's cumulative moving average of effects")]
      [:vega-lite
-      (oz-normalized-effects (normalize-effects  (filter #(= "B" (:color %)) effs-dat))  w
+      (oz-normalized-effects (normalize-effects  (filter black? effs-dat))  w
                              "Black's cumulative moving average of effects")]
      [:vega-lite
-      (oz-normalized-effects (concat (normalize-effects (filter #(= "W" (:color %)) effs-dat))
-                                      (normalize-effects (filter #(= "B" (:color %)) effs-dat)))
+      (oz-normalized-effects (concat (normalize-effects (filter white? effs-dat))
+                                      (normalize-effects (filter black? effs-dat)))
                               w
-                             "Cumulative moving average of effects")]
+                             "Cumulative moving average of effects (composite)")]
 
      [:div {:style {:display "flex" :flex-direction "row"}}
       [:vega-lite (oz-effects-summary effs-dat)]]
