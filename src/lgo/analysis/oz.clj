@@ -17,12 +17,12 @@
   "Prepares a database for plotting in the same diagram. Fixed keys are copied,
   then the variable ones are added as 'name' and its value under kw."
   [db fixedkeys varkeys kw]
-  (mapcat (fn [row]
-            (let [fixedvals (into {} (map (fn [k] [k (k row)]) fixedkeys))]
-              (map (fn [k] (into fixedvals
-                                 [[:name (name k)] [kw (k row)]]))
-                   varkeys)))
-          db))
+  (mapcat
+   (fn [row]
+     (let [fixedvals (into {} (map (fn [k] [k (k row)]) fixedkeys))]
+       (map (fn [k] (into fixedvals [[:name (name k)] [kw (k row)]]))
+            varkeys)))
+   db))
 
 ;; Oz visualization functions producing vega-lite specifications
 (defn oz-cops
@@ -65,14 +65,6 @@
          e-d avgs)))
 
 (defn oz-normalized-effects
-  [e-d w t]
-  {:data {:values (normalize-effects e-d)}
-   :encoding {:x {:field "move" :type "quantitative"}
-              :y {:field "cumsum" :type "quantitative"}
-              :color {:field "color" :type "nominal"}}
-   :mark "bar" :width w :title t})
-
-(defn oz-normalized-effects2
   [data w t]
   {:data {:values data}
    :encoding {:x {:field "move" :type "quantitative"}
@@ -156,13 +148,13 @@
      [:vega-lite (oz-deviations (filter #(= "W" (:color %)) dev-dat) w "Deviations (distances from the mean) of White's moves")]
      [:vega-lite (oz-deviations (filter #(= "B" (:color %)) dev-dat) w "Deviations of Black's moves")]
      [:vega-lite
-      (oz-normalized-effects (filter #(= "W" (:color %)) effs-dat)  w
+      (oz-normalized-effects (normalize-effects (filter #(= "W" (:color %)) effs-dat))  w
                              "White's cumulative moving average of effects")]
      [:vega-lite
-      (oz-normalized-effects (filter #(= "B" (:color %)) effs-dat)  w
+      (oz-normalized-effects (normalize-effects  (filter #(= "B" (:color %)) effs-dat))  w
                              "Black's cumulative moving average of effects")]
      [:vega-lite
-      (oz-normalized-effects2 (concat (normalize-effects (filter #(= "W" (:color %)) effs-dat))
+      (oz-normalized-effects (concat (normalize-effects (filter #(= "W" (:color %)) effs-dat))
                                       (normalize-effects (filter #(= "B" (:color %)) effs-dat)))
                               w
                              "Cumulative moving average of effects")]
