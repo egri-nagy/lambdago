@@ -13,7 +13,8 @@
             [lgo.sgf :refer [flat-list-properties
                              extract-properties
                              extract-single-value]]
-            [lgo.stats :refer [median mean]]
+            [lgo.stats :refer [median
+                               mean]]
             [lgo.analysis.converters :refer [B<->W]]
             [lgo.analysis.oz :refer [game-report]]))
 
@@ -39,23 +40,24 @@
                            (mapv (comp #(/ % 100.0) read-string)
                                  (extract-from-LZ val "winrate")))))
                props)
-        y (partition 2 x)] ;combining move and score mean
-    (map (fn [[player [means winrates]] move]
-           (let [meanz (if (= player "W")  ;all values form Black's perspective
-                         means
-                         (map (partial * -1) means))
-                 wr (if (= player "W")
-                      (first winrates)
-                      (- 100 (first winrates)))]
-             {:move move
-              :color (B<->W player)
-              :mean (first meanz)
-              :meanmean (mean meanz)
-              :medianmean (median meanz)
-              :means meanz
-              :winrate wr
-              :category "game"}))
-         y (iterate inc 1)))) ;counting the moves from 1
+        y (partition 2 x) ;combining move and score mean
+        z (map (fn [[player [means winrates]] move]
+                 (let [meanz (if (= player "W")  ;all values form Black's perspective
+                               means
+                               (map (partial * -1) means))
+                       wr (if (= player "W")
+                            (first winrates)
+                            (- 100 (first winrates)))]
+                   {:move move
+                    :color (B<->W player)
+                    :mean (first meanz)
+                    :meanmean (mean meanz)
+                    :medianmean (median meanz)
+                    :means meanz
+                    :winrate wr
+                    :category "game"}))
+               y (iterate inc 1))] ;counting the moves from 1
+    {:game (sort-by :move z)}))
 
 (defn sgf-report
   [sgf]
@@ -63,6 +65,5 @@
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
-        raw {:game (sort-by :move (raw-data flp))}
         title (str "B: " black " W: " white " R: " result)]
-    (game-report raw title)))
+    (game-report (raw-data flp) title)))
