@@ -20,7 +20,8 @@
 
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the tag.
-  If the tag has more values (like PV), this gets only the first."
+  If the tag has more values (like PV), this gets only the first,
+  but it gets all instances of the tag in order of appearance."
   [s tag]
   (map second
        (filter #(= tag (first %))
