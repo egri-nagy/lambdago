@@ -133,7 +133,7 @@
 (defn filename
   "Cuts the extension of the filename."
   [sgf_file]
-  (apply str (butlast (string/split sgf_file #"\."))))
+  (string/join (butlast (string/split sgf_file #"\."))))
 
 ;;
 

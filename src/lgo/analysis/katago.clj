@@ -39,7 +39,7 @@
                        [col "pass"]
                        [col (SGFcoord->GTPcoord move)]))
                    (:moves gd))
-        col (first (first moves))
+        col (ffirst moves)
         initial-player (code->col col)]
     (for [mvs (prefixes moves)]
       (let [player (if (even? (count mvs))
@@ -122,7 +122,7 @@
   [move]
   (let [m (zipmap "ABCDEFGHJKLMNOPQRST" (range))
         letter (first move)
-        num (read-string (apply str (rest move)))]
+        num (read-string (join (rest move)))]
     (if (= "pass" move)
       361
       (+ (m letter) (* 19 (- 19 num))))))
@@ -133,7 +133,7 @@
   values from P. Assuming that these policy values are all positive, we
   normalize them, then calculate the KL-divergence."
   [candidates policy]
-  (let [cands (filter (fn [[_ visits]] (> visits 0)) ; shall we do this or not?
+  (let [cands (filter (fn [[_ visits]] (pos? 0)) ; shall we do this or not?
                       candidates)
         P (normalize (map second cands))
         PI (normalize (map (fn [move] (nth policy (policy-table-index move)))
@@ -153,7 +153,7 @@
 (defn hit?
   [candidates policy]
   (let [raw-best (first (apply max-key second (map-indexed vector policy)))
-        top (first (first candidates))] ; cause it's sorted
+        top (ffirst candidates)] ; cause it's sorted
     (= raw-best (policy-table-index top))))
 
 (defn check-hits
