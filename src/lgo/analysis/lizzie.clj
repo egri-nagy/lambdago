@@ -36,8 +36,8 @@
         x (map (fn [[id val]]
                  (if (#{"B" "W"} id)
                    id
-                   (vector (mapv read-string
-                                 (extract-from-LZ val "scoreMean"))
+                   (vector (sort-by > (mapv read-string
+                                 (extract-from-LZ val "scoreMean")))
                            (mapv (comp #(/ % 100.0) read-string)
                                  (extract-from-LZ val "winrate")))))
                props)

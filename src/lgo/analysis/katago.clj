@@ -88,7 +88,7 @@
   "Processing one line of the KataGo output."
   [js]
   (let [d (json/read-str js :key-fn keyword)
-        means (map :scoreMean (:moveInfos d))
+        means (map :scoreMean (sort-by :order (:moveInfos d))) ;sorting to make sure
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv))
         [category color] (split (:id d) #" ")
