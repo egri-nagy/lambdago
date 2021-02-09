@@ -85,24 +85,25 @@
 ;; PROCESSING THE OUTPUT  of the analysis engine.
 
 (defn katago-turn-data
-  "Processing one line of the KataGo output."
+  "Processing one line of the KataGo output. It also adds some statistical calculations.
+  Outputs a hash-map."
   [js]
-  (let [d (json/read-str js :key-fn keyword)
+  (let [d (json/read-str js :key-fn keyword) ;the result of parsing JSON
         means (map :scoreMean (sort-by :order (:moveInfos d))) ;sorting to make sure
         omv (map (juxt :order :move :visits) (:moveInfos d))
-        candidates (map (comp vec rest) (sort-by first omv))
+        candidates (map (comp vec rest) (sort-by first omv)) ;stripping the order number
         [category color] (split (:id d) #" ")
         move (:turnNumber d)]
     {:move move
      :color color
      :winrate (:winrate (:rootInfo d))
-     :candidates candidates
+     :candidates candidates ;candidate moves and their visit counts in the order of strength
      :policy (:policy d)
      :mean (:scoreLead (:rootInfo d))
      :means means
      :meanmean (mean means)
      :medianmean (median means)
-     :category category} ))
+     :category category}))
 
 (defn katago-output
   "Processing a whole game analyzed by KataGo."
@@ -111,8 +112,9 @@
       [rdr (io/reader filename)
        d (map katago-turn-data (line-seq rdr))
        cats (group-by :category d)]
-    (into {} (map (fn [[k v]] [(keyword k) (sort-by :move v)])
-                  cats))))
+    (into {}
+          (map (fn [[k v]] [(keyword k) (sort-by :move v)]) ;sorting by move
+               cats))))
 
 ;;HIGHER LEVEL ANALYSIS
 
@@ -149,14 +151,20 @@
 
 ;; (def b40 (apply concat (map check-updated-policy (filter (fn [f] (string/ends-with? (.getName f) ".out")) (file-seq (clojure.java.io/file "/media/dersu/PRINT/b40/"))))))
 
-;;hitrate
+;; HIT RATE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn hit?
+  "Given the candidate moves and the raw policy, this answers the question:
+  Is the best candidate the same as the policy's top move?"
   [candidates policy]
-  (let [raw-best (first (apply max-key second (map-indexed vector policy)))
+  (let [raw-best (first
+                  (apply max-key
+                         second ;gets the policy entry
+                         (map-indexed vector policy))) ;;associating numbers to policy entries
         top (ffirst candidates)] ; cause it's sorted
     (= raw-best (policy-table-index top))))
 
 (defn check-hits
+  "Checks the whole game data for for hits."
   [outfile]
   (let [ko (katago-output outfile)
         hits (count (filter true?
@@ -164,6 +172,7 @@
                                  (map (juxt :candidates :policy) ko))))]
     [hits (float (/ hits (count ko)))]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn exp-visit-count
   "The move selection mechanism in AlphaGo Zero with temperature control."
   [visitcounts tau]
