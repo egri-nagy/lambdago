@@ -1,19 +1,10 @@
 (ns lgo.analysis.policy
   "Functions for working with KataGo's policy output table."
-(:require [clojure.data.json :as json]
-          [clojure.string :refer [lower-case
-                                  join
-                                  split]]
+(:require [clojure.string :refer [join]]
           [clojure.math.numeric-tower :as math]
-          [clojure.java.io :as io]
+
           [lgo.stats :refer [normalize
-                             KL-divergence
-                             median
-                             mean]]
-          [lgo.analysis.converters :refer [B<->W
-                                           code->col
-                                           black<->white
-                                           col->code]]))
+                             KL-divergence]]))
 
 ;HIGHER LEVEL ANALYSIS
 
@@ -34,7 +25,7 @@
   values from P. Assuming that these policy values are all positive, we
   normalize them, then calculate the KL-divergence."
   [candidates policy]
-  (let [cands (filter (fn [[_ visits]] (pos? 0)) ; shall we do this or not?
+  (let [cands (filter (fn [[_ visits]] (pos? visits)) ; shall we do this or not?
                       candidates)
         P (normalize (map second cands))
         PI (normalize (map (fn [move] (nth policy (policy-table-index move)))
@@ -43,10 +34,9 @@
 
 (defn check-updated-policy
   "Batch policy comparison."
-  [outfile]
-  (let [ko (katago-output outfile)]
-    (map (partial apply policy-comparison)
-         (map (juxt :candidates :policy) ko))))
+  [kgdat]
+  (map (partial apply policy-comparison)
+       (map (juxt :candidates :policy) kgdat)))
 
 ;; (def b40 (apply concat (map check-updated-policy (filter (fn [f] (string/ends-with? (.getName f) ".out")) (file-seq (clojure.java.io/file "/media/dersu/PRINT/b40/"))))))
 
@@ -64,12 +54,11 @@
 
 (defn check-hits
   "Checks the whole game data for for hits."
-  [outfile]
-  (let [ko (katago-output outfile)
-        hits (count (filter true?
+  [kgdat]
+  (let [hits (count (filter true?
                             (map (partial apply hit?)
-                                 (map (juxt :candidates :policy) ko))))]
-    [hits (float (/ hits (count ko)))]))
+                                 (map (juxt :candidates :policy) kgdat))))]
+    [hits (float (/ hits (count kgdat)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn exp-visit-count

@@ -6,14 +6,10 @@
             [clojure.string :refer [lower-case
                                     join
                                     split]]
-            [clojure.math.numeric-tower :as math]
             [clojure.java.io :as io]
-            [lgo.stats :refer [normalize
-                               KL-divergence
-                               median
-                               mean]]
-            [lgo.analysis.converters :refer [B<->W
-                                             code->col
+            [lgo.stats :refer [mean
+                               median]]
+            [lgo.analysis.converters :refer [code->col
                                              black<->white
                                              col->code]]
             [lgo.sgf :refer [game-data
