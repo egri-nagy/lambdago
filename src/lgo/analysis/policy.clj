@@ -6,7 +6,14 @@
           [lgo.stats :refer [normalize
                              KL-divergence]]))
 
-;HIGHER LEVEL ANALYSIS
+(defn top-moves
+  "Returns the n top moves given the policy table."
+  [policy n]
+  (take n
+        (sort-by
+         second ;gets the policy entry
+         >
+         (map-indexed vector policy))))
 
 ;;policy comparison
 (defn policy-table-index
@@ -18,6 +25,15 @@
     (if (= "pass" move)
       361
       (+ (m letter) (* 19 (- 19 num))))))
+
+(defn GTP-move
+  "Converting a policy table index to GTP move."
+  [index]
+  (if (= 361 index) "pass"
+      (let [row (math/floor (/ index 19))
+            column (mod index 19)
+            m (zipmap (range) "ABCDEFGHJKLMNOPQRST") ]
+        (str (m  column) (- 19 row) ))))
 
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
