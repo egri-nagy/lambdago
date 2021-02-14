@@ -26,16 +26,29 @@
             m (zipmap (range) "ABCDEFGHJKLMNOPQRST") ]
         (str (m  column) (- 19 row) ))))
 
-(defn top-moves
+(defn legal-moves
   "Returns the n top moves given the policy table."
-  [policy n]
-  (let [top-entries (take n
-                          (sort-by
-                           second ;gets the policy entry
-                           >
-                           (map-indexed vector policy)))]
+  [policy]
+  (let [top-entries (sort-by
+                     second ;gets the policy entry
+                     >
+                     (filter
+                      (fn [[_ v]] (pos? v))
+                      (map-indexed vector policy)))]
     (map (fn [p] (update p 0 GTP-move))
          top-entries)))
+
+(defn top-moves
+  [policy n]
+  (take n (legal-moves policy)))
+
+(defn non-legal-moves
+  "Returns the moves that are not allowed on the board."
+  [policy]
+  (map (comp GTP-move first)
+       (filter
+        (fn [[_ v]] (neg? v))
+        (map-indexed vector policy))))
 
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
