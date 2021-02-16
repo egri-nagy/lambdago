@@ -2,7 +2,6 @@
   "Functions for working with KataGo's policy output table."
 (:require [clojure.string :refer [join]]
           [clojure.math.numeric-tower :as math]
-
           [lgo.stats :refer [normalize
                              KL-divergence]]))
 
@@ -27,16 +26,19 @@
         (str (m  column) (- 19 row) ))))
 
 (defn legal-moves
-  "Returns the n top moves given the policy table."
+  "Returns all the available legal moves given the policy table
+  sorted by their value. Output is a collection of vectors of the form
+  [GTP-move policy-value]."
   [policy]
-  (let [top-entries (sort-by
+  (let [entries (sort-by
                      second ;gets the policy entry
                      >
                      (filter
                       (fn [[_ v]] (pos? v))
                       (map-indexed vector policy)))]
-    (map (fn [p] (update p 0 GTP-move))
-         top-entries)))
+    (map (fn [p]
+           (update p 0 GTP-move))
+         entries)))
 
 (defn top-moves
   [policy n]
