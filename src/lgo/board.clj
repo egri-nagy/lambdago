@@ -206,38 +206,40 @@
 ;; These functions query the properties of the board position and hypothetical
 ;; moves.
 
-(defn self-capture?
+(defn self-capture? ;TODO this is not working yet
   "Returns true if putting stone at the point would be a self-capture."
   [{width :width height :height lookup :lookup liberties :liberties}
    color
    point]
-  (let [ngbs (neighbours point width height)]
-    (when (not-any? nil? ngbs) ;; there is no liberty for stone
-      (let [chs (distinct (map lookup ngbs))
-            ch (reduce into
-                       #{point}
-                       (map :stones
-                            (filter #(= color (:color %))
-                                    chs)))
-            env (envelope ch width height)
-            ochs (map lookup env)]
+  (let [chains (distinct (map lookup (neighbours point width height)))]
+    (when (not-any? nil? chains) ; there is no liberty for stone
+      (let [;merge the friendly chains
+            merged (reduce into
+                           #{point}
+                           (map :stones
+                                (filter #(= color (:color %))
+                                        chains)))
+            env (envelope merged width height)
+            ochs (distinct (map lookup env))]
         (when (not-any? nil? ochs) ;; no liberty for merged chain
           ;; only enemy chains now, and none of them can be captured by stone
           (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
 
 (defn eye-fill?
-  "Returns true if putting stone there is filling up an eye."
+  "Returns true if putting stone there is filling up an eye.
+  This happens when all neighbours have a friendly chain (possible same)."
   [{width :width height :height lookup :lookup}
    color
    point]
   (let [ngbs (neighbours point width height)]
     (every?
-     (fn [ch] (and (not (nil? ch))
-                   (= color (:color ch))))
+     (fn [chain] (and (not (nil? chain))
+                   (= color (:color chain))))
      (map lookup ngbs))))
 
 (defn empty-points
-  "Returns the empty points of a board position."
+  "Returns the empty points of a board position, i.e. all the grid points
+  with no stone on them."
   [{lookup :lookup width :width height :height}]
   (filter (comp nil? lookup)
           (points width height)))
