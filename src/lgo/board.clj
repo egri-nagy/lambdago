@@ -1,6 +1,6 @@
 (ns lgo.board
-  "Functions for representing board state and its evolution, by adding stones
-  and capturing, or merging chains accordingly.
+  "Functions for representing a board state and its evolution, by adding stones,
+  possibly capturing, and merging the existing chains accordingly.
   The board position is stored as a vector of chains, in the order of creation.
   A chain has a color and a set of stones.
   When connecting friendly chains newer chains are merged to the oldest one.
@@ -13,7 +13,8 @@
   below produce a changed version of the board. These are 'updating' functions
   in this sense."
   (:require
-   [lgo.grid :refer [neighbours envelope points]]
+   [lgo.grid :refer [neighbours points]]
+   [lgo.chain :refer [envelope]]
    [lgo.util :refer [vec-rm-all vec-rm]]
    [kigen.position :refer [index]]
    [clojure.string :as string]))
@@ -44,7 +45,8 @@
    :stones [point]})
 
 (defn register-chain
-  "Updating the lookup table of the board by registering a given chain."
+  "Updating the lookup table of the board by registering a given chain.
+  Each stone in the chain is mapped to the chain itself in the lookup table."
   [board chain]
   (update board :lookup
           (fn [m] (into m (map (fn [pt] [pt chain])
