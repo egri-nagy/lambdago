@@ -17,11 +17,7 @@
   [& args]
   (let [command (first args)]
     (case command
-      "gtp" (do
-              (println (str "LambdaGo v"
-                        (version/get-version "lambdago" "lambdago")))
-                                        ;(load-file (first args))
-              (gtp-loop))
+      "gtp" (gtp-loop)
       "lizzie" (do
                  (oz/start-server!)
                  (oz/view! (sgf-report (slurp (second args))) :mode :vega))
