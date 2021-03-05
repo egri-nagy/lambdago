@@ -11,6 +11,15 @@
     (is (= (neighbours [2 4] 4 4)
            [[1 4] [3 4] [2 3]]))))
 
+(deftest points-test
+  (testing "Testing the all points function."
+    (is (= (points 1 1)
+           [[1 1]] ))
+    (is (= (points 2 3)
+           [[1 1] [2 1] [1 2] [2 2] [1 3] [2 3]]))))
+
+
+
 ;; (deftest inside-vs-boundary-test
 ;;   (testing "Testing the neighbours function for edges and corners."
 ;;     (is (= (inside-points  [[1 2] [3 2] [2 1] [2 3] [2 2]] 3 3)
