@@ -54,14 +54,18 @@
 
 (defn compute-liberties
   "Computes liberties of a chain. This is a fresh calculation (not incremental).
-  The algorithm works by removing the points of the chain from its envelope."
+  The algorithm works by removing the occupied from its envelope.
+  The occupied points must be enemy stones, otherwise they would belong to the
+  chain."
   [{width :width height :height lookup :lookup} ;; board
    chain]
   (let [e (envelope (:stones chain) width height)]
-    (set (remove lookup e))))
+    (set (remove lookup e)))) ;using truthy-falsey
 
 (defn update-liberties
-  "Updates a board by recomputing liberties of an existing chain."
+  "Updates a board by recomputing liberties of an existing chain.
+  Calling compute-liberies, thus it is a fresh recompute.
+  Updating refers to the lookup table of the board."
   [board chain]
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
@@ -82,7 +86,7 @@
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
   2. registering it in the lookup
-  Associating the set of liberties with the chain can be done later."
+  Associating the set of liberties with the chain should be done later."
   [board chain]
   (-> board
       ;;adding it to the vector of chains
@@ -103,8 +107,10 @@
                 (apply dissoc m (:stones chain))))))
 
 (defn capture-chain
-  "Capturing a chain involves updating the liberties of neighbouring
-  chains of opposite color."
+  "Capturing a chain involves
+  1. removing the chain from the vector of chains
+  2. updating the liberties of neighbouring chains of opposite color.
+  Friendly chains cannot be affected."
   [{lookup :lookup width :width height :height :as board}
    {stones :stones color :color :as chain}]
   (let [opp (opposite color)
@@ -121,8 +127,8 @@
   [board chains]
   (reduce capture-chain board chains))
 
-(defn dec-liberties
-  "Decrementing the liberties of some affected chains by removing a point."
+(defn remove-liberty
+  "Removes a single point from the liberties of all given chains."
   [board chains point]
   (reduce (fn [brd chn]
             (update-in brd [:liberties chn] #(disj % point)))
@@ -209,12 +215,12 @@
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
           opponent_chains (grouped_chains (opposite color))
-          to_be_captured (set (filter #(= 1 (count (liberties %)))
+          captured (set (filter #(= 1 (count (liberties %)))
                                       opponent_chains))
-          to_be_deced (remove to_be_captured opponent_chains)
+          affected (remove captured opponent_chains)
           updated_board (-> board
-                            (capture-chains to_be_captured)
-                            (dec-liberties to_be_deced point)
+                            (capture-chains captured)
+                            (remove-liberty affected point)
                             (merge-chains friendly_chains
                                           (single-stone-chain color point))
                             (update-liberties-by-point point))]
