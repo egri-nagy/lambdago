@@ -28,6 +28,9 @@
          merge-chains ;;merging friendly chains
          board-string) ;; traditional ASCII rendering of the board
 
+;; BOARD STATE EVOLUTION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The following functions culminate in the put-stone function.
+
 (defn empty-board
   "Creates an empty board with the given dimensions. It returns a hash-map with
   an empty vector of chains, and two hash-maps for lookup and liberties."
@@ -140,12 +143,12 @@
   connecting single-stone chain, the newly placed stone."
   [{chains :chains :as board}
    friendly_chains
-   connector]
+   connector] ; the newly created single-stone chain
   (if (empty? friendly_chains)
     (add-chain board connector) ;;nothing to merge, just add the connector chain
     (let [chain_indices (map (partial index chains) friendly_chains)
           chain_index (first chain_indices)
-          the_chain (first friendly_chains)
+          the_chain (first friendly_chains) ; merged into the oldest chain
           upd_chain (reduce
                      (fn [ch1 ch2]
                        {:color (:color ch1)
@@ -162,6 +165,46 @@
                   (fn [chains] (vec-rm-all chains (rest chain_indices))))
           (register-chain upd_chain) ;; the merged stones have wrong lookup
           (update-liberties upd_chain)))))
+
+(defn put-stone
+  "Places a single stone  on the board, updating the chain list.
+  The following things can happen to adjacent points:
+  1. if an adjacent point is empty, then it becomes a liberty of the new chain
+  2. when occupied by enemy stones,
+    a. its chain captured if the point is its last liberty
+    b. its chain needs to be updated by removing the point from its liberties
+  3. when occupied by a friendly stone, chains
+    a. get merged
+    b. possibly captured (self-capture)."
+  [{width :width height :height lookup :lookup liberties :liberties :as board}
+   color
+   point]
+  (when-not (lookup point) ; if stone is on board, return nil
+    ;;we compute the new state and rollback it turns out to be a self-capture
+    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
+          ;; adjacent chains, no duplicates, nils removed
+          adj_chains (remove nil? (distinct (map lookup adjpts)))
+          grouped_chains (group-by :color adj_chains)
+          friendly_chains (grouped_chains color)
+          opponent_chains (grouped_chains (opposite color))
+          ;;opponent chains with a single liberty (must be this point) captured
+          captured (set (filter #(= 1 (count (liberties %)))
+                                opponent_chains))
+          affected (remove captured opponent_chains)
+          updated_board (-> board
+                            (capture-chains captured)
+                            (remove-liberty affected point)
+                            (merge-chains friendly_chains
+                                          (single-stone-chain color point))
+                            (update-liberties-by-point point))]
+      ;;after we did everything, the new has no liberties, then it's a self-capture
+      (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
+        (remove-chain updated_board ((:lookup updated_board) point)) ; rollback
+        updated_board))))
+
+;; INFORMATION ABOUT THE BOARD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; These functions query the properties of the board position and hypothetical
+;; moves.
 
 (defn self-capture?
   "Returns true if putting stone at the point would be a self-capture."
@@ -193,48 +236,15 @@
                    (= color (:color ch))))
      (map lookup ngbs))))
 
-(defn put-stone
-  "Places a single stone  on the board, updating the chain list.
-  The following things can happen to adjacent points:
-  1. if it's empty, it becomes a liberty
-  2. when occupied by enemy stones,
-    a. its chain captured if the point is its last liberty
-    b. needs to be updated by removing the point from its liberties
-  3. when occupied by a friendly stone, chains
-    a. get merged
-    b. possibly captured."
-  [{width :width height :height lookup :lookup liberties :liberties :as board}
-   color
-   point]
-  (when-not (lookup point)
-    ;;otherwise the stone is not on the board yet, we do the full change and
-    ;;rollback it's a self-capture; if stone is on board, return nil
-    (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
-          ;; adjacent chains, no duplicates, nils removed
-          adj_chains (remove nil? (distinct (map lookup adjpts)))
-          grouped_chains (group-by :color adj_chains)
-          friendly_chains (grouped_chains color)
-          opponent_chains (grouped_chains (opposite color))
-          captured (set (filter #(= 1 (count (liberties %)))
-                                      opponent_chains))
-          affected (remove captured opponent_chains)
-          updated_board (-> board
-                            (capture-chains captured)
-                            (remove-liberty affected point)
-                            (merge-chains friendly_chains
-                                          (single-stone-chain color point))
-                            (update-liberties-by-point point))]
-      (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
-        (remove-chain updated_board ((:lookup updated_board) point)) ;;self-capture
-        updated_board))))
-
 (defn empty-points
   "Returns the empty points of a board position."
   [{lookup :lookup width :width height :height}]
   (filter (comp nil? lookup)
           (points width height)))
 
-;;for the ASCII rendering of a board
+;; VISUALIZATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; for the ASCII rendering of a board
+
 (def symbols {:b \X :w \O nil \.})
 
 (defn board-string
