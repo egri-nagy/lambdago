@@ -4,7 +4,7 @@
             [lgo.board :refer [empty-board put-stone]]
             [trptcolin.versioneer.core :as version]))
 
-(def list-commands ["name" "version" "protocol_version"])
+(def list-commands ["name" "version" "protocol_version" "boardsize" "clear_board"])
 
 (defn gtp-loop
   []
@@ -36,6 +36,10 @@
                 "boardsize" (do
                               (println "=")
                               (let [n (read-string (second pieces))]
+                                (empty-board n n)))
+                "clear_board" (do
+                              (println "=")
+                              (let [n (:width board)] ;TODO what if the board is not initialized yet
                                 (empty-board n n)))
                 "genmove" (do
                             (println "=")
