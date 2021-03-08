@@ -5,15 +5,22 @@
                       board-string empty-points eye-fill?]]))
 
 (defn genmove
+  "Given a board position, the color of the player to make a move, and
+  a history of previous board positions, this returns a random legal move,
+  and the updated board position and the updated history.
+  Assumption is that we do it right, so there will be no need for rollback."
   [board color history]
+  ;; Initially the candidates are all the empty points.
   (loop [cands (shuffle (empty-points board))]
     (if (empty? cands)
-      [:pass board]
-      (let [move (first cands)]
+      [:pass board history] ;passing if there are no options left
+      (let [move (first cands)] ; just pick the first and try it
+        ;; first some checking for illegal/bad moves
         (if (or (eye-fill? board color move)
                 (self-capture? board color move))
-          (recur (rest cands))
-          (let [nboard (put-stone board color move)]
-            (if (contains? history [(opposite color) (board-string nboard)])
-              (recur (rest cands))
-              [move nboard])))))))
+          (recur (rest cands)) ;if the move is not good, just try the rest
+          (let [nboard (put-stone board color move)
+                current [(opposite color) (board-string nboard)]]
+            (if (contains? history current)
+              (recur (rest cands)) ;situational superko
+              [move nboard (into history current)])))))))
