@@ -9,11 +9,12 @@
   a history of previous board positions, this returns a random legal move,
   and the updated board position and the updated history.
   Assumption is that we do it right, so there will be no need for rollback."
-  [board color history]
+  [{board :board history :history :as game}
+   color]
   ;; Initially the candidates are all the empty points.
   (loop [cands (shuffle (empty-points board))]
     (if (empty? cands)
-      [:pass board history] ;passing if there are no options left
+      (update game :moves #(conj % :pass)) ;passing if there are no options left
       (let [move (first cands)] ; just pick the first and try it
         ;; first some checking for illegal/bad moves
         (if (or (eye-fill? board color move)
@@ -23,4 +24,7 @@
                 current [(opposite color) (board-string nboard)]]
             (if (contains? history current)
               (recur (rest cands)) ;situational superko
-              [move nboard (into history current)])))))))
+              (-> game
+                  (update :board (constantly nboard))
+                  (update :moves #(conj % move))
+                  (update :history #(conj % current))))))))))

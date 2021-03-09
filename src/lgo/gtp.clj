@@ -1,9 +1,10 @@
 (ns lgo.gtp
   "The GTP engine of LambdaGo.
   The game is represented as a hash-map with keys :board, :moves, :history."
-  (:require [clojure.string :refer [split]]
+  (:require [clojure.string :refer [split trim]]
             [lgo.board :refer [empty-board put-stone]]
-            [trptcolin.versioneer.core :as version]))
+            [trptcolin.versioneer.core :as version]
+            [lgo.bot.random :refer [genmove]]))
 
 (def list-commands ["boardsize"
                     "clear_board"
@@ -13,10 +14,12 @@
                     "version"
                     ])
 
+(def m {"B" :b "W" :w})
+
 (defn gtp-loop
   []
   (loop [input (read-line)
-         game {}]
+         game {:moves [] :history #{}}]
     (let [pieces (split input #" ")
           command (first pieces)]
       (if (= "quit" command)
@@ -52,8 +55,14 @@
                                   (println)
                                   game)
                "genmove" (do
-                            (println "=")
-                            (let [n (read-string (second pieces))]
-                              (empty-board n n)))
+                            (let [col  (m (trim (str (read-string (second pieces)))))
+                                  ng  (genmove game col)
+                                  m (last (:moves ng))
+                                  mm  (zipmap (range 1 25) "ABCDEFGHJKLMNOPQRST")
+                                  out (if (= :pass m)
+                                        "PASS"
+                                        (str (mm (first m)) (last m)))]
+                              (println "= " out "\n")
+                             ng))
                 game)] ;default
           (recur (read-line) ngame))))))
