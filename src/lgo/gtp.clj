@@ -1,49 +1,59 @@
 (ns lgo.gtp
-  "The GTP engine of LambdaGo."
+  "The GTP engine of LambdaGo.
+  The game is represented as a hash-map with keys :board, :moves, :history."
   (:require [clojure.string :refer [split]]
             [lgo.board :refer [empty-board put-stone]]
             [trptcolin.versioneer.core :as version]))
 
-(def list-commands ["name" "version" "protocol_version" "boardsize" "clear_board"])
+(def list-commands ["boardsize"
+                    "clear_board"
+                    "komi"
+                    "name"
+                    "protocol_version"
+                    "version"
+                    ])
 
 (defn gtp-loop
   []
   (loop [input (read-line)
-         board nil]
+         game {}]
     (let [pieces (split input #" ")
           command (first pieces)]
       (if (= "quit" command)
-        board
-        (let [nboard
+        game
+        (let [ngame
               (case command
+                "boardsize" (do ; creating a new board with the given size
+                              (println "= \n")
+                              (let [n (read-string (second pieces))]
+                                (conj game [:board (empty-board n n)])))
+                "clear_board" (do
+                                (println "= \n")
+                                (let [n (:width (:board game))] ;TODO what if the board is not initialized yet
+                                  (conj game [:board (empty-board n n)])))
                 "version" (do
                             (println "= "
                                      (version/get-version "lambdago"
                                                           "lambdago") "\n")
-                            board)
+                            game)
+                "komi" (do ;komi is ignored for the moment
+                         (println "= \n")
+                         game)
                 "name" (do
                          (println "= LambdaGo\n")
-                            board)
+                         game)
                 "protocol_version" (do
                                      (println "= 2\n")
-                                     board)
+                                     game)
                 "list_commands" (do
-                                  (print "=")
+                                  (print "= ")
                                   (doseq [cmd list-commands]
                                     (println cmd))
                                   (println)
-                                  board)
-                "boardsize" (do
-                              (println "=")
-                              (let [n (read-string (second pieces))]
-                                (empty-board n n)))
-                "clear_board" (do
-                              (println "=")
-                              (let [n (:width board)] ;TODO what if the board is not initialized yet
-                                (empty-board n n)))
-                "genmove" (do
+                                  game)
+               "genmove" (do
                             (println "=")
                             (let [n (read-string (second pieces))]
                               (empty-board n n)))
-                board)]
-          (recur (read-line) nboard))))))
+                game)] ;default
+          (recur (read-line) ngame))))))
