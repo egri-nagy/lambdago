@@ -47,17 +47,16 @@
                 "name" (do
                          (println "= LambdaGo\n")
                          game)
-                "play" (do
-                         (let [col  (m (trim (str (read-string (second pieces)))))
-                               gtpmove (nth pieces 2)
-                               mm  (zipmap "ABCDEFGHJKLMNOPQRST" (range 1 25))
-                               x (mm (first gtpmove))
-                               y (read-string (apply str (rest gtpmove)))
-                               nboard (if (nil? x)
-                                        (:board game)
-                                        (put-stone (:board game) col [x,y]))]
-                           (println "= \n")
-                           (update game :board (constantly nboard))))
+                "play" (let [col  (m (trim (str (read-string (second pieces)))))
+                             gtpmove (nth pieces 2)
+                             mm  (zipmap "ABCDEFGHJKLMNOPQRST" (range 1 25))
+                             x (mm (first gtpmove))
+                             y (read-string (apply str (rest gtpmove)))
+                             nboard (if (nil? x)
+                                      (:board game)
+                                      (put-stone (:board game) col [x,y]))]
+                         (println "= \n")
+                         (update game :board (constantly nboard)))
                 "protocol_version" (do
                                      (println "= 2\n")
                                      game)
@@ -67,15 +66,14 @@
                                     (println cmd))
                                   (println)
                                   game)
-               "genmove" (do
-                            (let [col  (m (trim (str (read-string (second pieces)))))
-                                  ng  (genmove game col)
-                                  m (last (:moves ng))
-                                  mm  (zipmap (range 1 25) "ABCDEFGHJKLMNOPQRST")
-                                  out (if (= :pass m)
-                                        "PASS"
-                                        (str (mm (first m)) (last m)))]
-                              (println "= " out "\n")
-                             ng))
+               "genmove" (let [col  (m (trim (str (read-string (second pieces)))))
+                               ng  (genmove game col)
+                               m (last (:moves ng))
+                               mm  (zipmap (range 1 25) "ABCDEFGHJKLMNOPQRST")
+                               out (if (= :pass m)
+                                     "PASS"
+                                     (str (mm (first m)) (last m)))]
+                           (println "= " out "\n")
+                           ng)
                 game)] ;default
           (recur (read-line) ngame))))))
