@@ -1,4 +1,4 @@
-(defproject lambdago "2021.02.04"
+(defproject lambdago "2021.03.13"
   :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
   :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
@@ -11,7 +11,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [kigen "19.08.05"]
                  [metasoarous/oz "1.6.0-alpha6"]
-                 [org.clojure/data.json "1.0.0"]
+                 [org.clojure/data.json "1.1.0"]
                  [trptcolin/versioneer "0.2.0"]]
   :plugins [[lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
