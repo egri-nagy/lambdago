@@ -108,14 +108,16 @@
         effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
-        dev-dat (deviations effs-dat)
+        white? #(= "W" (:color %))
+        black? #(= "B" (:color %))
+        black-effs-dat (filter black? effs-dat)
+        white-effs-dat (filter white? effs-dat)
         cs (choices raw)
         tcs (data-transform cs [:color :move]
                             [:choice :median :AI :average] :scoreMean)
         N (count effs-dat)
         w (int (* 5.4 N))
-        white? #(= "W" (:color %))
-        black? #(= "B" (:color %))]
+       ]
     [:div
      [:h1 title]
      [:p "Move numbers for score means indicate how many moves made before."]
@@ -147,14 +149,14 @@
      [:vega-lite (oz-effects (effects-with-cost-of-passing  effs-dat copd)
                              w
                              "Effects of moves divided by cost of passing")]
-     [:vega-lite (oz-effects (filter white? effs-dat)
+     [:vega-lite (oz-effects white-effs-dat
                              w
                              "Effects of White's moves")]
-     [:vega-lite (oz-effects (filter black? effs-dat)
+     [:vega-lite (oz-effects black-effs-dat
                              w
                              "Effects of Black's moves")]
-     [:vega-lite (oz-deviations (filter white?  dev-dat) w "Deviations (distances from the mean) of White's moves")]
-     [:vega-lite (oz-deviations (filter black? dev-dat) w "Deviations of Black's moves")]
+     [:vega-lite (oz-deviations (deviations white-effs-dat) w "Deviations (distances from the mean) of White's moves")]
+     [:vega-lite (oz-deviations (deviations black-effs-dat) w "Deviations of Black's moves")]
      [:vega-lite
       (oz-normalized-effects (normalize-effects (filter white? effs-dat))  w
                              "White's cumulative moving average of effects")]

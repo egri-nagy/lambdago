@@ -56,10 +56,11 @@
          ps)))
 
 (defn deviations
+  "Calculating the deviations of the effects from the average."
   [effs]
-  (let [avg (mean (map :effect effs))]
+  (let [avg (mean (map :effect effs))] ;the average of all the effects
     (map (fn [{e :effect :as d}]
-           (into d [[:deviation (- e avg)]]))
+           (into d [[:deviation (- e avg)]])) ;adding :deviation to the map
          effs)))
 
 (defn cost-of-passing
