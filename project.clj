@@ -11,13 +11,13 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [kigen "19.08.05"]
                  [metasoarous/oz "1.6.0-alpha6"]
-                 [org.clojure/data.json "1.1.0"]
+                 [org.clojure/data.json "2.0.2"]
                  [trptcolin/versioneer "0.2.0"]]
   :plugins [[lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "0.3.14"]]
+            [jonase/eastwood "0.4.0"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
