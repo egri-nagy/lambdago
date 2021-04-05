@@ -205,6 +205,9 @@
 ;; INFORMATION ABOUT THE BOARD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; These functions query the properties of the board position and hypothetical
 ;; moves.
+(defn empty-board?
+  [board]
+  (empty? (:chains board)))
 
 (defn self-capture? ;TODO this is not working yet
   "Returns true if putting stone at the point would be a self-capture."
