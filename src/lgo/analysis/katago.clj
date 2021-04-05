@@ -33,7 +33,7 @@
         moves (map (fn [[col move]]
                      (if (empty? move)
                        [col "pass"]
-                       [col (SGFcoord->GTPcoord move)]))
+                       [col (SGFcoord->GTPcoord move (:size gd))]))
                    (:moves gd))
         col (ffirst moves)
         initial-player (code->col col)]
@@ -102,7 +102,8 @@
      :category category}))
 
 (defn katago-output
-  "Processing a whole game analyzed by KataGo."
+  "Processing a whole game analyzed by KataGo, proceeding line-by-line.
+  The input parameter is the filename of the KataGo output file."
   [filename]
   (let ;todo: what's wrong with with-open?
       [rdr (io/reader filename)

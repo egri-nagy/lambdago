@@ -104,9 +104,9 @@
 (def points->GTPcoords (zipmap (range 1 27) "ABCDEFGHJKLMNOPQRST"))
 
 (defn SGFcoord->GTPcoord
-  [[col row]]
+  [[col row] size]
   (str (points->GTPcoords (SGFcoords->points col))
-       (- 20 (SGFcoords->points row))))
+       (- (inc size) (SGFcoords->points row))))
 
 
 (defn SGF-game-moves->lgo
