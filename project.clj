@@ -11,7 +11,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [kigen "19.08.05"]
                  [metasoarous/oz "1.6.0-alpha6"]
-                 [org.clojure/data.json "2.0.2"]
+                 [org.clojure/data.json "2.2.2"]
                  [trptcolin/versioneer "0.2.0"]]
   :plugins [[lein-cloverage "1.2.2"]
             [lein-kibit "0.1.8"]
