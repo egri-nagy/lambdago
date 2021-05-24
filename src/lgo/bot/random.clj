@@ -12,14 +12,7 @@
   [{board :board history :history :as game}
    color]
   ;; Initially the candidates are all the empty points.
-  (loop [cands (let [libs (vec (reduce into #{}
-                           (filter #(< (count %) 3)
-                                   (map (:liberties board)
-                                        (filter #(= (opposite color) (:color %))
-                                                (:chains board))))))]
-           (if (empty? libs)
-             (shuffle (empty-points board))
-             libs))]
+  (loop [cands (shuffle (empty-points board))]
     (if (empty? cands)
       (update game :moves #(conj % :pass)) ;passing if there are no options left
       (let [move (first cands)] ; just pick the first and try it
