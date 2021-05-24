@@ -4,7 +4,7 @@
   (:require [clojure.string :refer [split trim join]]
             [lgo.board :refer [empty-board put-stone]]
             [trptcolin.versioneer.core :as version]
-            [lgo.bot.random :refer [genmove]]))
+            [lgo.bot.liberty :refer [genmove]]))
 
 (def list-commands ["boardsize"
                     "clear_board"
