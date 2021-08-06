@@ -10,7 +10,7 @@
                  [instaparse "1.4.10"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [kigen "19.08.05"]
-                 [metasoarous/oz "1.6.0-alpha6"]
+                 [metasoarous/oz "1.6.0-alpha34"]
                  [org.clojure/data.json "2.4.0"]
                  [trptcolin/versioneer "0.2.0"]]
   :plugins [[lein-cloverage "1.2.2"]
