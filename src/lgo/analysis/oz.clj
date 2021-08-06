@@ -2,7 +2,7 @@
   "Functions for visualization of  the output of a KataGo analysis, either
   through Lizzie or by the KataGo Analysis Engine directly."
   (:require [trptcolin.versioneer.core :as version]
-            [lgo.stats :refer [mean cmas]]
+            [lgo.stats :refer [cmas]]
             [lgo.analysis.processing :refer [unroll-scoremeans
                                              effects
                                              effects-with-cost-of-passing
@@ -103,7 +103,7 @@
 (defn game-report
   [RAW title]
   (let [raw (:game RAW) ;; the game entries
-        passed (:passed RAW) ;; entries for the artificially passed game
+        ;passed (:passed RAW) ;; entries for the artificially passed game
         copd (cost-of-passing RAW)
         effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
