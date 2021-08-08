@@ -42,8 +42,12 @@
   [e-d w t]
   {:data {:values e-d}
    :layer[{:encoding {:x {:field "move" :type "ordinal"}
-                        :y {:field "effect" :type "quantitative"} :color {:field "color" :type "nominal"}}
-             :mark "bar" :width w :title t}
+                      :y {:field "effect" :type "quantitative"}
+                      :fill {:field "color" :type "nominal"
+                             :scale {:range ["black" "white"]}}
+                      :stroke {:field "color" :type "nominal"
+                               :scale {:range ["black" "black"]}}}
+           :mark "bar" :width w :title t}
           {:encoding {
                         :y {:field "effect" :type "quantitative" :aggregate "mean"} :color {:field "color" :type "nominal"}}
              :mark "rule"}
