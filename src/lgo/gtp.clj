@@ -26,15 +26,15 @@
   []
   (loop [input (read-line) ;when starting, just read the first command and
          game {:moves [] :history #{}}] ;create an empty game
-    (let [pieces (split input #" ") ;space is a separator for GTP commands
-          command (first pieces)] ;the first one is the command
+    (let [args (split input #" ") ;space is a separator for GTP commands
+          command (first args)] ;the first one is the command
       (if (= "quit" command)
         game ;when done, we return the game object
         (let [ngame ;we create the next state, it might be the same
               (case command
                 "boardsize" (do ; creating a new board with the given size
                               (println "= \n")
-                              (let [n (read-string (second pieces))] ;getting the size
+                              (let [n (read-string (second args))] ;getting the size
                                 (conj game [:board (empty-board n n)])))
                 "clear_board" (do
                                 (println "= \n")
@@ -49,8 +49,8 @@
                 "name" (do
                          (println "= LambdaGo\n")
                          game)
-                "play" (let [col  (m (trim (str (read-string (second pieces)))))
-                             gtpmove (nth pieces 2)
+                "play" (let [col  (m (trim (str (read-string (second args)))))
+                             gtpmove (nth args 2)
                              x (numcoord (first gtpmove))
                              y (read-string (join (rest gtpmove)))
                              nboard (if (nil? x)
@@ -67,7 +67,7 @@
                                     (println cmd))
                                   (println)
                                   game)
-               "genmove" (let [col  (m (trim (str (read-string (second pieces)))))
+               "genmove" (let [col  (m (trim (str (read-string (second args)))))
                                ng  (genmove game col)
                                m (last (:moves ng))
                                out (if (= :pass m)
