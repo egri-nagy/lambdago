@@ -19,7 +19,7 @@
      (for [m (:means d)]
        {:color (:color d)
         :move (:move d)
-        :mean (if (= "B" (:color d))
+        :mean (if (= "black" (:color d))
                 m
                 (- m))})) ; to get the value form white's perspective
    dat))
@@ -29,7 +29,7 @@
   [gamedat]
   (map (fn [[{c1 :color m1 :mean}
              {m2 :mean v2 :move}]]
-         (let [eff (if (= c1 "B") ; need to negate for White
+         (let [eff (if (= c1 "black") ; need to negate for White
                      (- m2 m1)
                      (- (- m2 m1)))]
            {:color c1 :effect eff :move v2}))
@@ -49,7 +49,7 @@
   (let [ps (partition 2 1 dat)]
     (map (fn [[{c1 :color  m1 :mean mm :meanmean md :medianmean v1 :move}
                {c2 :color m2 :mean v2 :move}]]
-           (if (= "B" c1)
+           (if (= "black" c1)
              {:color c1 :choice m2 :move v1 :average mm :median md :AI m1}
              {:color c1 :choice (- m2) :move v1 :average (- mm) :median (- md) :AI (- m1)}
              ))
@@ -73,7 +73,7 @@
              ((comp (partial map :move) :game) dat))] ;move number
     (map (fn [[c m pm move]]
            {:color c
-            :cop (if (= "B" c)
+            :cop (if (= "black" c)
               (- m pm)
               (- pm m))
             :move move})
@@ -88,7 +88,7 @@
                      ((partial map :move)  (rest (:game dat))))
         realized (map (fn [[c m pm move]] ; is this the effect?
                         [c
-                         (if (= "B" c)
+                         (if (= "black" c)
                                 (- m pm)
                                 (- pm m))
                          move])

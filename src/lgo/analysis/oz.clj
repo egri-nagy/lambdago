@@ -47,8 +47,10 @@
   {:data {:values e-d}
    :layer[{:encoding {:x {:field "move" :type "ordinal"}
                       :y {:field "effect" :type "quantitative"}
-                      :fill black-white-fill
-                      :stroke black-strokes}
+                      :fill {:field "color" :type "nominal" :scale {:range {:field "color"}}}
+                      :stroke black-strokes
+                      :tooltip [{:field "move" :type "ordinal"}
+                                {:field "effect" :type "quantitative"}]}
            :mark "bar"
            :width w
            :title t}
@@ -115,8 +117,8 @@
         effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
         effs-dat (effects raw)
-        white? #(= "W" (:color %))
-        black? #(= "B" (:color %))
+        white? #(= "white" (:color %))
+        black? #(= "black" (:color %))
         black-effs-dat (filter black? effs-dat)
         white-effs-dat (filter white? effs-dat)
         cs (choices raw)

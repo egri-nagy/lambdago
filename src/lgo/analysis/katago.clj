@@ -91,7 +91,7 @@
         [category color] (split (:id d) #" ")
         move (:turnNumber d)]
     {:move move
-     :color color
+     :color (code->col color)
      :winrate (:winrate (:rootInfo d))
      :candidates candidates ;candidate moves and their visit counts in the order of strength
      :policy (:policy d)
