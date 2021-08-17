@@ -45,7 +45,7 @@
 (defn oz-effects
   [e-d w t]
   {:data {:values e-d}
-   :layer[{:encoding {:x {:field "move" :type "ordinal"}
+   :layer[{:encoding {:x {:field "move" :type "quantitative"}
                       :y {:field "effect" :type "quantitative"}
                       :fill {:field "color" :type "nominal" :scale {:range {:field "color"}}}
                       :stroke black-strokes
