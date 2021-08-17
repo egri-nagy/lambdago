@@ -36,22 +36,25 @@
            :mark "rule"}
           ]})
 
-
+(def black-white-fill  {:field "color"
+                        :type "nominal"
+                        :scale {:range ["black" "white"]}})
+(def black-strokes  {:field "color" :type "nominal"
+                     :scale {:range ["black" "black"]}})
 
 (defn oz-effects
   [e-d w t]
   {:data {:values e-d}
    :layer[{:encoding {:x {:field "move" :type "ordinal"}
                       :y {:field "effect" :type "quantitative"}
-                      :fill {:field "color" :type "nominal"
-                             :scale {:range ["black" "white"]}}
-                      :stroke {:field "color" :type "nominal"
-                               :scale {:range ["black" "black"]}}}
-           :mark "bar" :width w :title t}
-          {:encoding {
-                        :y {:field "effect" :type "quantitative" :aggregate "mean"} :color {:field "color" :type "nominal"}}
-             :mark "rule"}
-            ]})
+                      :fill black-white-fill
+                      :stroke black-strokes}
+           :mark "bar"
+           :width w
+           :title t}
+          {:encoding {:y {:field "effect" :type "quantitative" :aggregate "mean"}
+                      :color {:field "color" :type "nominal"}}
+           :mark "rule"}]})
 
 (defn oz-deviations
   [e-d w t]
