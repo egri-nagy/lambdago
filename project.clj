@@ -1,4 +1,4 @@
-(defproject lambdago "2021.08.17"
+(defproject lambdago "2021.08.23"
   :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
   :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
@@ -17,7 +17,7 @@
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "0.9.6"]]
+            [jonase/eastwood "0.9.7"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
