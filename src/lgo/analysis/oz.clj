@@ -24,39 +24,30 @@
             varkeys)))
    db))
 
-;; Oz visualization functions producing vega-lite specifications
-(defn oz-cops
-  [cops w t]
-  {:data {:values cops}
-   :layer[{:encoding {:x {:field "move" :type "ordinal"}
-                      :y {:field "cop" :type "quantitative"} :color {:field "color" :type "nominal"}}
-           :mark "bar" :width w :title t}
-          {:encoding {
-                      :y {:field "cop" :type "quantitative" :aggregate "mean"} :color {:field "color" :type "nominal"}}
-           :mark "rule"}
-          ]})
-
-(def black-white-fill  {:field "color"
-                        :type "nominal"
-                        :scale {:range ["black" "white"]}})
+;; Oz fragments for drawing styles
+(def color-coded-fill {:field "color"
+                       :type "nominal"
+                       :scale {:range {:field "color"}}})
 (def black-strokes  {:field "color" :type "nominal"
                      :scale {:range ["black" "black"]}})
+(def gray-strokes  {:field "color" :type "nominal"
+                     :scale {:range ["gray" "gray"]}})
 
-(defn oz-effects
-  [e-d w t]
-  {:data {:values e-d}
-   :layer[{:encoding {:x {:field "move" :type "quantitative"}
-                      :y {:field "effect" :type "quantitative"}
-                      :fill {:field "color" :type "nominal" :scale {:range {:field "color"}}}
-                      :stroke black-strokes
-                      :tooltip [{:field "move" :type "ordinal"}
-                                {:field "effect" :type "quantitative"}]}
-           :mark "bar"
-           :width w
-           :title t}
-          {:encoding {:y {:field "effect" :type "quantitative" :aggregate "mean"}
-                      :color {:field "color" :type "nominal"}}
-           :mark "rule"}]})
+
+
+;; Oz visualization functions producing vega-lite specifications
+(defn oz-bars-per-move
+  [dat field width title]
+  {:data {:values dat}
+   :encoding {:x {:field "move" :type "quantitative"}
+              :y {:field field :type "quantitative"}
+              :fill color-coded-fill
+              :stroke black-strokes
+              :tooltip [{:field "move" :type "ordinal"}
+                        {:field field :type "quantitative"}]}
+   :mark "bar"
+   :width width
+   :title title})
 
 (defn oz-deviations
   [e-d w t]
@@ -82,12 +73,14 @@
    :mark "bar" :width w :title t})
 
 
-(defn oz-effects-summary
-  [e-d]
-  {:data {:values e-d}
-   :title "Summary of effects"
+(defn oz-boxplot-summary
+  [dat field title]
+  {:data {:values dat}
+   :title title
    :encoding {:x {:field "color" :type "nominal"}
-              :y {:field "effect" :type "quantitative"}}
+              :y {:field field :type "quantitative"}
+              :fill color-coded-fill
+              :stroke gray-strokes}
    :mark {:type "boxplot" :extent "min-max"}})
 
 (defn oz-all-scoremeans
@@ -130,8 +123,8 @@
     [:div
      [:h1 title]
      [:p "Move numbers for score means indicate how many moves made before."]
-     [:vega-lite (oz-cops copd w "Cost of passing")]
-     [:vega-lite (oz-cops effcs
+     [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")]
+     [:vega-lite (oz-bars-per-move effcs "cop"
                           w
                           "Efficiency - how much percent of the score in cost of passing realized?")]
      [:vega-lite {:data {:values raw}
@@ -154,16 +147,22 @@
                   (filter white? all-sm)
                   w
                   "White's all scoreMeans for variations")]
-     [:vega-lite (oz-effects effs-dat w "Effects of moves")]
-     [:vega-lite (oz-effects (effects-with-cost-of-passing  effs-dat copd)
-                             w
-                             "Effects of moves divided by cost of passing")]
-     [:vega-lite (oz-effects white-effs-dat
-                             w
-                             "Effects of White's moves")]
-     [:vega-lite (oz-effects black-effs-dat
-                             w
-                             "Effects of Black's moves")]
+     [:vega-lite (oz-bars-per-move effs-dat "effect" w "Effects of moves")]
+     [:vega-lite (oz-bars-per-move
+                  (effects-with-cost-of-passing  effs-dat copd)
+                  "effect"
+                  w
+                  "Effects of moves divided by cost of passing")]
+     [:vega-lite (oz-bars-per-move
+                  white-effs-dat
+                  "effect"
+                  w
+                  "Effects of White's moves")]
+     [:vega-lite (oz-bars-per-move
+                  black-effs-dat
+                  "effect"
+                  w
+                  "Effects of Black's moves")]
      [:vega-lite (oz-deviations (deviations white-effs-dat) w "Deviations (distances from the mean) of White's moves")]
      [:vega-lite (oz-deviations (deviations black-effs-dat) w "Deviations of Black's moves")]
      [:vega-lite
@@ -179,7 +178,8 @@
                              "Cumulative moving average of effects (composite)")]
 
      [:div {:style {:display "flex" :flex-direction "row"}}
-      [:vega-lite (oz-effects-summary effs-dat)]]
+      [:vega-lite (oz-boxplot-summary effs-dat "effect" "Summary of effects")]
+      [:vega-lite (oz-boxplot-summary copd "cop" "Summary of cost of passings")]]
      [:p "report generated by LambdaGo v"
       (version/get-version "lambdago" "lambdago")]]))
 
