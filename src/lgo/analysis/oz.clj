@@ -13,6 +13,7 @@
 
 (declare scatterplot)
 
+;;further processing functions - TODO: check whether they belong to processing
 (defn data-transform
   "Prepares a database for plotting in the same diagram. Fixed keys are copied,
   then the variable ones are added as 'name' and its value under kw."
@@ -24,6 +25,14 @@
             varkeys)))
    db))
 
+(defn normalize-effects
+  "assuming that it is from one player"
+  [e-d]
+  (let [avgs (cmas (map :effect e-d))]
+    (map (fn [d v]
+           (conj d [:cumsum v]))
+         e-d avgs)))
+
 ;; Oz fragments for drawing styles
 (def color-coded-fill {:field "color"
                        :type "nominal"
@@ -33,10 +42,9 @@
 (def gray-strokes  {:field "color" :type "nominal"
                      :scale {:range ["gray" "gray"]}})
 
-
-
 ;; Oz visualization functions producing vega-lite specifications
 (defn oz-bars-per-move
+  "Generic bar graph for displaying a quantity for each move."
   [dat field width title]
   {:data {:values dat}
    :encoding {:x {:field "move" :type "quantitative"}
@@ -49,15 +57,8 @@
    :width width
    :title title})
 
-(defn normalize-effects
- "assuming that it is from one player"
- [e-d]
-  (let [avgs (cmas (map :effect e-d))]
-    (map (fn [d v]
-           (conj d [:cumsum v]))
-         e-d avgs)))
-
 (defn oz-boxplot-summary
+  "Generic boxplot for a quantity separately for both players."
   [dat field title]
   {:data {:values dat}
    :title title
@@ -67,6 +68,7 @@
               :stroke gray-strokes}
    :mark {:type "boxplot" :extent "min-max"}})
 
+;;the functions below remain to be specifi - maybe that is ok
 (defn oz-all-scoremeans
   [d w t]
   {:data {:values d}
@@ -78,7 +80,6 @@
               :stroke gray-strokes}
    :mark {:type "boxplot" :extent "min-max" :size 5}})
 
-
 (defn oz-choices
   [c w t]
   {:data {:values c}
@@ -86,7 +87,6 @@
               :y {:field "scoreMean" :type "quantitative"}
               :color {:field "name" :type "nominal"}}
    :mark {:type "line" :size 1}  :width w :title t })
-
 
 (defn game-report
   [RAW title]
