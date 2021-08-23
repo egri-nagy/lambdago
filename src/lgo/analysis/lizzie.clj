@@ -15,7 +15,7 @@
                              extract-single-value]]
             [lgo.stats :refer [median
                                mean]]
-            [lgo.analysis.converters :refer [B<->W]]
+            [lgo.analysis.converters :refer [B<->W code->col]]
             [lgo.analysis.oz :refer [game-report]]))
 
 (defn extract-from-LZ
@@ -50,7 +50,7 @@
                             (first winrates)
                             (- 100 (first winrates)))]
                    {:move move
-                    :color (B<->W player)
+                    :color (code->col (B<->W player))
                     :mean (first meanz)
                     :meanmean (mean meanz)
                     :medianmean (median meanz)
