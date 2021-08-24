@@ -47,7 +47,7 @@
   "Generic bar graph for displaying a quantity for each move."
   [dat field width title]
   {:data {:values dat}
-   :encoding {:x {:field "move" :type "quantitative"}
+   :encoding {:x {:field "move" :type "ordinal" :axis {:values (range 10 1001 10)}}
               :y {:field field :type "quantitative"}
               :fill color-coded-fill
               :stroke black-strokes
@@ -83,10 +83,10 @@
 (defn oz-choices
   [c w t]
   {:data {:values c}
-   :encoding {:x {:field "move" :type "ordinal"}
+   :encoding {:x {:field "move" :type "quantitative"}
               :y {:field "scoreMean" :type "quantitative"}
               :color {:field "name" :type "nominal"}}
-   :mark {:type "line" :size 1}  :width w :title t })
+   :mark {:type "line" :point true :tooltip {:content "data"}}  :width w :title t })
 
 (defn game-report
   [RAW title]
@@ -115,9 +115,9 @@
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move effcs "cop" w "Efficiency - how much percent of the score in cost of passing realized?")])
      [:vega-lite {:data {:values raw}
-                  :vconcat[{:encoding {:x {:field "move" :type "ordinal"}
+                  :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                                        :y {:field "winrate" :type "quantitative"}}
-                            :mark "line" :width w :title "winrate"}]}]
+                            :mark {:type "line" :point true :tooltip {:content "data"}}  :width w :title "winrate"}]}]
      [:vega-lite (oz-choices
                   (filter black? tcs)
                   w
