@@ -1,4 +1,4 @@
-![https://travis-ci.org/egri-nagy/lambdago.svg?branch=master](https://travis-ci.org/egri-nagy/lambdago.svg?branch=master)
+[![Clojure CI](https://github.com/egri-nagy/lambdago/actions/workflows/clojure.yml/badge.svg)](https://github.com/egri-nagy/lambdago/actions/workflows/clojure.yml)
 
 ![LambdaGo Logo](resources/lambdago_logo_300px.png)
 
