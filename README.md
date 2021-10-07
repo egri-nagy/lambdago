@@ -9,3 +9,5 @@ Currently, it contains
   2. reference implementation of a Go engine for the [Poetry of Programming](https://egri-nagy.github.io/popbook/) course;
   3. post-processing and visualization tools for AI analysis described in the paper [Derived metrics for the game of Go - intrinsic network strength assessment and cheat-detection](https://ieeexplore.ieee.org/document/9394360) (preprint [here](https://arxiv.org/abs/2009.01606)).
 
+## Requirements
+ * [Java runtime](https://www.java.com/) is needed to use LambdaGo, as it is written in [Clojure](https://www.clojure.org).
