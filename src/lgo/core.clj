@@ -30,5 +30,6 @@
                                         (second args))
                            :mode :vega))
       ;; for executing clojure code as a script
-      "script" (load-file (second args)))
+      "script" (load-file (second args))
+      nil (println "Available commands: gtp lizzie katago katago-input script"))
     (shutdown-agents)))
