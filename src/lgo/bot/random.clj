@@ -1,8 +1,8 @@
 (ns lgo.bot.random
-  "A simple bot playing random moves."
+  "A simple bot playing random moves including eye-fills."
   (:require
    [lgo.board :refer [self-capture? put-stone opposite
-                      board-string empty-points eye-fill?]]))
+                      board-string empty-points]]))
 
 (defn genmove
   "Given a board position, the color of the player to make a move, and
@@ -17,8 +17,7 @@
       (update game :moves #(conj % :pass)) ;passing if there are no options left
       (let [move (first cands)] ; just pick the first and try it
         ;; first some checking for illegal/bad moves
-        (if (or (eye-fill? board color move)
-                (self-capture? board color move))
+        (if (self-capture? board color move)
           (recur (rest cands)) ;if the move is not good, just try the rest
           (let [nboard (put-stone board color move)
                 current [(opposite color) (board-string nboard)]]

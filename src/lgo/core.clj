@@ -7,6 +7,7 @@
             [oz.core :as oz]
             [trptcolin.versioneer.core :as version]))
 
+
 (defn -main
   "The first argument is a command."
   [& args]
@@ -14,7 +15,8 @@
         numargs (count args)]
     (println (str "LambdaGo v" (version/get-version "lambdago" "lambdago")) )
     (case command
-      "gtp" (gtp-loop)
+      "gtp" (when (= numargs 2)
+              (gtp-loop (second args)))
       "lizzie" (if (= numargs 2)
                  (do
                    (oz/start-server!)
