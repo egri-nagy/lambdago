@@ -16,6 +16,7 @@
   "The first argument is a command."
   [& args]
   (let [command (first args)]
+    (println (str "LambdaGo v" (version/get-version "lambdago" "lambdago")) )
     (case command
       "gtp" (gtp-loop)
       "lizzie" (do
