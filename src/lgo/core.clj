@@ -10,14 +10,17 @@
 (defn -main
   "The first argument is a command."
   [& args]
-  (let [command (first args)]
+  (let [command (first args)
+        numargs (count args)]
     (println (str "LambdaGo v" (version/get-version "lambdago" "lambdago")) )
     (case command
       "gtp" (gtp-loop)
-      "lizzie" (do
-                 (oz/start-server!)
-                 (oz/view! (sgf-report (slurp (second args))) :mode :vega))
-      "katago-input" (if (= (count args) 4)
+      "lizzie" (if (= numargs 2)
+                 (do
+                   (oz/start-server!)
+                   (oz/view! (sgf-report (slurp (second args))) :mode :vega))
+                 (println "Usage: lizzie sgf-file"))
+      "katago-input" (if (= numargs 4)
                        (process-sgf (second args)
                                     (read-string (nth args 2))
                                     (read-string (nth args 3)))
