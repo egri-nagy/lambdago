@@ -1,14 +1,15 @@
 (ns lgo.bot.liberty
-  "A simple bot playing random moves."
+  "A simple bot playing random moves but not filling eyes and targeting
+  the opponents low liberty number groups."
   (:require
    [lgo.board :refer [self-capture? put-stone opposite
                       board-string empty-points eye-fill?]]))
 
 (defn genmove
   "Given a board position, the color of the player to make a move, and
-  a history of previous board positions, this returns a random legal move,
-  and the updated board position and the updated history.
-  Assumption is that we do it right, so there will be no need for rollback."
+  a history of previous board positions, this returns a random legal
+  non-eye-filling, low liberty targeting move,
+  and the updated board position and the updated history."
   [{board :board history :history :as game}
    color]
   ;; Initially the candidates are all the empty points.
