@@ -48,7 +48,7 @@
   [dat]
   (let [ps (partition 2 1 dat)]
     (map (fn [[{c1 :color  m1 :mean mm :meanmean md :medianmean v1 :move}
-               {c2 :color m2 :mean v2 :move}]]
+               {m2 :mean}]]
            (if (= "black" c1)
              {:color c1 :choice m2 :move v1 :average mm :median md :AI m1}
              {:color c1 :choice (- m2) :move v1 :average (- mm) :median (- md) :AI (- m1)}
