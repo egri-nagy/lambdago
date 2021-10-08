@@ -1,14 +1,9 @@
 (ns lgo.core
   (:gen-class)
-  (:require [lgo.board :refer :all] ;;for repl convenience
-            [lgo.game :refer :all]
-            [lgo.sgf :refer :all]
-            [lgo.grid :refer :all]
-            [lgo.gtp :refer :all]
-            [lgo.stats :refer :all]
-            [lgo.analysis.lizzie :refer :all]
-            [lgo.analysis.katago :refer :all]
-            [lgo.analysis.oz :refer :all]
+  (:require [lgo.gtp :refer [gtp-loop]]
+            [lgo.analysis.lizzie :refer [sgf-report]]
+            [lgo.analysis.katago :refer [katago-output process-sgf]]
+            [lgo.analysis.oz :refer [game-report]]
             [oz.core :as oz]
             [trptcolin.versioneer.core :as version]))
 
