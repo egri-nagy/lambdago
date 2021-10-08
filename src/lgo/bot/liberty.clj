@@ -2,7 +2,7 @@
   "A simple bot playing random moves."
   (:require
    [lgo.board :refer [self-capture? put-stone opposite
-                      board-string empty-points empty-board? eye-fill?]]))
+                      board-string empty-points eye-fill?]]))
 
 (defn genmove
   "Given a board position, the color of the player to make a move, and
