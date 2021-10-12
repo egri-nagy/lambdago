@@ -8,17 +8,13 @@
 
 (defn neighbours
   "Returns the neighbours of a grid point. It considers the size of the board,
-  i.e. edges and corners are handled properly.
-  Method:
-  We generate all neighbours, then filter the valid ones (not the fastest)."
+  i.e. edges and corners are handled properly."
   [[column row] width height]
-  (let [points  [[(dec column) row]
-                 [(inc column) row]
-                 [column (dec row)]
-                 [column (inc row)]]]
-    (filterv (fn [[c r]] (and (<= 1 c width)
-                              (<= 1 r height)))
-             points)))
+  (filterv identity ;removes nils
+           [(when-not (= 1 column) [(dec column) row]) ;gives nil otherwise
+            (when-not (= 1 row) [column (dec row)])
+            (when-not (= width column) [(inc column) row])
+            (when-not (= height row) [column (inc row)])]))
 
 (defn points
   "Returns all the points of the board of the given dimensions."
