@@ -176,7 +176,6 @@
    color
    point]
   (when-not (lookup point) ; if stone is on board, return nil
-    ;;we compute the new state and rollback it turns out to be a self-capture
     (let [adjpts (neighbours point width height) ;;adjacent points, neighbours
           ;; adjacent chains, no duplicates, nils removed
           adj_chains (remove nil? (distinct (map lookup adjpts)))
@@ -193,9 +192,9 @@
                             (merge-chains friendly_chains
                                           (single-stone-chain color point))
                             (update-liberties-by-point point))]
-      ;;after we did everything, the new has no liberties, then it's a self-capture
+      ;;if the new has no liberties, then it's a self-capture
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
-        (remove-chain updated_board ((:lookup updated_board) point)) ; rollback
+        (remove-chain updated_board ((:lookup updated_board) point))
         updated_board))))
 
 ;; INFORMATION ABOUT THE BOARD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -205,7 +204,7 @@
   [board]
   (empty? (:chains board)))
 
-(defn self-capture? ;TODO this is not working yet
+(defn self-capture?
   "Returns true if putting stone at the point would be a self-capture."
   [{width :width height :height lookup :lookup liberties :liberties}
    color
@@ -222,7 +221,7 @@
             ochs (distinct (map lookup env))]
         (when (not-any? nil? ochs) ;; no liberty for merged chain
           ;; only enemy chains now, and none of them can be captured by stone
-          (not-any? #(= #{point} (liberties %)) (distinct ochs)))))))
+          (not-any? #(= #{point} (liberties %)) ochs))))))
 
 (defn eye-fill?
   "Returns true if putting stone there is filling up an eye.
