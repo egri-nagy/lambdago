@@ -79,12 +79,6 @@
   [board point]
   (update-liberties board ((:lookup board) point)))
 
-(defn bulk-update-liberties
-  "Updates liberties for the set of chains given.
-  Only for compatibility with threading macro."
-  [board chains]
-  (reduce update-liberties board chains))
-
 (defn add-chain
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
@@ -120,7 +114,9 @@
         affected_chains (filter #(= opp (:color %))
                                 (distinct
                                  (map lookup
-                                      (envelope stones width height))))]
+                                      (envelope stones width height))))
+        bulk-update-liberties (fn [board chains] ;for the threading macro
+                                (reduce update-liberties board chains))]
     (-> board
         (remove-chain chain)
         (bulk-update-liberties affected_chains))))
