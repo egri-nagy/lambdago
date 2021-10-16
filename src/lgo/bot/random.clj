@@ -5,15 +5,22 @@
    [lgo.board :refer [self-capture? put-stone opposite
                       board-string empty-points]]))
 
+(defn candidate-moves
+  "Initially the candidates are all the empty points.
+  We split the collection at a random point and put together the other way
+  around. No need to shuffle the whole collection."
+  [board]
+  (let [empty-pts (empty-points board)
+        k (rand-int (count empty-pts))]
+    (concat (drop k empty-pts) (take k empty-pts))))
+
 (defn genmove
   "Given a board position and the color of the player to make a move,
   this makes a random legal move, and returns an updated board,
   including the move sequence and history."
   [{board :board history :history :as game}
    color]
-  ;; Initially the candidates are all the empty points.
-  ;; shuffle is used to create a random sequence
-  (loop [cands (shuffle (empty-points board))]
+  (loop [cands (candidate-moves board)]
     (if (empty? cands)
       (update game :moves #(conj % :pass)) ;passing if there are no options left
       (let [move (first cands)] ; just pick the first and try it
