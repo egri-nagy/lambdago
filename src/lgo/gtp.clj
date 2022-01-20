@@ -24,25 +24,34 @@
 (def GTPcoord (zipmap (range 1 25) "ABCDEFGHJKLMNOPQRSTUVWXYZ"))
 
 (defn gtp-loop
-  "The main loop for listening to and executing GTP commands."
+  "The main loop for listening to and executing GTP commands. The engine
+  parameter is used to find the appropriate genmove function."
   [engine]
-  (let [genmove (eval (symbol (str "lgo.bot." engine "/genmove")))]
+  (let [;here is the LISP trickery to get the right function dynamically
+        genmove (eval (symbol (str "lgo.bot." engine "/genmove")))]
     (loop [input (read-line) ;when starting, just read the first command and
            game {:moves [] :history #{}}] ;create an empty game
-      (let [args (split input #" ") ;space is a separator for GTP commands
-            command (first args)] ;the first one is the command
+      (let [args (split input #" ") ;space is a separator in GTP commands
+            command (first args)] ;the first argument is the command
         (if (= "quit" command)
           game ;when done, we return the game object
           (let [ngame ;we create the next state, it might be the same
                 (case command
-                  "boardsize" (do ; creating a new board with the given size
-                                (println "= \n")
-                                (let [n (read-string (second args))] ;getting the size
-                                  (conj game [:board (empty-board n n)])))
-                  "clear_board" (do
-                                  (println "= \n")
-                                  (let [n (:width (:board game))] ;TODO what if the board is not initialized yet
-                                    {:moves [] :history #{} :board (empty-board n n)}))
+                  ;; creates a new board of the given size for the current game
+                  "boardsize"
+                  (do
+                    (println "= \n")
+                    (let [n (read-string (second args))] ;getting the size
+                      (conj game [:board (empty-board n n)])))
+                  ;; clears the board (creates a new 19x19 if there is no board)
+                  "clear_board"
+                  (do
+                    (println "= \n")
+                    (let [current_size (:width (:board game))
+                          n (if-not (current_size)
+                              current_size
+                              19)]
+                      {:moves [] :history #{} :board (empty-board n n)}))
                   "version" (do
                               (println "= "
                                        (version/get-version "lambdago" "lambdago")
