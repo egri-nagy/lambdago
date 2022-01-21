@@ -52,42 +52,57 @@
                               current_size
                               19)]
                       {:moves [] :history #{} :board (empty-board n n)}))
-                  "version" (do
-                              (println "= "
-                                       (version/get-version "lambdago" "lambdago")
-                                       engine"\n")
-                              game)
-                  "komi" (do ;komi is ignored for the moment
-                           (println "= \n")
-                           game)
-                  "name" (do
-                           (println "= LambdaGo\n")
-                           game)
-                  "play" (let [col  (m (trim (str (read-string (second args)))))
-                               gtpmove (nth args 2)
-                               x (numcoord (first gtpmove))
-                               y (read-string (join (rest gtpmove)))
-                               nboard (if (nil? x)
-                                        (:board game)
-                                        (put-stone (:board game) col [x,y]))]
-                           (println "= \n")
-                           (update game :board (constantly nboard)))
-                  "protocol_version" (do
-                                       (println "= 2\n")
-                                       game)
-                  "list_commands" (do
-                                    (print "= ")
-                                    (doseq [cmd list-commands]
-                                      (println cmd))
-                                    (println)
-                                    game)
-                  "genmove" (let [col  (m (trim (str (read-string (second args)))))
-                                  ng  (genmove game col)
-                                  m (last (:moves ng))
-                                  out (if (= :pass m)
-                                        "PASS"
-                                        (str (GTPcoord (first m)) (last m)))]
-                              (println "= " out "\n")
-                              ng)
+                  ;; returns the version number information
+                  "version"
+                  (do
+                    (println "= "
+                             (version/get-version "lambdago" "lambdago")
+                             engine"\n")
+                    game)
+                  ;; setting komi
+                  "komi"
+                  (do ;komi is ignored for the moment
+                    (println "= \n")
+                    game)
+                  ;; name of the bot
+                  "name"
+                  (do
+                    (println "= LambdaGo " engine "\n")
+                    game)
+                  ;; plays the move received through GTP
+                  "play"
+                  (let [col  (m (trim (str (read-string (second args)))))
+                        gtpmove (nth args 2)
+                        x (numcoord (first gtpmove))
+                        y (read-string (join (rest gtpmove)))
+                        nboard (if (nil? x)
+                                 (:board game)
+                                 (put-stone (:board game) col [x,y]))]
+                    (println "= \n")
+                    (update game :board (constantly nboard)))
+                  ;; GTP stuff?
+                  "protocol_version"
+                  (do
+                    (println "= 2\n")
+                    game)
+                  ;; the list of implemented commands
+                  "list_commands"
+                  (do
+                    (print "= ")
+                    (doseq [cmd list-commands]
+                      (println cmd))
+                    (println)
+                    game)
+                  ;; generating a move
+                  "genmove"
+                  (let [col  (m (trim (str (read-string (second args)))))
+                        ng  (genmove game col)
+                        m (last (:moves ng))
+                        out (if (= :pass m)
+                              "PASS"
+                              (str (GTPcoord (first m)) (last m)))]
+                    (println "= " out "\n")
+                    ng)
                   game)] ;default
+            ;; keep reading the next line in an infinite loop
             (recur (read-line) ngame)))))))
