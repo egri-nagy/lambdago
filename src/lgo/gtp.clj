@@ -36,39 +36,9 @@
         (if (= "quit" command)
           game ;when done, we return the game object
           (let [ngame ;we create the next state, it might be the same
-                (case command
-                  ;; creates a new board of the given size for the current game
-                  "boardsize"
-                  (do
-                    (println "= \n")
-                    (let [n (read-string (second args))] ;getting the size
-                      (conj game [:board (empty-board n n)])))
-                  ;; clears the board (creates a new 19x19 if there is no board)
-                  "clear_board"
-                  (do
-                    (println "= \n")
-                    (let [current_size (:width (:board game))
-                          n (if-not (current_size)
-                              current_size
-                              19)]
-                      {:moves [] :history #{} :board (empty-board n n)}))
-                  ;; returns the version number information
-                  "version"
-                  (do
-                    (println "= "
-                             (version/get-version "lambdago" "lambdago")
-                             engine"\n")
-                    game)
-                  ;; setting komi
-                  "komi"
-                  (do ;komi is ignored for the moment
-                    (println "= \n")
-                    game)
-                  ;; name of the bot
-                  "name"
-                  (do
-                    (println "= LambdaGo " engine "\n")
-                    game)
+                (case command ;;action selection based on commands
+
+                  ;; GAME COMMANDS the most important/interesting part ;;;;;;;;;
                   ;; plays the move received through GTP
                   "play"
                   (let [col  (m (trim (str (read-string (second args)))))
@@ -80,6 +50,52 @@
                                  (put-stone (:board game) col [x,y]))]
                     (println "= \n")
                     (update game :board (constantly nboard)))
+                  ;; generating a move
+                  "genmove"
+                  (let [col  (m (trim (str (read-string (second args)))))
+                        ng  (genmove game col)
+                        m (last (:moves ng))
+                        out (if (= :pass m)
+                              "PASS"
+                              (str (GTPcoord (first m)) (last m)))]
+                    (println "= " out "\n")
+                    ng)
+
+                  ;; INITIALIZATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                  ;; creates a new board of the given size for the current game
+                  "boardsize"
+                  (do
+                    (println "= \n")
+                    (let [n (read-string (second args))] ;getting the size
+                      (conj game [:board (empty-board n n)])))
+                  ;; clears the board (creates a new 19x19 if there is none)
+                  "clear_board"
+                  (do
+                    (println "= \n")
+                    (let [current_size (:width (:board game))
+                          n (if-not (current_size)
+                              current_size
+                              19)]
+                      {:moves [] :history #{} :board (empty-board n n)}))
+                  ;; setting komi
+                  "komi"
+                  (do ;komi is ignored for the moment
+                    (println "= \n")
+                    game)
+
+                  ;; ADMINISTRATIVE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                  ;; returns the version number information
+                  "version"
+                  (do
+                    (println "= "
+                             (version/get-version "lambdago" "lambdago")
+                             engine"\n")
+                    game)
+                  ;; name of the bot
+                  "name"
+                  (do
+                    (println "= LambdaGo " engine "\n")
+                    game)
                   ;; GTP stuff?
                   "protocol_version"
                   (do
@@ -93,16 +109,8 @@
                       (println cmd))
                     (println)
                     game)
-                  ;; generating a move
-                  "genmove"
-                  (let [col  (m (trim (str (read-string (second args)))))
-                        ng  (genmove game col)
-                        m (last (:moves ng))
-                        out (if (= :pass m)
-                              "PASS"
-                              (str (GTPcoord (first m)) (last m)))]
-                    (println "= " out "\n")
-                    ng)
-                  game)] ;default
+
+                  ;; default behavior - returning the unchanged game
+                  game)]
             ;; keep reading the next line in an infinite loop
             (recur (read-line) ngame)))))))
