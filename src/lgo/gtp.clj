@@ -41,19 +41,19 @@
                   ;; GAME COMMANDS the most important/interesting part ;;;;;;;;;
                   ;; plays the move received through GTP
                   "play"
-                  (let [col  (m (trim (str (read-string (second args)))))
+                  (let [color (m (trim (str (read-string (second args)))))
                         gtpmove (nth args 2)
                         x (numcoord (first gtpmove))
                         y (read-string (join (rest gtpmove)))
                         nboard (if (nil? x)
                                  (:board game)
-                                 (put-stone (:board game) col [x,y]))]
+                                 (put-stone (:board game) color [x,y]))]
                     (println "= \n")
                     (update game :board (constantly nboard)))
                   ;; generating a move
                   "genmove"
-                  (let [col  (m (trim (str (read-string (second args)))))
-                        ng  (genmove game col)
+                  (let [color (m (trim (str (read-string (second args)))))
+                        ng  (genmove game color)
                         m (last (:moves ng))
                         out (if (= :pass m)
                               "PASS"
@@ -73,7 +73,7 @@
                   (do
                     (println "= \n")
                     (let [current_size (:width (:board game))
-                          n (if-not (current_size)
+                          n (if-not current_size
                               current_size
                               19)]
                       {:moves [] :history #{} :board (empty-board n n)}))
