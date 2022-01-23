@@ -73,7 +73,7 @@
                   (do
                     (println "= \n")
                     (let [current_size (:width (:board game))
-                          n (if-not current_size
+                          n (if current_size
                               current_size
                               19)]
                       {:moves [] :history #{} :board (empty-board n n)}))
