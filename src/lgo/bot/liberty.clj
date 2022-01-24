@@ -5,6 +5,18 @@
    [lgo.board :refer [self-capture? put-stone opposite
                       board-string empty-points eye-fill?]]))
 
+(defn candidate-moves
+  "Liberty removing moves first, then random ones."
+  [board color]
+  (let [libs (vec (reduce into #{}
+                          (filter #(<= (count %) 1) ; capture
+                                  (map (:liberties board)
+                                       (filter #(= (opposite color) (:color %))
+                                               (:chains board))))))
+        empties (set (empty-points board))
+        extras (remove (set libs) empties)]
+    (concat (shuffle libs) (shuffle extras))))
+
 (defn genmove
   "Given a board position, the color of the player to make a move, and
   a history of previous board positions, this returns a random legal
@@ -13,14 +25,7 @@
   [{board :board history :history :as game}
    color]
   ;; Initially the candidates are all the empty points.
-  (loop [cands (let [libs (vec (reduce into #{}
-                           (filter #(< (count %) 2)
-                                   (map (:liberties board)
-                                        (filter #(= (opposite color) (:color %))
-                                                (:chains board))))))
-                     empties (set (empty-points board))
-                     extras (remove (set libs) empties)]
-           (concat (shuffle libs) (shuffle extras)))]
+  (loop [cands (candidate-moves board color)]
     (if (empty? cands)
       (update game :moves #(conj % :pass)) ;passing if there are no options left
       (let [move (first cands)] ; just pick the first and try it
