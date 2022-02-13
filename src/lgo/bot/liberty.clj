@@ -8,11 +8,12 @@
 (defn candidate-moves
   "Liberty removing moves first, then random ones."
   [board color]
-  (let [libs (vec (reduce into #{}
-                          (filter #(<= (count %) 1) ; capture
-                                  (map (:liberties board)
-                                       (filter #(= (opposite color) (:color %))
-                                               (:chains board))))))
+  (let [libs (vec
+              (reduce into #{}
+                      (filter #(<= (count %) 1) ;1 capture, 2 atari
+                              (map (:liberties board)
+                                   (filter #(= (opposite color) (:color %))
+                                           (:chains board))))))
         empties (set (empty-points board))
         extras (remove (set libs) empties)]
     (concat (shuffle libs) (shuffle extras))))
