@@ -5,7 +5,7 @@
             :url "none"
             :year 2019
             :key "mit"}
-  :dependencies [[org.clojure/clojure "1.10.3"]
+  :dependencies [[org.clojure/clojure "1.11.0"]
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.10"]
                  [org.clojure/math.numeric-tower "0.0.5"]
@@ -13,11 +13,11 @@
                  [metasoarous/oz "2.0.0-alpha5"]
                  [org.clojure/data.json "2.4.0"]
                  [trptcolin/versioneer "0.2.0"]]
-  :plugins [[lein-cloverage "1.2.2"]
+  :plugins [[lein-cloverage "1.2.3"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "1.1.1"]]
+            [jonase/eastwood "1.2.3"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
