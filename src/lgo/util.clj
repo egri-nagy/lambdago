@@ -14,7 +14,7 @@
 (defn index
   "Getting the first index of an element in a vector."
   ;;adapted from kigen
-  [v elt]
+  [^clojure.lang.PersistentVector v elt]
   (first
    (for [[index element] (map vector (range) v)
          :when (= elt element)]
