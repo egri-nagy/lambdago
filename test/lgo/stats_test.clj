@@ -17,10 +17,12 @@
 
 (deftest median-test
   (testing "Testing median."
+    (is (= (median [13]) 13))
     (is (= (median [1 2 3]) 2))
     (is (= (median [1 -1]) 0))
     (is (= (median [38, 10, 21, 23, 23, 38, 2]) 23))
-    (is (== (median [38, 10, 21, 23, 22, 38, 2, 1]) 21.5))))
+    (is (== (median [38, 10, 21, 23, 22, 38, 2, 1]) 21.5))
+    (is (= (median (range 10001) ) 5000))))
 
 (deftest normalize-test
   (testing "Testing normalization."
