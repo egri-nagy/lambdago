@@ -9,7 +9,6 @@
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.12"]
                  [org.clojure/math.numeric-tower "0.0.5"]
-                 [kigen "19.08.05"]
                  [metasoarous/oz "2.0.0-alpha5"]
                  [org.clojure/data.json "2.4.0"]
                  [trptcolin/versioneer "0.2.0"]]

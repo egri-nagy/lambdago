@@ -15,8 +15,7 @@
   (:require
    [lgo.grid :refer [neighbours points]]
    [lgo.chain :refer [envelope]]
-   [lgo.util :refer [vec-rm-all vec-rm]]
-   [kigen.position :refer [index]]
+   [lgo.util :refer [vec-rm-all vec-rm index]]
    [clojure.string :as string]))
 
 ;;for switching between the colors
