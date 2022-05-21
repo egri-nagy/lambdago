@@ -34,6 +34,10 @@
 (deftest KL-divergence-test
   (testing "Testing Kullback-Leibler divergence."
     (let [P [0.36 0.48 0.16] ; Wikipedia example
-          Q [1/3 1/3 1/3]]
+          Q [1/3 1/3 1/3]
+          P1 [0.25, 0.33, 0.23, 0.19]
+          Q1 [0.21, 0.21, 0.32, 0.26]]
       (is (= (KL-divergence P Q) 0.0852996013183706))
-      (is (= (KL-divergence Q P) 0.09745500678538754)))))
+      (is (= (KL-divergence Q P) 0.09745500678538754))
+      (is (= (KL-divergence P1 Q1) 0.057192913458712795))
+      (is (= (KL-divergence Q1 P1) 0.05569721781445004)))))

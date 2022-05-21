@@ -2,7 +2,7 @@
   "Statistical functions.")
 
 (defn mean
-  "Calculating the average."
+  "Calculating the average of a non-empty collection of numbers."
   [nums]
   (/ (apply + nums)
      (count nums)))
@@ -10,7 +10,9 @@
 (defn cmas
   "Cumulative moving averages. These can be calculated incrementally:
   when receiving a new value (the nth) we can scale the difference between
-  the previvous cma and the new value by 1/n, and add it to the previous cma."
+  the previous cma and the new value by 1/n, and add it to the previous cma.
+  The derivation of the formula is straightforward:
+  https://en.wikipedia.org/wiki/Moving_average#Cumulative_average"
   [nums]
   (rest ;to drop the starting zero
    (reductions (fn [cma [x n]]
@@ -20,7 +22,7 @@
                     (rest (range)))))) ;1,2,3,...
 
 (defn median
-  "Calculating the median for a collection of numerical values."
+  "Calculating the median for a inon-empty collection of numerical values."
   [nums]
   (let [ordered (vec (sort nums))
         n (count nums)
@@ -39,7 +41,9 @@
 
 (defn KL-divergence
   "The Kullback-Leibler divergence of probability distributions P and Q.
-  The information gain when using Q instead of P. Using natural logarithm."
+  Interpreted as the information gain when using P instead of Q.
+  In other words, the information lost when we use Q instead of P.
+  Using natural logarithm."
   [P Q]
   (apply +
          (map
