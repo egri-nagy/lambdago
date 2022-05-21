@@ -37,11 +37,11 @@
                    (:moves gd))
         col (ffirst moves)
         initial-player (code->col col)]
-    (for [mvs (prefixes moves)]
+    (for [mvs (prefixes moves)] ;katago needs the previous moves
       (let [player (if (even? (count mvs))
                      initial-player
                      (black<->white initial-player))]
-        {:id (str "game" " "  (col->code player))
+        {:id (str "game" " "  (col->code player)) ;the id tells whether it is a game move or not
          :rules (lower-case (:rules gd))
          :komi (:komi gd)
          :initialPlayer initial-player
@@ -60,7 +60,7 @@
         d
         (update :moves #(conj % [code "pass"]))
         ;;no policy details needed for imaginary pass
-        (update :includePolicy (constantly false))
+        (update :includePolicy (constantly false)) ;we don't want the policy table for the passed
         (update :id (constantly (str "passed " code)))
         (update :maxVisits (constantly maxvisits)))))
    kid))
