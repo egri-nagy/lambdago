@@ -1,6 +1,16 @@
 (ns lgo.stats-test
   (:require [clojure.test :refer :all]
-            [lgo.stats :refer :all]))
+            [lgo.stats :refer :all]
+            [clojure.math :refer [pow round]]))
+
+(defn precision-fn
+  "n is the number of decimal digits to be kept."
+  [n]
+  (let [p (pow 10 n)]
+    (fn [x]
+      (double (/ (round (* p x)) p)))))
+
+(def with-8-digits (precision-fn 8))
 
 (deftest mean-test
   (testing "Testing mean."
@@ -38,7 +48,11 @@
           P1 [0.25, 0.33, 0.23, 0.19]
           Q1 [0.21, 0.21, 0.32, 0.26]]
       (is (zero? (KL-divergence P P)))
-      (is (= (KL-divergence P Q) 0.0852996013183706))
-      (is (= (KL-divergence Q P) 0.09745500678538754))
-      (is (= (KL-divergence P1 Q1) 0.057192913458712795))
-      (is (= (KL-divergence Q1 P1) 0.05569721781445004)))))
+      (is (= (with-8-digits (KL-divergence P Q))
+             (with-8-digits 0.0852996013183706)))
+      (is (= (with-8-digits (KL-divergence Q P))
+             (with-8-digits 0.09745500678538754)))
+      (is (= (with-8-digits (KL-divergence P1 Q1))
+             (with-8-digits 0.057192913458712795)))
+      (is (= (with-8-digits (KL-divergence Q1 P1))
+             (with-8-digits 0.05569721781445004))))))
