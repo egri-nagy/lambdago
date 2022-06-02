@@ -9,12 +9,23 @@
 ;; to see the grammar, just print SGFparser, it is a bit unreadable due to
 ;; double escapes
 (def SGFparser
-  (insta/parser (str ;;"GameRecord = GameTree+                         \n"
-                     "GameTree   = <\"(\"> Node* GameTree* <\")\">   \n"
+  (insta/parser (str "GameTree   = <\"(\"> Node* GameTree* <\")\">   \n"
                      "Node = <\";\"> Property*                       \n"
                      "Property   = Identifier Value*                 \n"
                      "Identifier  = #'[A-Z]+'                        \n"
                      "Value  = <\"[\"> #\"(\\\\.|[^\\\\\\]]*)*\" <\"]\">")))
+;; functions working on the parsed tree
+(defn remove-variations
+  "Removes variations, keeping only the main line of the game, assuming it is
+  the first variation."
+  [pt]
+  (insta/transform
+   {:GameTree (fn [& children]
+                (let [node?  #(= :Node (first %))
+                      nodes (take-while node? children)
+                      tree (first (drop-while node? children))]
+                  (vec (concat nodes tree))))}
+   pt)) 
 
 ;; transform functions for instaparse, turning properties really into pairs,
 ;; other nodes just returned or grouped into a sequence
