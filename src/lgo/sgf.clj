@@ -9,7 +9,7 @@
 ;; to see the grammar, just print SGFparser, it is a bit unreadable due to
 ;; double escapes
 (def SGFparser
-  (insta/parser (str "GameRecord = GameTree+                         \n"
+  (insta/parser (str ;;"GameRecord = GameTree+                         \n"
                      "GameTree   = <\"(\"> Node* GameTree* <\")\">   \n"
                      "Node = <\";\"> Property*                       \n"
                      "Property   = Identifier Value*                 \n"
