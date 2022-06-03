@@ -20,13 +20,14 @@
   "Removes variations, keeping only the main line of the game, assuming it is
   the first variation."
   [pt]
-  (insta/transform
-   {:GameTree (fn [& children]
-                (let [node?  #(= :Node (first %))
-                      nodes (take-while node? children)
-                      tree (first (drop-while node? children))]
-                  (vec (concat nodes tree))))}
-   pt))
+  (into [:GameTree] ;need to put his one back for the main variation
+        (insta/transform
+         {:GameTree (fn [& children]
+                      (let [node?  #(= :Node (first %))
+                            nodes (take-while node? children)
+                            tree (first (drop-while node? children))]
+                        (vec (concat nodes tree))))}
+         pt)))
 
 (defn pt2sgf
   "Reassembles the parse tree into the corresponding SGF string."
