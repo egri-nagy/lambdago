@@ -26,7 +26,18 @@
                       nodes (take-while node? children)
                       tree (first (drop-while node? children))]
                   (vec (concat nodes tree))))}
-   pt)) 
+   pt))
+
+(defn pt2sgf
+  "Reassembles the parse tree into the corresponding SGF string."
+  [pt]
+  (insta/transform
+   {:GameTree (fn [& children] (str "(" (apply str children) ")"))
+    :Node (fn [& children] (apply str ";" children))
+    :Identifier identity
+    :Value (fn [v] (str "[" v "]"))
+    :Property str}
+   pt))
 
 ;; transform functions for instaparse, turning properties really into pairs,
 ;; other nodes just returned or grouped into a sequence
