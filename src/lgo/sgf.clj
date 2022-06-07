@@ -6,7 +6,7 @@
   (:require [clojure.string :as string]
             [instaparse.core :as insta]))
 
-;; a crude parser for SGF files for extracting property values
+;; a parser for SGF files
 ;; to see the grammar, just print SGFparser, it is a bit unreadable due to
 ;; double escapes
 (def SGFparser
@@ -15,6 +15,7 @@
                      "Property   = Identifier Value*                 \n"
                      "Identifier  = #'[A-Z]+'                        \n"
                      "Value  = <\"[\"> #\"(\\\\.|[^\\\\\\]]*)*\" <\"]\">")))
+
 ;; functions working on the parsed tree
 (defn remove-variations
   "Removes variations, keeping only the main line of the game, assuming it is
@@ -39,6 +40,10 @@
     :Value (fn [v] (str "[" v "]"))
     :Property str}
    pt))
+
+(defn remove-comments
+  []
+  )
 
 ;; transform functions for instaparse, turning properties really into pairs,
 ;; other nodes just returned or grouped into a sequence
