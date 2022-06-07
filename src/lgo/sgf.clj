@@ -16,6 +16,13 @@
                      "Identifier  = #'[A-Z]+'                        \n"
                      "Value  = <\"[\"> #\"(\\\\.|[^\\\\\\]]*)*\" <\"]\">")))
 
+(defn prepare-sgf
+  "Removes newlines from the sgf string in preparation for parsing.
+  This seems to acceptable. The grammar is way simpler this way"
+  [sgfstring]
+  (string/join
+   (remove #{\newline \return} sgfstring)))
+
 ;; functions working on the parsed tree
 (defn remove-variations
   "Removes variations, keeping only the main line of the game, assuming it is
@@ -41,9 +48,15 @@
     :Property str}
    pt))
 
-(defn remove-comments
-  []
-  )
+(defn remove-property
+  "Removes all properties with the given identifier."
+  [pt id]
+  (insta/transform
+   {:Property (fn [& children]
+                (if (= id (second (first children)))
+                  nil
+                  children))}
+   pt))
 
 ;; transform functions for instaparse, turning properties really into pairs,
 ;; other nodes just returned or grouped into a sequence
@@ -72,12 +85,9 @@
   This removes newlines before parsing the SGF, which seems to acceptable.
   The grammar is way simpler this way."
   [sgfstring]
-  (let [sgf (string/join (remove #{\newline \return} sgfstring))
-        pt (SGFparser sgf)
+  (let [pt (SGFparser (prepare-sgf sgfstring))
         simplified-pt (insta/transform flatteners pt)]
     (flatten-to-vectors simplified-pt)))
-
-
 
 (defn extract-properties
   "Extracting values of properties matching a predicate function from a
