@@ -49,13 +49,17 @@
    pt))
 
 (defn remove-property
-  "Removes all properties with the given identifier."
+  "Removes all properties with the given identifier.
+  It is meant for comments, and analysis info. Removing moves would break things?"
   [pt id]
   (insta/transform
-   {:Property (fn [& children]
-                (if (= id (second (first children)))
-                  nil
-                  children))}
+   {:Node (fn [& children]
+            ;;recreating the node with the matching properties removed
+            (into [:Node]
+                  (remove
+                   (fn [[_ [_ ID]] & _] ;funky destructuring to check the id
+                     (= id ID))
+                   children)))}
    pt))
 
 ;; transform functions for instaparse, turning properties really into pairs,
