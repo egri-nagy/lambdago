@@ -62,6 +62,17 @@
                    children)))}
    pt))
 
+(defn properties
+  "All properties, identifier-value pairs in a sequence that keeps the
+  order of occurence (meaningful when there are no variations)."
+  [pt]
+  (insta/transform
+   {:Property (fn [[_ ID] [_ VALUE] & _]
+                (vector ID VALUE))
+    :GameTree concat
+    :Node (fn [& args] (into [] args))}
+   pt))
+
 ;; transform functions for instaparse, turning properties really into pairs,
 ;; other nodes just returned or grouped into a sequence
 (def flatteners
