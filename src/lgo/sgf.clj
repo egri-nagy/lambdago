@@ -73,7 +73,7 @@
 (defn clean
   "Removing commonly used unnecessary properties form the parse tree."
   [pt]
-  (remove-properties not-needed-for-basic-game-data pt))
+  (remove-properties pt not-needed-for-basic-game-data))
 
 (defn properties
   "All properties, identifier-value pairs in a sequence that keeps the
@@ -105,8 +105,8 @@
 (defn game-data
   "Returns a hash-map containing game information extracted from
   the SGF string."
-  [sgf]
-  (let [flp (properties sgf)]
+  [sgfstring]
+  (let [flp (properties (clean (remove-variations (SGFparser (prepare-sgf sgfstring)))))]
     {:rules (or (extract-single-value flp "RU") "japanese")
      :black (or (extract-single-value flp "PB") "BLACK")
      :white (or (extract-single-value flp "PW") "WHITE")
