@@ -10,7 +10,7 @@
   means.
   "
   (:require [clojure.string :as string]
-            [lgo.sgf :refer [flat-list-properties
+            [lgo.sgf :refer [properties
                              extract-properties
                              extract-single-value]]
             [lgo.stats :refer [median
@@ -62,7 +62,7 @@
 
 (defn sgf-report
   [sgf]
-  (let [flp (flat-list-properties sgf)
+  (let [flp (properties sgf)
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
