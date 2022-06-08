@@ -48,19 +48,24 @@
     :Property str}
    pt))
 
-(defn remove-property
-  "Removes all properties with the given identifier.
+(defn remove-properties
+  "Removes all properties with the given identifiers.
   It is meant for comments, and analysis info. Removing moves would break things?"
-  [pt id]
+  [pt idset]
   (insta/transform
    {:Node (fn [& children]
             ;;recreating the node with the matching properties removed
             (into [:Node]
                   (remove
                    (fn [[_ [_ ID]] & _] ;funky destructuring to check the id
-                     (= id ID))
+                     (idset ID))
                    children)))}
    pt))
+
+(defn remove-property
+  "Removing just one property from the parse tree. See remove-properties."
+  [pt id]
+  (remove-properties pt #{id}))
 
 (defn properties
   "All properties, identifier-value pairs in a sequence that keeps the
