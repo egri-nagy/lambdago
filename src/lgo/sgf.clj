@@ -104,14 +104,18 @@
 
 (defn game-data
   "Returns a hash-map containing game information extracted from
-  the SGF string."
+  the SGF string. Defaults: black player BLACK, white player WHITE, rule set japanese,
+  komi 6.5."
   [sgfstring]
   (let [flp (properties (clean (remove-variations (SGFparser (prepare-sgf sgfstring)))))]
     {:rules (or (extract-single-value flp "RU") "japanese")
      :black (or (extract-single-value flp "PB") "BLACK")
      :white (or (extract-single-value flp "PW") "WHITE")
      :result (or (extract-single-value flp "RE") "unknown")
-     :komi (read-string (extract-single-value flp "KM"))
+     :komi (let [komi  (extract-single-value flp "KM")]
+             (if komi
+               (read-string komi)
+               6.5))
      :size (read-string (extract-single-value flp "SZ"))
      :moves (extract-properties flp #(or (= % "B") (= % "W")))}))
 
