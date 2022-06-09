@@ -13,7 +13,7 @@
                                              black<->white
                                              col->code]]
             [lgo.sgf :refer [game-data
-                             filename
+                             filename-without-extension
                              SGFcoord->GTPcoord]]))
 
 ;; GENERATING INPUT files for the KataGo Analysis Engine ;;;;;;;;;;;;;;;;;;;;;;
@@ -67,7 +67,7 @@
 
 (defn process-sgf
   [sgf_file max-visits passed-max-visits]
-  (let [name (filename sgf_file)
+  (let [name (filename-without-extension sgf_file)
         output (str name ".in")
         kgd (map #(conj % [:maxVisits max-visits])
                  (katago-input-data (slurp sgf_file)))]

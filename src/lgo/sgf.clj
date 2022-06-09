@@ -167,11 +167,11 @@
    ")"))
 
 
-(defn filename
-  "Cuts the extension of the filename."
+(defn filename-without-extension
+  "Cuts the extension of the filename, returns the input if there is
+  no exptension separated by a dot."
   [sgf_file]
-  (string/join (butlast (string/split sgf_file #"\."))))
-
-;;
-
-;;(sgf/SGF-game-moves->lgo (sgf/extract-game-moves (slurp "example.sgf")))
+  (let [parts (string/split sgf_file #"\.")]
+    (if (> (count parts) 2)
+      (string/join "." (butlast parts))
+      sgf_file)))
