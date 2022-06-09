@@ -14,8 +14,9 @@
   [& args]
   (let [command (first args)
         numargs (count args)]
-    (println (str "LambdaGo v" (version/get-version "lambdago" "lambdago")) )
     (case command
+      "version"  (println (str "LambdaGo v"
+                               (version/get-version "lambdago" "lambdago")))
       "gtp" (when (= numargs 2)
               (gtp-loop (second args)))
       "simplify-sgf" (if (= 2 numargs)
