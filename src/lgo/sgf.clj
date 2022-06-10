@@ -6,6 +6,8 @@
   (:require [clojure.string :as string]
             [instaparse.core :as insta]))
 
+;; parsing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; a parser for SGF files
 ;; to see the grammar, just print SGFparser, it is a bit unreadable due to
 ;; double escapes
@@ -23,7 +25,8 @@
   (string/join
    (remove #{\newline \return} sgfstring)))
 
-;; functions working on the parsed tree
+;; functions working on the parsed tree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn remove-variations
   "Removes variations, keeping only the main line of the game, assuming it is
   the first variation."
@@ -171,17 +174,8 @@
          lgomoves))
    ")"))
 
-
-(defn filename-without-extension
-  "Cuts the extension of the filename, returns the input if there is
-  no exptension separated by a dot."
-  [sgf_file]
-  (let [parts (string/split sgf_file #"\.")]
-    (if (> (count parts) 2)
-      (string/join "." (butlast parts))
-      sgf_file)))
-
 (defn simplify-sgf-file
+  ""
   [sgf_file]
   (let [filename (filename-without-extension sgf_file)
         pt (SGFparser(prepare-sgf (slurp sgf_file)))
