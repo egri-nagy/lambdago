@@ -78,6 +78,11 @@
   [pt]
   (remove-properties pt not-needed-for-basic-game-data))
 
+(defn simplify
+  "Removes variations and unused properties from parse tree."
+  [pt]
+  (clean (remove-variations pt)))
+
 (defn properties
   "All properties, identifier-value pairs in a sequence that keeps the
   order of occurence (meaningful when there are no variations)."
@@ -105,10 +110,14 @@
   [flp ID]
   (second (first (extract-property flp ID))))
 
-(defn simplify
-  "Removes variations and unused properties from parse tree."
-  [pt]
-  (clean (remove-variations pt)))
+(defn simplified-sgf-string
+  "Parses an SGF string, simplifies and returns an SGF string without variations and
+  non-essential properties."
+  [sgfstring]
+  (let [pt (SGFparser(prepare-sgf sgfstring))
+        simplified (simplify pt)
+        sgfout (pt2sgf simplified)]
+    sgfout))
 
 (defn game-data
   "Returns a hash-map containing game information extracted from
@@ -173,12 +182,3 @@
          (cycle [:b :w])
          lgomoves))
    ")"))
-
-(defn simplify-sgf-string
-  ""
-  [sgfstring]
-  (let [pt (SGFparser(prepare-sgf sgfstring))
-        simplified (simplify pt)
-        sgfout (pt2sgf simplified)]
-    (println sgfout)))
-

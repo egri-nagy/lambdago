@@ -4,7 +4,7 @@
             [lgo.analysis.lizzie :refer [sgf-report]]
             [lgo.analysis.katago :refer [katago-output process-sgf]]
             [lgo.analysis.oz :refer [game-report]]
-            [lgo.sgf :refer [simplify-sgf-string]]
+            [lgo.sgf :refer [simplified-sgf-string]]
             [oz.core :as oz]
             [trptcolin.versioneer.core :as version]))
 
@@ -19,7 +19,7 @@
       "gtp" (when (= numargs 2)
               (gtp-loop (second args)))
       "simplify-sgf" (if (= 2 numargs)
-                       (print (simplify-sgf-string (slurp (second args))))
+                       (println (simplified-sgf-string (slurp (second args))))
                        (println "Usage: simplify-sgf sgf-file"))
       "lizzie" (if (= numargs 2)
                  (do
