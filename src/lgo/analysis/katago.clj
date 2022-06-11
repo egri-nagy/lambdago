@@ -13,8 +13,8 @@
                                              black<->white
                                              col->code]]
             [lgo.sgf :refer [game-data
-                             filename-without-extension
-                             SGFcoord->GTPcoord]]))
+                             SGFcoord->GTPcoord]]
+            [lgo.util :refer [filename-without-extension]]))
 
 ;; GENERATING INPUT files for the KataGo Analysis Engine ;;;;;;;;;;;;;;;;;;;;;;
 

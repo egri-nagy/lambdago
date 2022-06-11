@@ -174,11 +174,10 @@
          lgomoves))
    ")"))
 
-(defn simplify-sgf-file
+(defn simplify-sgf-string
   ""
-  [sgf_file]
-  (let [filename (filename-without-extension sgf_file)
-        pt (SGFparser(prepare-sgf (slurp sgf_file)))
+  [sgfstring]
+  (let [pt (SGFparser(prepare-sgf sgfstring))
         simplified (simplify pt)
         sgfout (pt2sgf simplified)]
     (println sgfout)))
