@@ -66,17 +66,19 @@
    kid))
 
 (defn process-sgf
-  [sgf_file max-visits passed-max-visits]
-  (let [name (filename-without-extension sgf_file)
-        output (str name ".in")
-        kgd (map #(conj % [:maxVisits max-visits])
-                 (katago-input-data (slurp sgf_file)))]
-    (spit output
-          (join "\n"
-                (map json/write-str
-                     (concat kgd
-                             (katago-passed-game-data kgd
-                                                      passed-max-visits)))))))
+  ([sgf_file max-visits]
+   (process-sgf sgf_file max-visits 0))
+  ([sgf_file max-visits passed-max-visits]
+   (let [name (filename-without-extension sgf_file)
+         output (str name ".in")
+         kgd (map #(conj % [:maxVisits max-visits])
+                  (katago-input-data (slurp sgf_file)))
+         passed (when-not (zero? passed-max-visits)
+                  (katago-passed-game-data kgd passed-max-visits))]
+     (spit output
+           (join "\n"
+                 (map json/write-str
+                      (concat kgd passed)))))))
 
 ;; PROCESSING THE OUTPUT  of the analysis engine.
 

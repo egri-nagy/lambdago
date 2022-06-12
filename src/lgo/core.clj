@@ -26,12 +26,14 @@
                    (oz/start-server!)
                    (oz/view! (sgf-report (slurp (second args))) :mode :vega))
                  (println "Usage: lizzie sgf-file"))
-      "katago-input" (if (= numargs 4)
-                       (process-sgf (second args)
-                                    (read-string (nth args 2))
-                                    (read-string (nth args 3)))
+      "katago-input" (if (>= numargs 3)
+                       (let [sgf_file (second args)
+                             max-visits (read-string (nth args 2))]
+                         (if (= numargs 4)
+                           (process-sgf sgf_file max-visits (read-string (nth args 3)))
+                           (process-sgf sgf_file max-visits)))
                        (println "Usage: katago-input"
-                                "sgf-file maxvisits passed-maxvisits"))
+                                "sgf-file maxvisits [passed-maxvisits]"))
       ;; for analyzing katago output
       "katago" (do
                  (oz/start-server!)
