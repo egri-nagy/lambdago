@@ -1,9 +1,9 @@
-(defproject lambdago "2022.06.09"
+(defproject lambdago "2022.06.12"
   :description "Software package for the Igo Math course https://egri-nagy.github.io/igomath/"
   :url "https://github.com/egri-nagy/lambdago"
   :license {:name "MIT License"
             :url "none"
-            :year 2019
+            :year 2022
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [com.bhauman/rebel-readline "0.1.4"]
