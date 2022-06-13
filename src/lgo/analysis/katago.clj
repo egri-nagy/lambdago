@@ -1,7 +1,8 @@
 (ns lgo.analysis.katago
   "Functions for doing KataGo analysis directly.
   Preparing input files for the analysis engine and parsing the
-  output into a map suitable for visualization."
+  output into a map suitable for visualization.
+  https://github.com/lightvector/KataGo/blob/master/docs/Analysis_Engine.md"
   (:require [clojure.data.json :as json]
             [clojure.string :refer [lower-case
                                     join
@@ -27,7 +28,8 @@
 
 (defn katago-input-data
   "Produces maps containing input data extracted from a game
-  for the KataGo analysis engine."
+  for the KataGo analysis engine. It converts the SGF coordinates to GTP.
+  The :id tag contains information used by LambdaGo."
   [sgf]
   (let [gd (game-data sgf)
         moves (map (fn [[col move]]
@@ -66,6 +68,7 @@
    kid))
 
 (defn process-sgf
+  "Processes an SGF file to produce an input for KataGo analysis."
   ([sgf_file max-visits]
    (process-sgf sgf_file max-visits 0))
   ([sgf_file max-visits passed-max-visits]
