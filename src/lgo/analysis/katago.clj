@@ -88,8 +88,8 @@
 (defn katago-turn-data
   "Processing one line of the KataGo output. It also adds some statistical calculations.
   Outputs a hash-map."
-  [js]
-  (let [d (json/read-str js :key-fn keyword) ;the result of parsing JSON
+  [json-line]
+  (let [d (json/read-str json-line :key-fn keyword) ;the result of parsing JSON
         means (map :scoreMean (sort-by :order (:moveInfos d))) ;sorting to make sure
         omv (map (juxt :order :move :visits) (:moveInfos d))
         candidates (map (comp vec rest) (sort-by first omv)) ;stripping the order number
