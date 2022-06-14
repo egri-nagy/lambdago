@@ -29,24 +29,6 @@
 
 ;; working with the database ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn effects
-  "The score mean differences caused by the moves."
-  [dat]
-  (map (fn [[{c1 :color m1 :mean} {m2 :mean v2 :move}]]
-         {:color c1 ;the owner of the effect is the first color
-          :effect (- m2 m1)
-          :move v2})
-       (partition 2 1 dat))) ; all pairs of the rows
-
-(defn effects-with-cost-of-passing
-  "The score mean differences caused by the moves."
-  [effs cops]
-  (map (fn [{c :color m :move e :effect }
-            {cop :cop}]
-         {:color c :effect (/ e cop) :move m})
-       effs
-       cops))
-
 (defn choices
   [dat]
   (let [ps (partition 2 1 dat)]
@@ -58,13 +40,36 @@
              ))
          ps)))
 
+(defn effects
+  "The score mean differences caused by the moves."
+  [dat]
+  (map (fn [[{c1 :color m1 :mean} {m2 :mean v2 :move}]]
+         {:color c1 ;the owner of the effect is the first color
+          :effect (- m2 m1)
+          :move v2})
+       (partition 2 1 dat))) ; all pairs of the rows
+
+;; working with effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn effects-with-cost-of-passing
+  ""
+  [effs cops]
+  (map (fn [{c :color m :move e :effect }
+            {cop :cop}]
+         {:color c :effect (/ e cop) :move m})
+       effs
+       cops))
+
 (defn deviations
-  "Calculating the deviations of the effects from the average."
+  "Calculating the deviations of the effects from the average.
+  This assumes that data is for the same color."
   [effs]
   (let [avg (mean (map :effect effs))] ;the average of all the effects
     (map (fn [{e :effect :as d}]
            (into d [[:deviation (- e avg)]])) ;adding :deviation to the map
          effs)))
+
+;; cost of passing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn cost-of-passing
   [dat]
