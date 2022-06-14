@@ -4,8 +4,11 @@
   win, negative means White win.
   Move counter tells how many moves were made. Color tells whose turn is it.
 
-  The raw data is a hash-map with keys color, move, mean, meanmean, medianmean,
-  means. The dat input refers to this database."
+  The raw data is a hash-map with the folowing keys.
+
+  :color :move :mean :meanmean :medianmean :means
+
+  The dat input refers to this database."
   (:require [lgo.stats :refer [mean]]))
 
 ;;TODO we repeatedly switch sign for white, is there a better place to do that?
@@ -24,16 +27,18 @@
                 (- m))})) ; to get the value form white's perspective
    dat))
 
+;; working with the database ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn effects
   "The score mean differences caused by the moves."
-  [gamedat]
+  [dat]
   (map (fn [[{c1 :color m1 :mean}
              {m2 :mean v2 :move}]]
          (let [eff (if (= c1 "black") ; need to negate for White
                      (- m2 m1)
                      (- (- m2 m1)))]
            {:color c1 :effect eff :move v2}))
-       (partition 2 1 gamedat))) ; all pairs of the rows
+       (partition 2 1 dat))) ; all pairs of the rows
 
 (defn effects-with-cost-of-passing
   "The score mean differences caused by the moves."
