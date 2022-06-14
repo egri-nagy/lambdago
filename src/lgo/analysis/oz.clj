@@ -95,11 +95,16 @@
         copd (cost-of-passing RAW)
         effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
-        effs-dat (effects raw)
+        ;;effects
+        raw-effs (effects raw)
         white? #(= "white" (:color %))
         black? #(= "black" (:color %))
-        black-effs-dat (filter black? effs-dat)
-        white-effs-dat (filter white? effs-dat)
+        black-effs-dat (filter black? raw-effs)
+        white-effs-dat (map
+                        (fn [d] (update d :effect (partial * -1)))
+                        (filter white? raw-effs))
+        effs-dat (concat black-effs-dat white-effs-dat)
+        ;;choices
         cs (choices raw)
         tcs (data-transform cs [:color :move]
                             [:choice :median :AI :average] :scoreMean)
@@ -134,6 +139,7 @@
                   (filter white? all-sm)
                   w
                   "White's all scoreMeans for variations")]
+     [:h2 "Effects"]
      [:vega-lite (oz-bars-per-move effs-dat "effect" w "Effects of moves")]
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move (effects-with-cost-of-passing  effs-dat copd) "effect" w "Effects of moves divided by cost of passing")])
@@ -147,9 +153,7 @@
                   "effect"
                   w
                   "Effects of Black's moves")]
-     [:vega-lite (oz-bars-per-move (deviations white-effs-dat) "deviation" w "Deviations (distances from the mean) of White's moves")]
-     [:vega-lite (oz-bars-per-move (deviations black-effs-dat) "deviation" w "Deviations of Black's moves")]
-     [:vega-lite
+    [:vega-lite
       (oz-bars-per-move (normalize-effects (filter white? effs-dat)) "cumsum" w
                              "White's cumulative moving average of effects")]
      [:vega-lite
@@ -161,7 +165,8 @@
                              "cumsum"
                               w
                              "Cumulative moving average of effects (composite)")]
-
+     [:vega-lite (oz-bars-per-move (deviations white-effs-dat) "deviation" w "Deviations (distances from the mean) of White's moves")]
+     [:vega-lite (oz-bars-per-move (deviations black-effs-dat) "deviation" w "Deviations of Black's moves")]
      [:div {:style {:display "flex" :flex-direction "row"}}
       [:vega-lite (oz-boxplot-summary effs-dat "effect" "Summary of effects")]
       (when-not (empty? copd) [:vega-lite (oz-boxplot-summary copd "cop" "Summary of cost of passings")])]

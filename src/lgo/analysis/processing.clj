@@ -32,12 +32,10 @@
 (defn effects
   "The score mean differences caused by the moves."
   [dat]
-  (map (fn [[{c1 :color m1 :mean}
-             {m2 :mean v2 :move}]]
-         (let [eff (if (= c1 "black") ; need to negate for White
-                     (- m2 m1)
-                     (- (- m2 m1)))]
-           {:color c1 :effect eff :move v2}))
+  (map (fn [[{c1 :color m1 :mean} {m2 :mean v2 :move}]]
+         {:color c1 ;the owner of the effect is the first color
+          :effect (- m2 m1)
+          :move v2})
        (partition 2 1 dat))) ; all pairs of the rows
 
 (defn effects-with-cost-of-passing
