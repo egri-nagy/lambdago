@@ -73,12 +73,13 @@
 
 (defn cost-of-passing
   [dat]
-  (let [tuples
-        (map vector
-             ((comp (partial map :color) :game) dat) ;color
-             ((comp (partial map :mean) :game) dat) ;mean
-             ((comp (partial map :mean) :passed) dat) ;hypothetical passed mean
-             ((comp (partial map :move) :game) dat))] ;move number
+  (let [game (:game dat)
+        passed (:passed dat)
+        tuples (map vector
+                    (map :color game) ;color
+                    (map :mean game) ;mean
+                    (map :mean passed) ;hypothetical passed mean
+                    (map :move game))] ;move number
     (map (fn [[c m pm move]]
            {:color c
             :cop (if (= "black" c)
