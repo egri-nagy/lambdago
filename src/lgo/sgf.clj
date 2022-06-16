@@ -110,21 +110,23 @@
   [flp ID]
   (second (first (extract-property flp ID))))
 
+(defn simplified-parse-tree
+  [sgfstring]
+  (let [pt (SGFparser(prepare-sgf sgfstring))]
+    (simplify pt)))
+
 (defn simplified-sgf-string
   "Parses an SGF string, simplifies and returns an SGF string without variations and
   non-essential properties."
   [sgfstring]
-  (let [pt (SGFparser(prepare-sgf sgfstring))
-        simplified (simplify pt)
-        sgfout (pt2sgf simplified)]
-    sgfout))
+  (pt2sgf (simplified-parse-tree sgf-string)))
 
 (defn game-data
   "Returns a hash-map containing game information extracted from
   the SGF string. Defaults: black player BLACK, white player WHITE, rule set japanese,
   komi 6.5."
   [sgfstring]
-  (let [flp (properties (simplify (SGFparser (prepare-sgf sgfstring))))]
+  (let [flp (properties (simplified-parse-tree sgfstring))]
     {:rules (or (extract-single-value flp "RU") "japanese")
      :black (or (extract-single-value flp "PB") "BLACK")
      :white (or (extract-single-value flp "PW") "WHITE")
