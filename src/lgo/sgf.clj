@@ -119,7 +119,7 @@
   "Parses an SGF string, simplifies and returns an SGF string without variations and
   non-essential properties."
   [sgfstring]
-  (pt2sgf (simplified-parse-tree sgf-string)))
+  (pt2sgf (simplified-parse-tree sgfstring)))
 
 (defn game-data
   "Returns a hash-map containing game information extracted from

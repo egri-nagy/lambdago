@@ -11,6 +11,7 @@
   "
   (:require [clojure.string :as string]
             [lgo.sgf :refer [properties
+                             simplified-parse-tree
                              extract-properties
                              extract-single-value]]
             [lgo.stats :refer [median
@@ -62,7 +63,7 @@
 
 (defn sgf-report
   [sgf]
-  (let [flp (properties sgf)
+  (let [flp (properties (simplified-parse-tree sgf))
         black (extract-single-value flp "PB")
         white (extract-single-value flp "PW")
         result (extract-single-value flp "RE")
