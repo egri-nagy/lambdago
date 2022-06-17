@@ -19,6 +19,7 @@
             [lgo.analysis.converters :refer [B<->W code->col]]
             [lgo.analysis.oz :refer [game-report]]))
 
+;;TODO revamp this data extraction from LZ property
 (defn extract-from-LZ
   "Simply extracts from LZ string s the values after the tag.
   If the tag has more values (like PV), this gets only the first,
@@ -62,6 +63,8 @@
     {:game (sort-by :move z)}))
 
 (defn sgf-report
+  "Parses an sgf string, creates a title, extracts the raw data
+  and calls game-report to create the visualization."
   [sgf]
   (let [flp (properties (simplified-parse-tree sgf))
         black (extract-single-value flp "PB")

@@ -25,33 +25,6 @@
             m (zipmap (range) "ABCDEFGHJKLMNOPQRST") ]
         (str (m  column) (- 19 row) ))))
 
-(defn legal-moves
-  "Returns all the available legal moves given the policy table
-  sorted by their value. Output is a collection of vectors of the form
-  [GTP-move policy-value]."
-  [policy]
-  (let [entries (sort-by
-                     second ;gets the policy entry
-                     >
-                     (filter
-                      (fn [[_ v]] (pos? v))
-                      (map-indexed vector policy)))]
-    (map (fn [p]
-           (update p 0 GTP-move))
-         entries)))
-
-(defn top-moves
-  [policy n]
-  (take n (legal-moves policy)))
-
-(defn non-legal-moves
-  "Returns the moves that are not allowed on the board."
-  [policy]
-  (map (comp GTP-move first)
-       (filter
-        (fn [[_ v]] (neg? v))
-        (map-indexed vector policy))))
-
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
   It takes the top N moves from policy Q, finds the corresponding policy
