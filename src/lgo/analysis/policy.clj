@@ -5,7 +5,7 @@
           [lgo.stats :refer [normalize
                              KL-divergence]]))
 
-;;policy comparison
+;; converting from GTP coordinates to KataGo's policy table ;;;;;;;;;;;;;;;;;;;;
 (defn policy-table-index
   "Converting a GTP? move to a policy table index."
   [move]
@@ -25,6 +25,7 @@
             m (zipmap (range) "ABCDEFGHJKLMNOPQRST") ]
         (str (m  column) (- 19 row) ))))
 
+;; policy comparison by KL-divergence ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn policy-comparison
   "Compares the earlier policy P with the later policy Q.
   It takes the top N moves from policy Q, finds the corresponding policy
