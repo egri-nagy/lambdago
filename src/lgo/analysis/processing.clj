@@ -104,7 +104,7 @@
                       triples)]
     (map (fn [[c v m] cop]
            {:color c
-            :cop (* 100 (/ v cop))
+            :efficiency (* 100 (/ v cop))
             :move m})
          realized
          (map :cop cops))))

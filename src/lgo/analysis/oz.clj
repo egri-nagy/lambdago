@@ -118,7 +118,7 @@
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")])
      (when-not (empty? copd)
-       [:vega-lite (oz-bars-per-move effcs "cop" w "Efficiency - how much percent of the score in cost of passing realized?")])
+       [:vega-lite (oz-bars-per-move effcs "efficiency" w "Efficiency - how much percent of the score in cost of passing realized?")])
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                                        :y {:field "winrate" :type "quantitative"}}
