@@ -12,6 +12,8 @@
 
 (declare scatterplot)
 
+(def sign-swap (partial * -1))
+
 ;;further processing functions - TODO: check whether they belong to processing
 (defn data-transform
   "Prepares a database for plotting in the same diagram. Fixed keys are copied,
@@ -95,7 +97,7 @@
               (fn [d m]
                 (if (= "black" (:color m))
                   (conj d m)
-                  (conj d (update m :cop (partial * -1)))))
+                  (conj d (update m :cop sign-swap))))
               []
               (cost-of-passing RAW))
         all-sm (unroll-scoremeans raw)
@@ -105,7 +107,7 @@
         black? #(= "black" (:color %))
         black-effs-dat (filter black? raw-effs)
         white-effs-dat (map
-                        (fn [d] (update d :effect (partial * -1)))
+                        (fn [d] (update d :effect sign-swap))
                         (filter white? raw-effs))
         effs-dat (concat black-effs-dat white-effs-dat)
         ;;choices
@@ -122,7 +124,7 @@
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")])
      (when-not (empty? copd)
-       [:vega-lite (oz-bars-per-move copd "efficiency" w "Efficiency - how much percent of the score in cost of passing realized?")])
+       [:vega-lite (oz-bars-per-move copd "efficiency" w "Efficiency - how much percent of the score in cost of passing realized? (tops at 151%)")])
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                                        :y {:field "winrate" :type "quantitative"}}
