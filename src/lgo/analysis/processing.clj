@@ -83,10 +83,10 @@
                     (map :move game))] ;move number
     (map (fn [[col mean passedmean nextmean move]]
            (let [cop (- mean passedmean)
-                 achievement (- nextmean passedmean)] ;effect?
+                 effect (- nextmean passedmean)] ;recalculating effect here
              {:color col
               :cop cop
-              :efficiency (* 100 (/ achievement cop))
+              :efficiency (min (* 100 (/ effect cop)) 151)
               :move move}))
          tuples)))
 

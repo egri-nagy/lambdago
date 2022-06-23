@@ -91,7 +91,13 @@
   [RAW title]
   (let [raw (:game RAW) ;; the game entries
         ;passed (:passed RAW) ;; entries for the artificially passed game
-        copd (cost-of-passing RAW)
+        copd (reduce
+              (fn [d m]
+                (if (= "black" (:color m))
+                  (conj d m)
+                  (conj d (update m :cop (partial * -1)))))
+              []
+              (cost-of-passing RAW))
         all-sm (unroll-scoremeans raw)
         ;;effects
         raw-effs (effects raw)

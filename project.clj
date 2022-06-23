@@ -16,7 +16,7 @@
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "1.2.3"]
+            [jonase/eastwood "1.2.4"]
             [fourtytoo/record-deps "0.3.3-SNAPSHOT"]]
   :main lgo.core
   :target-path "target/%s"
