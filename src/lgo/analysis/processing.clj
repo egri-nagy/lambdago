@@ -79,32 +79,14 @@
                     (map :color game) ;color
                     (map :mean game) ;mean
                     (map :mean passed) ;hypothetical passed mean
+                    (map :mean (rest game)) ;skipping first to get next mean
                     (map :move game))] ;move number
-    (map (fn [[col mean passedmean move]]
-           {:color col
-            :cop (if (= "black" col)
-              (- mean passedmean)
-              (- passedmean mean))
-            :move move})
+    (map (fn [[col mean passedmean nextmean move]]
+           (let [cop (- mean passedmean)
+                 achievement (- nextmean passedmean)] ;effect?
+             {:color col
+              :cop cop
+              :efficiency (* 100 (/ achievement cop))
+              :move move}))
          tuples)))
 
-(defn efficiency
-  [dat cops]
-  (let [triples (map vector
-                     ((comp (partial map :color) :game) dat)
-                     ((partial map :mean)  (rest (:game dat))) ;next mean
-                     ((comp (partial map :mean) :passed) dat)
-                     ((partial map :move)  (rest (:game dat))))
-        realized (map (fn [[col nextmean pm move]] ; is this the effect?
-                        [col
-                         (if (= "black" col)
-                                (- nextmean pm)
-                                (- pm nextmean))
-                         move])
-                      triples)]
-    (map (fn [[col v m] cop]
-           {:color col
-            :efficiency (* 100 (/ v cop))
-            :move m})
-         realized
-         (map :cop cops))))

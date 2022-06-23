@@ -8,8 +8,7 @@
                                              effects-with-cost-of-passing
                                              choices
                                              deviations
-                                             cost-of-passing
-                                             efficiency]]))
+                                             cost-of-passing]]))
 
 (declare scatterplot)
 
@@ -93,7 +92,6 @@
   (let [raw (:game RAW) ;; the game entries
         ;passed (:passed RAW) ;; entries for the artificially passed game
         copd (cost-of-passing RAW)
-        effcs (efficiency RAW copd)
         all-sm (unroll-scoremeans raw)
         ;;effects
         raw-effs (effects raw)
@@ -118,7 +116,7 @@
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")])
      (when-not (empty? copd)
-       [:vega-lite (oz-bars-per-move effcs "efficiency" w "Efficiency - how much percent of the score in cost of passing realized?")])
+       [:vega-lite (oz-bars-per-move copd "efficiency" w "Efficiency - how much percent of the score in cost of passing realized?")])
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                                        :y {:field "winrate" :type "quantitative"}}
