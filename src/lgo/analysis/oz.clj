@@ -5,7 +5,6 @@
             [lgo.stats :refer [cmas]]
             [lgo.analysis.processing :refer [unroll-scoremeans
                                              effects
-                                             effects-with-cost-of-passing
                                              choices
                                              deviations
                                              cost-of-passing]]))
@@ -124,7 +123,9 @@
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")])
      (when-not (empty? copd)
-       [:vega-lite (oz-bars-per-move copd "efficiency" w "Efficiency - how much percent of the score in cost of passing realized? (tops at 151%)")])
+       [:vega-lite (oz-bars-per-move
+                    (map #(update % :move inc) copd) ;quick hack as it is off by one
+                    "efficiency" w "Efficiency - how much percent of the score in cost of passing realized? (tops at 151%)")])
      [:vega-lite {:data {:values raw}
                   :vconcat[{:encoding {:x {:field "move" :type "quantitative"}
                                        :y {:field "winrate" :type "quantitative"}}
@@ -148,7 +149,8 @@
      [:h2 "Effects"]
      [:vega-lite (oz-bars-per-move effs-dat "effect" w "Effects of moves")]
      (when-not (empty? copd)
-       [:vega-lite (oz-bars-per-move (effects-with-cost-of-passing  effs-dat copd) "effect" w "Effects of moves divided by cost of passing")])
+       
+       )
      [:vega-lite (oz-bars-per-move
                   white-effs-dat
                   "effect"

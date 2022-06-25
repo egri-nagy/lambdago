@@ -51,15 +51,6 @@
 
 ;; working with effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn effects-with-cost-of-passing
-  ""
-  [effs cops]
-  (map (fn [{c :color m :move e :effect }
-            {cop :cop}]
-         {:color c :effect (/ e cop) :move m})
-       effs
-       cops))
-
 (defn deviations
   "Calculating the deviations of the effects from the average.
   This assumes that data is for the same color."
@@ -83,10 +74,10 @@
                     (map :move game))] ;move number
     (map (fn [[col mean passedmean nextmean move]]
            (let [cop (- mean passedmean)
-                 effect (- nextmean passedmean)] ;recalculating effect here
+                 achievement (- nextmean passedmean)]
              {:color col
               :cop cop
-              :efficiency (min (* 100 (/ effect cop)) 151)
+              :efficiency (min (* 100 (/ achievement cop)) 151)
               :move move}))
          tuples)))
 
