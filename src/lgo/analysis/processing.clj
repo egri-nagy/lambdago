@@ -81,3 +81,11 @@
               :move move}))
          tuples)))
 
+(defn effect-vs-cop
+  [effd copd]
+  (map
+   (fn [{effcol :color effect :effect move :move}
+        {copcol :color cop :cop}]
+     (when (= effcol copcol)
+       {:col effcol :effect effect :cop cop}))
+   effd copd))
