@@ -121,7 +121,11 @@
      [:h1 title]
      [:p "Move numbers for score means indicate how many moves made before."]
      (when-not (empty? copd)
-       (let [d (effect-vs-cop raw-effs copd)]
+       (let [d (map
+                (fn [m] (if (= (:col m) "white")
+                          (update m :effect sign-swap)
+                          m))
+                (effect-vs-cop raw-effs copd))]
          [:vega-lite
           ;(scatterplot (map :effect d) "effect" (map :cop d) "cop")
           {:data {:values d}
@@ -131,6 +135,7 @@
                       }
            :mark ;"point"
            {:type "point" :point true :tooltip {:content "data"}}
+           :width w
          }
           ]))
      (when-not (empty? copd)

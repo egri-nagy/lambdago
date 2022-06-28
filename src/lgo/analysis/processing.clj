@@ -87,5 +87,5 @@
    (fn [{effcol :color effect :effect move :move}
         {copcol :color cop :cop}]
      (when (= effcol copcol)
-       {:col effcol :effect effect :cop cop}))
+       {:col effcol :effect effect :cop cop :move move}))
    effd copd))
