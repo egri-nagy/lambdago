@@ -144,6 +144,23 @@
              })
           ]))
      (when-not (empty? copd)
+       [:vega-lite
+                                        ;(scatterplot (map :effect d) "effect" (map :cop d) "cop")
+        (let [l (map :cop copd)
+              a (apply min l)
+              b (apply max l)] 
+          {:data {:values copd}
+           :encoding {:x {:field "cop" :type "quantitative" :scale {:domain [a b]} }
+                      :y {:field "efficiency" :type "quantitative"}
+                      :color {:field "color" :type "nominal"}
+                      :fill color-coded-fill :stroke gray-strokes
+                      }
+           :mark ;"point"
+           {:type "point" :point true :tooltip {:content "data"}}
+           :width w :height h :title "Cost of passing versus efficiency (more info in tooltips)"
+           })
+        ])
+     (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move copd "cop" w "Cost of passing")])
      (when-not (empty? copd)
        [:vega-lite (oz-bars-per-move
