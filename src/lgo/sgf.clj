@@ -135,7 +135,7 @@
              (if komi
                (read-string komi)
                6.5))
-     :size (read-string (extract-single-value flp "SZ"))
+     :size (read-string (or (extract-single-value flp "SZ") "19"))
      :moves (extract-properties flp #(or (= % "B") (= % "W")))}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
