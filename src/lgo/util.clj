@@ -28,6 +28,6 @@
   no exptension separated by a dot."
   [filename]
   (let [parts (split filename #"\.")]
-    (if (> (count parts) 2)
+    (if (>= (count parts) 2)
       (join "." (butlast parts))
       filename)))
