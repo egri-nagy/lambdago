@@ -24,11 +24,31 @@ java -jar lambdago-YYYY.MM.DD-standalone.jar <command> <arguments>
 ## Commands
 
 ### AI analysis visualization of Lizzie output
-After a complete analysis is done, Lizzie can save the analysis information into the SGF file, then
+After a complete analysis is done, [Lizzie](https://github.com/featurecat/lizzie) can save the analysis information into the SGF file, then
 ```
 lizzie <sgf_file>
 ```
-LambdaGo command will parse that SGF file (for now, no variations allowed), then show the analysis diagrams in a newly opened browser window.
+LambdaGo command will parse that SGF file, then show the analysis diagrams in a newly opened browser window.
+
+### AI analysis for KataGo
+
+[KataGo](https://katagotraining.org/) has an [analysis engine](https://github.com/lightvector/KataGo/blob/master/docs/Analysis_Engine.md)
+
+```
+katago-input <sgf-file> <visits> <passed-visits>
+```
+This will produce an input for the KataGo analysis engine. The number of visits spent on each move need to be specified. The `passed-visits` is optional, if given the number of moves to be analyzed doubles, but the *cost of passing* values will be available.
+
+To visualize the analysis:
+```
+katago <analysis-output-file>
+```
+Alternatively, a single html file can be generated instead of showing it in a browser window.
+
+```
+katago-export <analysis>
+```
+In order to get this working, [Vega and Vega Lite](https://vega.github.io/) need to be installed, that can be done by `npm install -g vega vega-lite vega-cli`.
 
 ### The GTP mode
 To start LambdaGo in [GTP](http://www.lysator.liu.se/~gunnar/gtp/) mode:

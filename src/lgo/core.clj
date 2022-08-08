@@ -43,7 +43,7 @@
                            :mode :vega))
       "katago-export"
       (do
-        (if (= numargs 2) 
+        (if (= numargs 2)
           (let [filename (second args)]
             (oz/export! (game-report (katago-output filename)
                                      filename)
