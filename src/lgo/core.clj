@@ -5,6 +5,7 @@
             [lgo.analysis.katago :refer [katago-output process-sgf]]
             [lgo.analysis.oz :refer [game-report]]
             [lgo.sgf :refer [simplified-sgf-string]]
+            [lgo.util :refer [filename-without-extension]]
             [oz.core :as oz]
             [trptcolin.versioneer.core :as version]))
 
@@ -40,7 +41,17 @@
                  (oz/view! (game-report (katago-output (second args))
                                         (second args))
                            :mode :vega))
-      ;; for executing clojure code as a script
+      "katago-export"
+      (do
+        (if (= numargs 2) 
+          (let [filename (second args)]
+            (oz/export! (game-report (katago-output filename)
+                                     filename)
+                        (str
+                         (filename-without-extension filename)
+                         ".html"))))
+        (println "Usage: katago-export analysis-output-file"))
+     ;; for executing clojure code as a script
       "script" (load-file (second args))
       nil (println "Available commands: gtp lizzie katago katago-input script"))
     (shutdown-agents)))
