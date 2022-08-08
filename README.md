@@ -46,7 +46,7 @@ katago <analysis-output-file>
 Alternatively, a single html file can be generated instead of showing it in a browser window.
 
 ```
-katago-export <analysis>
+katago-export <analysis-output-file>
 ```
 In order to get this working, [Vega and Vega Lite](https://vega.github.io/) need to be installed, that can be done by `npm install -g vega vega-lite vega-cli`.
 
