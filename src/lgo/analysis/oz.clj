@@ -2,6 +2,7 @@
   "Functions for visualization of  the output of a KataGo analysis, either
   through Lizzie or by the KataGo Analysis Engine directly."
   (:require [trptcolin.versioneer.core :as version]
+            [meander.epsilon :refer [match]]
             [lgo.stats :refer [cmas]]
             [lgo.analysis.processing :refer [unroll-scoremeans
                                              effects
@@ -16,6 +17,22 @@
 
 ;;further processing functions - TODO: check whether they belong to processing
 (defn data-transform
+  "Declarative version of data-transform2."
+  [db]
+  (mapcat
+   (fn [m]
+     (match m
+            ; this is the input, the properties have their own keys
+            {:color ?color :move ?move
+             :choice ?choice :average ?average :median ?median :AI ?AI}
+            ; the output: each property is separated into a map
+            [{:color ?color :move ?move :name "choice" :scoreMean ?choice}
+             {:color ?color :move ?move :name "average" :scoreMean ?average}
+             {:color ?color :move ?move :name "median" :scoreMean ?median}
+             {:color ?color :move ?move :name "AI" :scoreMean ?AI}]))
+   db))
+
+(defn data-transform2
   "Prepares a database for plotting in the same diagram. Fixed keys are copied,
   then the variable ones are added as 'name' and its value under kw."
   [db fixedkeys varkeys kw]
@@ -112,8 +129,7 @@
         effs-dat (concat black-effs-dat white-effs-dat)
         ;;choices
         cs (choices raw)
-        tcs (data-transform cs [:color :move]
-                            [:choice :median :AI :average] :scoreMean)
+        tcs (data-transform2 cs [:color :move] [:choice :median :AI :average] :scoreMean)
         N (count effs-dat)
         w (int (* 5.4 N))
         h (int (* 2 N))]
