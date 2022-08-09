@@ -33,8 +33,9 @@
    db))
 
 (defn data-transform2
-  "Prepares a database for plotting in the same diagram. Fixed keys are copied,
-  then the variable ones are added as 'name' and its value under kw."
+  "Prepares a database of different mean values for plotting in the same diagram.
+  Fixed keys are copied, then the variable ones are added as 'name' and its
+  value under kw."
   [db fixedkeys varkeys kw]
   (mapcat
    (fn [row]
