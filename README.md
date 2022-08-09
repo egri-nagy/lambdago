@@ -29,6 +29,10 @@ After a complete analysis is done, [Lizzie](https://github.com/featurecat/lizzie
 lizzie <sgf_file>
 ```
 LambdaGo command will parse that SGF file, then show the analysis diagrams in a newly opened browser window.
+```
+lizzie-export <sgf_file>
+```
+Exporting creates a standalone html file instead opening the diagrams in the browser.
 
 ### AI analysis for KataGo
 
