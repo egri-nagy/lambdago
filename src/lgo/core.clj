@@ -27,6 +27,14 @@
                    (oz/start-server!)
                    (oz/view! (sgf-report (slurp (second args))) :mode :vega))
                  (println "Usage: lizzie sgf-file"))
+      "lizzie-export" (if (= numargs 2)
+                 (let [filename (second args)]
+
+                   (oz/export! (sgf-report (slurp filename))
+                               (str
+                                (filename-without-extension filename)
+                                ".html")))
+                 (println "Usage: lizzie sgf-file"))
       "katago-input" (if (>= numargs 3)
                        (let [sgf_file (second args)
                              max-visits (read-string (nth args 2))]
@@ -36,11 +44,13 @@
                        (println "Usage: katago-input"
                                 "sgf-file maxvisits [passed-maxvisits]"))
       ;; for analyzing katago output
-      "katago" (do
-                 (oz/start-server!)
-                 (oz/view! (game-report (katago-output (second args))
-                                        (second args))
-                           :mode :vega))
+      "katago" (if (= numargs 2)
+                 (do
+                   (oz/start-server!)
+                   (oz/view! (game-report (katago-output (second args))
+                                          (second args))
+                             :mode :vega))
+                 (println "Usage: katago-export analysis-output-file"))
       "katago-export"
       (do
         (if (= numargs 2)
@@ -53,5 +63,5 @@
         (println "Usage: katago-export analysis-output-file"))
      ;; for executing clojure code as a script
       "script" (load-file (second args))
-      nil (println "Available commands: gtp lizzie katago katago-input script"))
+      nil (println "Available commands: verson gtp simplify-sgf lizzie lizzie-export katago-input katago katago-export script"))
     (shutdown-agents)))
