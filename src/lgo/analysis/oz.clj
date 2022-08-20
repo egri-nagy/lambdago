@@ -139,6 +139,12 @@
      [:h1 title]
      [:p "Move numbers for score means indicate how many moves made before."]
      (when-not (empty? copd)
+       (let [s (apply + (map :cop copd))
+             m (count copd)]
+         [:p
+          (format  "Total cop: %.2f" (double s)) " for " m  " moves. "
+          (format "Average: %.2f"  (double (/ s m)))]))
+     (when-not (empty? copd)
        (let [d (map
                 (fn [m] (if (= (:color m) "white")
                           (update m :effect sign-swap)
