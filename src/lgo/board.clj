@@ -7,6 +7,8 @@
   Liberties for chains are stored separately, as the set of liberties may change
   even if the chain remains the same.
   For quick access we also have a lookup table from points to chains.
+   
+  A point is simply a vector, a pair of positive integers in the order of column, row.
 
   The evolution of the board is traced by creating newer versions of the
   immutable data structure representing the board. Several of the functions
