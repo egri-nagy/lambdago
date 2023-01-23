@@ -78,13 +78,15 @@
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
   2. registering it in the lookup
-  Associating the set of liberties with the chain should be done later." ;TODO why not computing liberties?
+  3. associating the set of liberties with the chain."
   [board chain]
   (-> board
       ;;adding it to the vector of chains
       (update :chains #(conj % chain))
       ;;updating the reverse lookup
-      (register-chain chain)))
+      (register-chain chain)
+      ;;recomputing liberties
+      (update-liberties chain)))
 
 (defn remove-chain
   "The opposite of add-chain, same order of steps, also removing liberties."
@@ -136,9 +138,7 @@
    friendly_chains
    connector] ; the newly created single-stone chain
   (if (empty? friendly_chains)
-    (-> board
-        (add-chain connector) ;;nothing to merge, just add the connector chain
-        (update-liberties connector))
+    (add-chain  board connector) ;;nothing to merge, just add the connector chain
     (let [chain_indices (map (partial index chains) friendly_chains)
           upd_chain (reduce
                      (fn [ch1 ch2]
