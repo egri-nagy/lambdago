@@ -74,12 +74,6 @@
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
 
-(defn update-liberties-by-point
-  "Updates the liberties of a chain specified by one of its points.
-  Just to automate lookup in threading macros."
-  [board point]
-  (update-liberties board ((:lookup board) point)))
-
 (defn add-chain
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
