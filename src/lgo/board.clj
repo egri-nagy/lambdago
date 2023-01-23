@@ -58,9 +58,9 @@
 
 (defn compute-liberties
   "Computes liberties of a chain. This is a fresh calculation (not incremental).
-  The algorithm works by removing the occupied from its envelope.
-  The occupied points must be enemy stones, otherwise they would belong to the
-  chain."
+  The algorithm works by removing the occupied points from its envelope.
+  Note that these occupied points must be enemy stones, otherwise they would
+  belong to the chain."
   [{width :width height :height lookup :lookup} ;; board
    chain]
   (let [e (envelope (:stones chain) width height)]
@@ -84,7 +84,7 @@
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
   2. registering it in the lookup
-  Associating the set of liberties with the chain should be done later."
+  Associating the set of liberties with the chain should be done later." ;TODO why not computing liberties?
   [board chain]
   (-> board
       ;;adding it to the vector of chains
@@ -142,7 +142,7 @@
    friendly_chains
    connector] ; the newly created single-stone chain
   (if (empty? friendly_chains)
-    (add-chain board connector) ;;nothing to merge, just add the connector chain
+    (update-liberties (add-chain board connector) connector) ;;nothing to merge, just add the connector chain
     (let [chain_indices (map (partial index chains) friendly_chains)
           chain_index (first chain_indices)
           the_chain (first friendly_chains) ; merged into the oldest chain
@@ -191,8 +191,7 @@
                             (capture-chains captured)
                             (remove-liberty affected point)
                             (merge-chains friendly_chains
-                                          (single-stone-chain color point))
-                            (update-liberties-by-point point))]
+                                          (single-stone-chain color point)))]
       ;;if the new has no liberties, then it's a self-capture
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
         (remove-chain updated_board ((:lookup updated_board) point))

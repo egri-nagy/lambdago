@@ -17,7 +17,8 @@
             (when-not (= height row) [column (inc row)])]))
 
 (defn points
-  "Returns all the points of the board of the given dimensions."
+  "Returns all the points of the board of the given dimensions (in no
+   particular order)."
   [width height]
   (for [row (range 1 (inc height))
         col (range 1 (inc width))]
