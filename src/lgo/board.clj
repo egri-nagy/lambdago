@@ -142,25 +142,24 @@
    friendly_chains
    connector] ; the newly created single-stone chain
   (if (empty? friendly_chains)
-    (update-liberties (add-chain board connector) connector) ;;nothing to merge, just add the connector chain
+    (-> board
+        (add-chain connector) ;;nothing to merge, just add the connector chain
+        (update-liberties connector))
     (let [chain_indices (map (partial index chains) friendly_chains)
-          chain_index (first chain_indices)
-          the_chain (first friendly_chains) ; merged into the oldest chain
           upd_chain (reduce
                      (fn [ch1 ch2]
                        {:color (:color ch1)
                         :stones (into (:stones ch1) (:stones ch2))})
-                     the_chain
+                     (first friendly_chains) ; merge into the oldest chain
                      (concat (rest friendly_chains) [connector]))]
-
       (-> board
           ;; updating the oldest chain
-          (update-in [:chains  chain_index]
+          (update-in [:chains  (first chain_indices)]
                      (constantly upd_chain))
           ;;removing all the merged ones
           (update :chains
                   (fn [chains] (vec-rm-all chains (rest chain_indices))))
-          (register-chain upd_chain) ;; the merged stones have wrong lookup
+          (register-chain upd_chain) ;; the merged stones have wrong lookup values
           (update-liberties upd_chain)))))
 
 (defn put-stone
