@@ -3,11 +3,12 @@
   (:require [lgo.gtp :refer [gtp-loop]]
             [lgo.analysis.lizzie :refer [sgf-report]]
             [lgo.analysis.katago :refer [katago-output process-sgf]]
-            [lgo.analysis.oz :refer [game-report]]
+            [lgo.analysis.oz :refer [game-report cop-fingerprints]]
             [lgo.sgf :refer [simplified-sgf-string]]
             [lgo.util :refer [filename-without-extension]]
             [oz.core :as oz]
-            [trptcolin.versioneer.core :as version]))
+            [trptcolin.versioneer.core :as version]
+            [clojure.java.io :as jio]))
 
 (defn -main
   "The first argument is a command."
@@ -28,13 +29,13 @@
                    (oz/view! (sgf-report (slurp (second args))) :mode :vega))
                  (println "Usage: lizzie sgf-file"))
       "lizzie-export" (if (= numargs 2)
-                 (let [filename (second args)]
+                        (let [filename (second args)]
 
-                   (oz/export! (sgf-report (slurp filename))
-                               (str
-                                (filename-without-extension filename)
-                                ".html")))
-                 (println "Usage: lizzie sgf-file"))
+                          (oz/export! (sgf-report (slurp filename))
+                                      (str
+                                       (filename-without-extension filename)
+                                       ".html")))
+                        (println "Usage: lizzie sgf-file"))
       "katago-input" (if (>= numargs 3)
                        (let [sgf_file (second args)
                              max-visits (read-string (nth args 2))]
@@ -50,7 +51,19 @@
                    (oz/view! (game-report (katago-output (second args))
                                           (second args))
                              :mode :vega))
-                 (println "Usage: katago-export analysis-output-file"))
+                 (println "Usage: katago analysis-output-file"))
+      "cops" (if (>= numargs 2)
+               (let [raws (into {} (map
+                                    (fn [filename]
+                                      [(filename-without-extension
+                                        (.getName (clojure.java.io/file filename)))
+                                       (katago-output filename)])
+                                    (rest args)))]
+                 (do
+                   (oz/start-server!)
+                   (oz/view! (cop-fingerprints raws)
+                             :mode :vega)))
+               (println "Usage: cops analysis-output-file"))
       "katago-export"
       (do
         (if (= numargs 2)

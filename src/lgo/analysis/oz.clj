@@ -228,6 +228,30 @@
       (when-not (empty? copd) [:vega-lite (oz-boxplot-summary copd "cop" "Summary of cost of passings")])]
      ]))
 
+(defn cop-fingerprints
+  [RAWs] 
+  [:div
+   [:p "LambdaGo v" (version/get-version "lambdago" "lambdago")]
+   [:h1 "Cost of passing fingerprints"] 
+   (for [[name RAW] RAWs]
+     (let [copd (reduce
+                 (fn [d m]
+                   (if (= "black" (:color m))
+                     (conj d m)
+                     (conj d (update m :cop sign-swap))))
+                 []
+                 (cost-of-passing RAW))
+           s (apply + (map :cop copd))
+           m (count copd)] 
+       [:vega-lite
+        (oz-bars-per-move copd "cop" (* 5 (count copd))
+                          (str
+                           name ", "
+                           "cost of passing, "
+                           (format  "total: %.2f" (double s))
+                           " for " m  " moves,"
+                           (format "average: %.2f"  (double (/ s m)))))]))])
+
 ;; general plotting functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn scatterplot
   [xs xlabel ys ylabel]
