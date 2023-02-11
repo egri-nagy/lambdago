@@ -66,28 +66,33 @@
   "Generic bar graph for displaying a quantity for each move."
   [dat field width title]
   {:data {:values dat}
-   :encoding {:x {:field "move" :type "ordinal" :axis {:values (range 10 1001 10)}}
-              :y {:field field :type "quantitative"}
+   :encoding {:x {:field "move" :type "ordinal" :axis {:labelFontSize 16
+                                                       :titleFontSize 16
+                                                       :titleFontWeight "normal"
+                                                       :values (range 10 1001 10)}}
+              :y {:field field :type "quantitative"
+                  :axis {:labelFontSize 16 :titleFontSize 16 :titleFontWeight "normal"}}
               :fill color-coded-fill
               :stroke black-strokes
               :tooltip [{:field "move" :type "ordinal"}
                         {:field field :type "quantitative"}]}
    :mark "bar"
    :width width
-   :title title})
+   :height 120
+   :title {:text title :fontSize 16 :fontWeight "normal"}})
 
 (defn oz-boxplot-summary
   "Generic boxplot for a quantity separately for both players."
   [dat field title]
   {:data {:values dat}
-   :title title
+   :title {:text title :fontSize 16 :fontWeight "normal"}
    :encoding {:x {:field "color" :type "nominal"}
               :y {:field field :type "quantitative"}
               :fill color-coded-fill
               :stroke gray-strokes}
    :mark {:type "boxplot" :extent "min-max"}})
 
-;;the functions below remain to be specifi - maybe that is ok
+;;the functions below remain to be specific - maybe that is ok
 (defn oz-all-scoremeans
   [d w t]
   {:data {:values d}
@@ -244,10 +249,9 @@
            s (apply + (map :cop copd))
            m (count copd)] 
        [:vega-lite
-        (oz-bars-per-move copd "cop" (* 5 (count copd))
+        (oz-bars-per-move copd "cop" (* 4.5 (count copd))
                           (str
                            name ", "
-                           "cost of passing, "
                            (format  "total: %.2f" (double s))
                            " for " m  " moves,"
                            (format "average: %.2f"  (double (/ s m)))))]))])

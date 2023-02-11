@@ -64,6 +64,17 @@
                    (oz/view! (cop-fingerprints raws)
                              :mode :vega)))
                (println "Usage: cops analysis-output-file"))
+        "cops-export" (if (>= numargs 2)
+                 (let [raws (into {} (map
+                                      (fn [filename]
+                                        [(filename-without-extension
+                                          (.getName (clojure.java.io/file filename)))
+                                         (katago-output filename)])
+                                      (rest args)))]
+                   (do 
+                     (oz/export! (cop-fingerprints raws)
+                                 "cop-fingerprints.html")))
+                 (println "Usage: cops analysis-output-file"))
       "katago-export"
       (do
         (if (= numargs 2)
