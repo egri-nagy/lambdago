@@ -12,12 +12,14 @@
                  [metasoarous/oz "2.0.0-alpha5"]
                  [org.clojure/data.json "2.4.0"]
                  [trptcolin/versioneer "0.2.0"]
-                 [meander/epsilon "0.0.650"]]
+                 [meander/epsilon "0.0.650"]
+                 [io.github.nextjournal/clerk "0.13.842"]
+                 [aerial.hanami "0.15.1"]]
   :plugins [[lein-cloverage "1.2.4"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
-            [jonase/eastwood "1.3.0"]
+            [jonase/eastwood "1.4.0"]
             [fourtytoo/record-deps "0.3.3-SNAPSHOT"]]
   :main lgo.core
   :target-path "target/%s"
