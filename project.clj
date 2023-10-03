@@ -6,6 +6,7 @@
             :year 2022
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.11.1"]
+                 [org.clojure/tools.reader "1.3.6"] ;why? who needs this?
                  [com.bhauman/rebel-readline "0.1.4"]
                  [instaparse "1.4.12"]
                  [org.clojure/math.numeric-tower "0.0.5"]
@@ -18,7 +19,8 @@
             [lein-ancient "0.7.0"]
             [lein-bikeshed "0.5.2"]
             [jonase/eastwood "1.4.0"]
-            [fourtytoo/record-deps "0.3.3-SNAPSHOT"]]
+            [fourtytoo/record-deps "0.3.3-SNAPSHOT"]
+            [cider/cider-nrepl "0.38.1"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
