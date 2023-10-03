@@ -6,7 +6,7 @@
             [lgo.analysis.oz :refer [game-report cop-fingerprints]]
             [lgo.sgf :refer [simplified-sgf-string]]
             [lgo.util :refer [filename-without-extension]]
-            [oz.core :as oz]
+            
             [trptcolin.versioneer.core :as version]
             [clojure.java.io :as jio]))
 
@@ -25,16 +25,18 @@
                        (println "Usage: simplify-sgf sgf-file"))
       "lizzie" (if (= numargs 2)
                  (do
-                   (oz/start-server!)
-                   (oz/view! (sgf-report (slurp (second args))) :mode :vega))
+                   ;(oz/start-server!)
+                   ;(oz/view! (sgf-report (slurp (second args))) :mode :vega))
+                 )
                  (println "Usage: lizzie sgf-file"))
       "lizzie-export" (if (= numargs 2)
                         (let [filename (second args)]
 
-                          (oz/export! (sgf-report (slurp filename))
-                                      (str
-                                       (filename-without-extension filename)
-                                       ".html")))
+                          ;; (oz/export! (sgf-report (slurp filename))
+                          ;;             (str
+                          ;;              (filename-without-extension filename)
+                          ;;              ".html")))
+                        )
                         (println "Usage: lizzie sgf-file"))
       "katago-input" (if (>= numargs 3)
                        (let [sgf_file (second args)
@@ -47,10 +49,11 @@
       ;; for analyzing katago output
       "katago" (if (= numargs 2)
                  (do
-                   (oz/start-server!)
-                   (oz/view! (game-report (katago-output (second args))
-                                          (second args))
-                             :mode :vega))
+                  ;;  (oz/start-server!)
+                  ;;  (oz/view! (game-report (katago-output (second args))
+                  ;;                         (second args))
+                  ;;            :mode :vega))
+                 )
                  (println "Usage: katago analysis-output-file"))
       "cops" (if (>= numargs 2)
                (let [raws (into {} (map
@@ -60,9 +63,10 @@
                                        (katago-output filename)])
                                     (rest args)))]
                  (do
-                   (oz/start-server!)
-                   (oz/view! (cop-fingerprints raws)
-                             :mode :vega)))
+                  ;;  (oz/start-server!)
+                  ;;  (oz/view! (cop-fingerprints raws)
+                  ;;            :mode :vega)))
+                 ))
                (println "Usage: cops analysis-output-file"))
         "cops-export" (if (>= numargs 2)
                  (let [raws (into {} (map
@@ -72,20 +76,22 @@
                                          (katago-output filename)])
                                       (rest args)))]
                    (do 
-                     (oz/export! (cop-fingerprints raws)
-                                 "cop-fingerprints.html")))
+                    ;;  (oz/export! (cop-fingerprints raws)
+                    ;;              "cop-fingerprints.html")))
+                   ))
                  (println "Usage: cops analysis-output-file"))
       "katago-export"
       (do
         (if (= numargs 2)
-          (let [filename (second args)]
-            (oz/export! (game-report (katago-output filename)
-                                     filename)
-                        (str
-                         (filename-without-extension filename)
-                         ".html"))))
-        (println "Usage: katago-export analysis-output-file"))
+          (let [filename (second args)]  
+            ;; (oz/export! (game-report (katago-output filename)
+            ;;                          filename)
+            ;;             (str
+            ;;              (filename-without-extension filename)
+            ;;              ".html"))))
+            
+            (println "Usage: katago-export analysis-output-file"))))
      ;; for executing clojure code as a script
       "script" (load-file (second args))
-      nil (println "Available commands: verson gtp simplify-sgf lizzie lizzie-export katago-input katago katago-export script"))
-    (shutdown-agents)))
+      nil (println "Available commands: verson gtp simplify-sgf lizzie lizzie-export katago-input katago katago-export script")))
+    (shutdown-agents))
