@@ -13,7 +13,7 @@
                  [org.clojure/data.json "2.4.0"]
                  [trptcolin/versioneer "0.2.0"]
                  [meander/epsilon "0.0.650"]
-                 [io.github.nextjournal/clerk "0.15.957"]]
+                 [org.scicloj/clay "2-alpha38"]]
   :plugins [[lein-cloverage "1.2.4"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]

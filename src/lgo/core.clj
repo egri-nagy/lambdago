@@ -6,7 +6,6 @@
             [lgo.analysis.oz :refer [game-report cop-fingerprints]]
             [lgo.sgf :refer [simplified-sgf-string]]
             [lgo.util :refer [filename-without-extension]]
-            [nextjournal.clerk :as clerk]
             [trptcolin.versioneer.core :as version]
             [clojure.java.io :as jio]))
 
