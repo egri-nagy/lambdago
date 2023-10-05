@@ -3,7 +3,7 @@
   (:require [lgo.gtp :refer [gtp-loop]]
             [lgo.analysis.lizzie :refer [sgf-report]]
             [lgo.analysis.katago :refer [katago-output process-sgf]]
-            [lgo.analysis.oz :refer [game-report cop-fingerprints]]
+            [lgo.analysis.clay :refer [game-report]]
             [lgo.sgf :refer [simplified-sgf-string]]
             [lgo.util :refer [filename-without-extension]]
             [trptcolin.versioneer.core :as version]
@@ -46,13 +46,8 @@
                        (println "Usage: katago-input"
                                 "sgf-file maxvisits [passed-maxvisits]"))
       ;; for analyzing katago output
-      "katago" (if (= numargs 2)
-                 (do
-                  ;;  (oz/start-server!)
-                  ;;  (oz/view! (game-report (katago-output (second args))
-                  ;;                         (second args))
-                  ;;            :mode :vega))
-                 )
+      "katago" (if (= numargs 2) 
+                 (game-report (katago-output (second args)) (second args)) 
                  (println "Usage: katago analysis-output-file"))
       "cops" (if (>= numargs 2)
                (let [raws (into {} (map

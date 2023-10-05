@@ -3,13 +3,13 @@
   through Lizzie or by the KataGo Analysis Engine directly."
   (:require [trptcolin.versioneer.core :as version]
             [meander.epsilon :refer [match]]
-            [lgo.stats :refer [cmas]]
             [lgo.analysis.processing :refer [unroll-scoremeans
                                              effects
                                              choices
                                              deviations
                                              cost-of-passing
-                                             effect-vs-cop]]))
+                                             effect-vs-cop
+                                             normalize-effects]]))
 
 (declare scatterplot)
 
@@ -44,13 +44,7 @@
             varkeys)))
    db))
 
-(defn normalize-effects
-  "assuming that it is from one player"
-  [e-d]
-  (let [avgs (cmas (map :effect e-d))]
-    (map (fn [d v]
-           (conj d [:cumsum v]))
-         e-d avgs)))
+
 
 ;; Oz fragments for drawing styles
 (def color-coded-fill {:field "color"

@@ -9,7 +9,7 @@
   :color :move :mean :meanmean :medianmean :means
 
   The dat input refers to this database."
-  (:require [lgo.stats :refer [mean]]))
+  (:require [lgo.stats :refer [mean cmas]]))
 
 ;;TODO we repeatedly switch sign for white, is there a better place to do that?
 
@@ -89,3 +89,11 @@
      (when (= effcol copcol)
        {:color effcol :effect effect :cop cop :move move}))
    effd copd))
+
+(defn normalize-effects
+  "assuming that it is from one player"
+  [e-d]
+  (let [avgs (cmas (map :effect e-d))]
+    (map (fn [d v]
+           (conj d [:cumsum v]))
+         e-d avgs)))

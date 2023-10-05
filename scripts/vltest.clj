@@ -28,7 +28,7 @@
       vega-lite-point-plot))
 
 
-(clay/handle-value!
+(def full-report
  (kind/table {:column-names [:hey :ho]
               :row-vectors [
                             [(kind/vega-lite {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
@@ -46,3 +46,6 @@
                                                          :y {:field "b" :type "quantitative"}}
                                               :mark "bar"})
                              (random-vega-lite-plot 9)]]}))
+
+(clay/handle-value! full-report)
+(clay/write-html! "test.html")
