@@ -23,5 +23,5 @@
             [cider/cider-nrepl "0.38.1"]]
   :main lgo.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}}
+  :profiles {:uberjar {:aot [lgo.core]}}
   :aliases {"rebl" ["trampoline" "run" "-m" "rebel-readline.main"]})

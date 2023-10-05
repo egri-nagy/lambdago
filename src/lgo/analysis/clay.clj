@@ -1,4 +1,4 @@
-(ns lgo.analysis.clay
+(ns ^:skip-aot lgo.analysis.clay
   "Functions for generating reports by using clay."
  (:require [lgo.stats :refer [cmas]]
            [lgo.analysis.processing :refer [unroll-scoremeans
@@ -32,22 +32,31 @@
         w (int (* 5.4 N))
         h (int (* 2 N))]
     (kind/table
-     {:columnames [title]
-      :row-vectors [[(vl-bars-per-move effs-dat "effect" w "Effects of moves")]
-                    [(vl-bars-per-move white-effs-dat "effect" w "Effects of White's moves")]
-                    [(vl-bars-per-move black-effs-dat "effect" w "Effects of Black's moves")]
-                    [(vl-bars-per-move (normalize-effects (filter white? effs-dat)) "cumsum" w
-                                       "Cumulative moving average of effects (white)")]
-                    [(vl-bars-per-move (normalize-effects  (filter black? effs-dat)) "cumsum" w
-                                       "Cumulative moving average of effects (black)")]
-                    [(vl-bars-per-move (concat (normalize-effects (filter white? effs-dat))
-                                               (normalize-effects (filter black? effs-dat)))
-                                       "cumsum" w
-                                       "Cumulative moving average of effects (composite)")]
-                    [(vl-bars-per-move (deviations white-effs-dat) "deviation" w
-                                       "Deviations from meean effect (white)")]
-                    [(vl-bars-per-move (deviations black-effs-dat) "deviation" w
-                                       "Deviations from mean effect (black)")]]})))
+     {:column-names [title]
+      :row-vectors
+      [[(kind/vega-lite
+         (vl-bars-per-move effs-dat "effect" w "Effects of moves"))]
+       [(kind/vega-lite
+         (vl-bars-per-move white-effs-dat "effect" w "Effects of White's moves"))]
+       [(kind/vega-lite
+         (vl-bars-per-move black-effs-dat "effect" w "Effects of Black's moves"))]
+       [(kind/vega-lite
+         (vl-bars-per-move (normalize-effects (filter white? effs-dat)) "cumsum" w
+                           "Cumulative moving average of effects (white)"))]
+       [(kind/vega-lite
+         (vl-bars-per-move (normalize-effects  (filter black? effs-dat)) "cumsum" w
+                           "Cumulative moving average of effects (black)"))]
+       [(kind/vega-lite
+         (vl-bars-per-move (concat (normalize-effects (filter white? effs-dat))
+                                   (normalize-effects (filter black? effs-dat)))
+                           "cumsum" w
+                           "Cumulative moving average of effects (composite)"))]
+       [(kind/vega-lite
+         (vl-bars-per-move (deviations white-effs-dat) "deviation" w
+                           "Deviations from meean effect (white)"))]
+       [(kind/vega-lite
+         (vl-bars-per-move (deviations black-effs-dat) "deviation" w
+                           "Deviations from mean effect (black)"))]]})))
 
 (defn game-report
   [raw title]
