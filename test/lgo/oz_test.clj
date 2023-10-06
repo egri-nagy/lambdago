@@ -1,6 +1,6 @@
 (ns lgo.oz-test
   (:require [clojure.test :refer :all]
-            [lgo.analysis.oz :refer :all]))
+            [lgo.analysis.processing :refer :all]))
 
 (def data
   [{:color "black",

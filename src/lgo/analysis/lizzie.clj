@@ -17,7 +17,7 @@
             [lgo.stats :refer [median
                                mean]]
             [lgo.analysis.converters :refer [B<->W code->col]]
-            [lgo.analysis.oz :refer [game-report]]))
+            [lgo.analysis.clay :refer [game-report]]))
 
 ;;TODO revamp this data extraction from LZ property
 (defn extract-from-LZ
