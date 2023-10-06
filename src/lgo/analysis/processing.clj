@@ -9,7 +9,39 @@
   :color :move :mean :meanmean :medianmean :means
 
   The dat input refers to this database."
-  (:require [lgo.stats :refer [mean cmas]]))
+  (:require [lgo.stats :refer [mean cmas]]
+            [meander.epsilon :refer [match]]))
+
+
+(defn data-transform
+  "Declarative version of data-transform2."
+  [db]
+  (mapcat
+   (fn [m]
+     (match m
+            ; this is the input, the properties have their own keys
+       {:color ?color :move ?move
+        :choice ?choice :average ?average :median ?median :AI ?AI}
+            ; the output: each property is separated into a map
+       [{:color ?color :move ?move :name "choice" :scoreMean ?choice}
+        {:color ?color :move ?move :name "average" :scoreMean ?average}
+        {:color ?color :move ?move :name "median" :scoreMean ?median}
+        {:color ?color :move ?move :name "AI" :scoreMean ?AI}]))
+   db))
+
+(defn data-transform2
+  "Prepares a database of different mean values for plotting in the same diagram.
+  Fixed keys are copied, then the variable ones are added as 'name' and its
+  value under kw."
+  [db fixedkeys varkeys kw]
+  (mapcat
+   (fn [row]
+     (let [fixedvals (into {} (map (fn [k] [k (k row)]) fixedkeys))]
+       (map (fn [k] (into fixedvals [[:name (name k)] [kw (k row)]]))
+            varkeys)))
+   db))
+
+
 
 ;;TODO we repeatedly switch sign for white, is there a better place to do that?
 

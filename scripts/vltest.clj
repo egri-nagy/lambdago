@@ -30,7 +30,7 @@
 
 (def full-report
  (kind/table {:column-names [:hey :ho]
-              :row-vectors [
+              :row-vectors [["hupi" (kind/vega-lite nil)]
                             [(kind/vega-lite {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
                                               :data {:values [{:a "A" :b 28}
                                                               {:a "B" :b 55}
