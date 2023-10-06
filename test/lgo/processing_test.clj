@@ -1,4 +1,4 @@
-(ns lgo.oz-test
+(ns lgo.processing-test
   (:require [clojure.test :refer :all]
             [lgo.analysis.processing :refer :all]))
 
