@@ -25,15 +25,15 @@
    of the vage-lite visualizations."
   [RAW title]
   (let [raw (:game RAW) ;; the game entries
-       copd (reduce
-             (fn [d m]
-               (if (= "black" (:color m))
-                 (conj d m)
-                 (conj d (update m :cop sign-swap))))
-             []
-             (cost-of-passing RAW))
-       all-sm (unroll-scoremeans raw)
-        ;;effects
+        copd (reduce
+              (fn [d m]
+                (if (= "black" (:color m))
+                  (conj d m)
+                  (conj d (update m :cop sign-swap))))
+              []
+              (cost-of-passing RAW))
+        all-sm (unroll-scoremeans raw)
+        ;;effect
         raw-effs (effects raw)
         white? #(= "white" (:color %))
         black? #(= "black" (:color %))
