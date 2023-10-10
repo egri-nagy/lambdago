@@ -133,9 +133,11 @@
        [(kind/vega-lite
          (vl-bars-per-move (deviations black-effs-dat) "deviation" w
                            "Deviations from mean effect (black)"))]
-       [(vl-boxplot-summary effs-dat "effect" "Summary of effects")]
+       [(kind/vega-lite
+         (vl-boxplot-summary effs-dat "effect" "Summary of effects"))]
         [(when-not (empty? copd)
-           (vl-boxplot-summary copd "cop" "Summary of cost of passings"))]
+           (kind/vega-lite
+            (vl-boxplot-summary copd "cop" "Summary of cost of passings")))]
        ]})))
 
 (defn game-report
