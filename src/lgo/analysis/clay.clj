@@ -16,7 +16,7 @@
                                     gray-strokes]]
            [scicloj.clay.v2.api :as clay]
            [scicloj.kindly.v4.kind :as kind]
-           [trptcolin.versioneer.core :as version]))
+           [lgo.util :refer [version]]))
 
 (def sign-swap (partial * -1))
 
@@ -52,7 +52,7 @@
      {:column-names [title]
       :row-vectors
       [;;header info
-       [(str "LambdaGo v" (version/get-version "lambdago" "lambdago" \n)
+       [(str "LambdaGo " (version) "\n"
              "Move numbers for score means indicate how many moves made before."
              (when-not (empty? copd)
                (let [s (apply + (map :cop copd))

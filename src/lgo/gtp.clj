@@ -3,7 +3,7 @@
   The game is represented as a hash-map with keys :board, :moves, :history."
   (:require [clojure.string :refer [split trim join]]
             [lgo.board :refer [empty-board put-stone]]
-            [trptcolin.versioneer.core :as version]
+            [lgo.util :refer [version]]
             ;;engines
             [lgo.bot.random]
             [lgo.bot.liberty]))
@@ -88,7 +88,7 @@
                   "version"
                   (do
                     (println "= "
-                             (version/get-version "lambdago" "lambdago")
+                             (version)
                              engine"\n")
                     game)
                   ;; name of the bot

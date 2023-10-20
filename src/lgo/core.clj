@@ -5,8 +5,7 @@
             [lgo.analysis.katago :refer [katago-output process-sgf]]
             [lgo.analysis.clay :refer [game-report]]
             [lgo.sgf :refer [simplified-sgf-string]]
-            [lgo.util :refer [filename-without-extension]]
-            [trptcolin.versioneer.core :as version]
+            [lgo.util :refer [filename-without-extension version]]
             [clojure.java.io :as jio]))
 
 (defn -main
@@ -15,8 +14,8 @@
   (let [command (first args)
         numargs (count args)]
     (case command
-      "version"  (println (str "LambdaGo v"
-                               (version/get-version "lambdago" "lambdago")))
+      "version"  (println (str "LambdaGo "
+                               (version)))
       "gtp" (when (= numargs 2)
               (gtp-loop (second args)))
       "simplify-sgf" (if (= 2 numargs)

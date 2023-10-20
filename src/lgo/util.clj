@@ -1,6 +1,7 @@
 (ns lgo.util
   "Little utility functions for handling vectors, filenames."
-  (:require [clojure.string :refer [split join]]))
+  (:require [clojure.string :refer [split join]]
+            [clojure.tools.build.api :as build]))
 
 ;; vector functions
 (defn vec-rm
@@ -31,3 +32,8 @@
     (if (>= (count parts) 2)
       (join "." (butlast parts))
       filename)))
+
+(defn version
+  "Returns the version number as a string."
+  []
+  (format "v%s" (build/git-count-revs nil)))

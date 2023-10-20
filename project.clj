@@ -11,7 +11,6 @@
                  [instaparse "1.4.12"]
                  [org.clojure/math.numeric-tower "0.0.5"]
                  [org.clojure/data.json "2.4.0"]
-                 [trptcolin/versioneer "0.2.0"]
                  [meander/epsilon "0.0.650"]
                  [org.scicloj/clay "2-alpha38"]]
   :plugins [[lein-cloverage "1.2.4"]
