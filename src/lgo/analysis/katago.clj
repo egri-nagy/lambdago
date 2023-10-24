@@ -50,7 +50,7 @@
          :boardXSize (:size gd)
          :boardYSize (:size gd)
          :moves mvs
-         :includePolicy true}))))
+         :includePolicy false}))))
 
 (defn katago-passed-game-data
   "Takes already prepared katago input data, and appends a pass."
