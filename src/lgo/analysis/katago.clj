@@ -78,6 +78,7 @@
                   (katago-input-data (slurp sgf_file)))
          passed (when-not (zero? passed-max-visits)
                   (katago-passed-game-data kgd passed-max-visits))]
+     (println "Processing" output)
      (spit output
            (join "\n"
                  (map json/write-str

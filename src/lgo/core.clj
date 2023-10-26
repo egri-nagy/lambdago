@@ -36,14 +36,15 @@
                           ;;              ".html")))
                         )
                         (println "Usage: lizzie sgf-file"))
-      "katago-input" (if (>= numargs 3)
-                       (let [sgf_file (second args)
-                             max-visits (read-string (nth args 2))]
-                         (if (= numargs 4)
-                           (process-sgf sgf_file max-visits (read-string (nth args 3)))
-                           (process-sgf sgf_file max-visits)))
-                       (println "Usage: katago-input"
-                                "sgf-file maxvisits [passed-maxvisits]"))
+      "katago-input" (do (if (>= numargs 3)
+                           (let [sgf_file (second args)
+                                 max-visits (read-string (nth args 2))]
+                             (if (= numargs 4)
+                               (process-sgf sgf_file max-visits (read-string (nth args 3)))
+                               (process-sgf sgf_file max-visits)))
+                           (println "Usage: katago-input"
+                                    "sgf-file maxvisits [passed-maxvisits]"))
+                         (System/exit 0))
       ;; for analyzing katago output
       "katago" (if (= numargs 2) 
                  (game-report (katago-output (second args)) (second args)) 
