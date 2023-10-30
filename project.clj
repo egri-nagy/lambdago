@@ -18,7 +18,7 @@
             [lein-ancient "0.7.0"]
             [jonase/eastwood "1.4.0"]
             [fourtytoo/record-deps "0.3.3-SNAPSHOT"]
-            [cider/cider-nrepl "0.40.0"]]
+            [cider/cider-nrepl "0.41.0"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot [lgo.core]}})

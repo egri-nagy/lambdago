@@ -44,7 +44,7 @@
                      initial-player
                      (black<->white initial-player))]
         {:id (str "game" " "  (col->code player)) ;the id tells whether it is a game move or not
-         :rules (lower-case (:rules gd))
+         :rules (lower-case (:rules gd)) ;rules are lowercased to work with KataGo
          :komi (:komi gd)
          :initialPlayer initial-player
          :boardXSize (:size gd)
@@ -70,7 +70,7 @@
 (defn process-sgf
   "Processes an SGF file to produce an input for KataGo analysis."
   ([sgf_file max-visits]
-   (process-sgf sgf_file max-visits 0))
+   (process-sgf sgf_file max-visits 0)) ;zero indicates no cost of passing
   ([sgf_file max-visits passed-max-visits]
    (let [name (filename-without-extension sgf_file)
          output (str name ".in")
