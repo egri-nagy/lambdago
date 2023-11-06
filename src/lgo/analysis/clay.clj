@@ -4,7 +4,7 @@
                                             effects
                                             choices
                                             deviations
-                                            cost-of-passing
+                                            cost-of-passing-data
                                             effect-vs-cop
                                             normalize-effects
                                             data-transform2]]
@@ -25,13 +25,7 @@
    of the vage-lite visualizations."
   [RAW title]
   (let [raw (:game RAW) ;; the game entries
-        copd (reduce
-              (fn [d m]
-                (if (= "black" (:color m))
-                  (conj d m)
-                  (conj d (update m :cop sign-swap))))
-              []
-              (cost-of-passing RAW))
+        copd (cost-of-passing-data RAW)
         all-sm (unroll-scoremeans raw)
         ;;effect
         raw-effs (effects raw)

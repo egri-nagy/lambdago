@@ -13,6 +13,8 @@
             [meander.epsilon :refer [match]]))
 
 
+(def sign-swap (partial * -1))
+
 (defn data-transform
   "Declarative version of data-transform2."
   [db]
@@ -112,6 +114,16 @@
               :efficiency (min (* 100 (/ achievement cop)) 151)
               :move move}))
          tuples)))
+
+(defn cost-of-passing-data
+  [RAW]
+  (reduce
+   (fn [d m]
+     (if (= "black" (:color m))
+       (conj d m)
+       (conj d (update m :cop sign-swap))))
+   []
+   (cost-of-passing RAW)))
 
 (defn effect-vs-cop
   [effd copd]
