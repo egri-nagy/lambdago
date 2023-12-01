@@ -13,7 +13,7 @@
                  [org.clojure/math.numeric-tower "0.0.5"]
                  [org.clojure/data.json "2.4.0"]
                  [meander/epsilon "0.0.650"]
-                 [org.scicloj/clay "2-alpha41"]]
+                 [org.scicloj/clay "2-alpha42"]]
   :plugins [[lein-cloverage "1.2.4"]
             [lein-kibit "0.1.8"]
             [lein-ancient "0.7.0"]
