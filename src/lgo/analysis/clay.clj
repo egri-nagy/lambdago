@@ -139,7 +139,10 @@
    browser to display."
   [raw title]
   (clay/start!)
-  (clay/handle-value! (create-game-report raw title)))
+  (clay/make! {:format      [:html]
+               :single-value (create-game-report raw title)})
+  ;(clay/handle-value! (create-game-report raw title))
+  )
 
 ;; (defn cop-fingerprints
 ;;   [RAWs]
