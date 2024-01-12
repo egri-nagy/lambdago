@@ -228,7 +228,7 @@
                    (= color (:color chain))))
      (map lookup ngbs))))
 
-(defn empty-points
+(defn empty-points ;TODO store the empty points explicitly, this would simplify the bots
   "Returns the empty points of a board position, i.e. all the grid points
   with no stone on them."
   [{lookup :lookup width :width height :height}]
