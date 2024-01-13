@@ -2,7 +2,7 @@
   "A simple bot playing random moves but not filling eyes and targeting
   the opponents low liberty number groups."
   (:require
-   [lgo.board :refer [self-capture? put-stone opposite
+   [lgo.board :refer [self-capture? put-stone opponent
                       board-string empty-points eye-fill?]]))
 
 (defn candidate-moves
@@ -12,7 +12,7 @@
               (reduce into #{}
                       (filter #(<= (count %) 1) ;1 capture, 2 atari
                               (map (:liberties board)
-                                   (filter #(= (opposite color) (:color %))
+                                   (filter #(= (opponent color) (:color %))
                                            (:chains board))))))
         empties (set (empty-points board))
         extras (remove (set libs) empties)]
@@ -35,7 +35,7 @@
                 (self-capture? board color move))
           (recur (rest cands)) ;if the move is not good, just try the rest
           (let [nboard (put-stone board color move)
-                current [(opposite color) (board-string nboard)]]
+                current [(opponent color) (board-string nboard)]]
             (if (contains? history current)
               (recur (rest cands)) ;situational superko
               (-> game

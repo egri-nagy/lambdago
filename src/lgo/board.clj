@@ -1,9 +1,9 @@
 (ns lgo.board
-  "Functions for representing a board state and its evolution, by adding stones,
-  possibly capturing, and merging the existing chains accordingly.
+  "Functions for representing a board state and its evolution by adding stones,
+  and by possibly capturing and merging the existing chains accordingly.
   The board position is stored as a vector of chains, in the order of creation.
   A chain has a color and a set of stones.
-  When connecting friendly chains newer chains are merged to the oldest one.
+  When connecting friendly chains newer chains are merged into the oldest one.
   Liberties for chains are stored separately, as the set of liberties may change
   even if the chain remains the same.
   For quick access we also have a lookup table from points to chains.
@@ -12,8 +12,8 @@
 
   The evolution of the board is traced by creating newer versions of the
   immutable data structure representing the board. Several of the functions
-  below produce a changed version of the board. These are 'updating' functions
-  in this sense."
+  below produce a changed version of the board. These are called 'updating'
+  functions in this sense only."
   (:require
    [lgo.grid :refer [neighbours points]]
    [lgo.chain :refer [envelope]]
@@ -21,7 +21,7 @@
    [clojure.string :as string]))
 
 ;;for switching between the colors
-(def opposite {:b :w, :w :b})
+(def opponent {:b :w, :w :b})
 
 (declare empty-board ;; data structure for an empty board
          put-stone ;; this puts a stone on a board position
@@ -89,7 +89,7 @@
       (update-liberties chain)))
 
 (defn remove-chain
-  "The opposite of add-chain, same order of steps, also removing liberties."
+  "The inverse of add-chain, same order of steps, also removing liberties."
   [board chain]
   (-> board
       (update :chains
@@ -103,11 +103,11 @@
 (defn capture-chain
   "Capturing a chain involves
   1. removing the chain from the vector of chains
-  2. updating the liberties of neighbouring chains of opposite color.
+  2. updating the liberties of neighbouring chains of opponent color.
   Friendly chains cannot be affected."
   [{lookup :lookup width :width height :height :as board}
    {stones :stones color :color :as chain}]
-  (let [opp (opposite color)
+  (let [opp (opponent color)
         affected_chains (filter #(= opp (:color %))
                                 (distinct
                                  (map lookup
@@ -175,7 +175,7 @@
           adj_chains (remove nil? (distinct (map lookup adjpts)))
           grouped_chains (group-by :color adj_chains)
           friendly_chains (grouped_chains color)
-          opponent_chains (grouped_chains (opposite color))
+          opponent_chains (grouped_chains (opponent color))
           ;;opponent chains with a single liberty (must be this point) captured
           captured (set (filter #(= 1 (count (liberties %)))
                                 opponent_chains))

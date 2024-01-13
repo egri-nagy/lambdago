@@ -2,7 +2,7 @@
   "A simple bot playing random moves including eye-fills.
   It only passes when there are no legal moves left."
   (:require
-   [lgo.board :refer [self-capture? put-stone opposite
+   [lgo.board :refer [self-capture? put-stone opponent
                       board-string empty-points]]))
 
 (defn candidate-moves
@@ -28,7 +28,7 @@
         (if (self-capture? board color move)
           (recur (rest cands)) ;if the move is not good, just try the rest
           (let [nboard (put-stone board color move)
-                current [(opposite color) (board-string nboard)]]
+                current [(opponent color) (board-string nboard)]]
             (if (contains? history current)
               (recur (rest cands)) ;situational superko, another exit point
               (-> game
