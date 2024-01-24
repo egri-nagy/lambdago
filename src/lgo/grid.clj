@@ -1,7 +1,8 @@
 (ns lgo.grid
   "Functions for dealing with points on a rectangular grid.
   Representation: a point is a pair (vector) of integers.
-  [column row]")
+  [column row]
+   Column and row values start with 1.")
 
 (declare neighbours
          points)

@@ -1,6 +1,6 @@
 (ns lgo.grid-test
-  (:require [clojure.test :refer :all]
-            [lgo.grid :refer :all]))
+  (:require [clojure.test :refer [is deftest testing]]
+            [lgo.grid :refer [neighbours points]]))
 
 (deftest neighbours-test
   (testing "Testing the neighbours function for edges and corners."
@@ -16,13 +16,6 @@
     (is (= (points 1 1)
            [[1 1]] ))
     (is (= (points 2 3)
-           [[1 1] [2 1] [1 2] [2 2] [1 3] [2 3]]))))
-
-
-
-;; (deftest inside-vs-boundary-test
-;;   (testing "Testing the neighbours function for edges and corners."
-;;     (is (= (inside-points  [[1 2] [3 2] [2 1] [2 3] [2 2]] 3 3)
-;;            '([2 2])))
-;;     (is (= (boundary-points  [[1 2] [3 2] [2 1] [2 3] [2 2]] 3 3)
-;;            '([1 2] [3 2] [2 1] [2 3])))))
+           [[1 1] [2 1] [1 2] [2 2] [1 3] [2 3]]))
+    (is (= (* 17 19)
+           (count (points 17 19))))))
