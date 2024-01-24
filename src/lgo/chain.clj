@@ -25,16 +25,3 @@
   (remove (set (inside-stones stones width height))
           stones))
 
-(defn envelope
-  "Returns the points that need to be occupied by enemy stones to surround
-  the group of stones. Note: this is not about a given board postion, just
-  a general computation - enemy stones are not checked.
-  Method: We compute all neighbours of the boundary, and remove the set
-  of original stones from that."
-  [stones width height]
-  (let [boundary (boundary-stones stones width height)
-        fullneighbours (reduce (fn [r pt]
-                                 (into r (neighbours pt width height)))
-                               #{}
-                               boundary)]
-    (remove (set stones) fullneighbours)))

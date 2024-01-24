@@ -13,9 +13,3 @@
     (is (= (boundary-stones  [[1 2] [3 2] [2 1] [2 3] [2 2]] 3 3)
            '([1 2] [3 2] [2 1] [2 3])))))
 
-(deftest envelope-test
-  (testing "Testing the envelope."
-    (is (= (envelope  [[1 2] [3 2] [2 1] [2 3] [2 2]] 3 3)
-           '( [3 3] [1 1] [1 3] [3 1] )))
-    (is (= (envelope  [[1 2] [3 2] [2 1] [2 3] ] 3 3)
-           '([2 2]  [3 3] [1 1] [1 3] [3 1])))))

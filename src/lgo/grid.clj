@@ -5,7 +5,8 @@
    Column and row values start with 1.")
 
 (declare neighbours
-         points)
+         points
+         envelope)
 
 (defn neighbours
   "Returns the neighbours of a grid point. It considers the size of the board,
@@ -24,3 +25,17 @@
   (for [row (range 1 (inc height))
         col (range 1 (inc width))]
     [col row]))
+
+(defn envelope
+  "Returns the points that need to be occupied by enemy stones to surround
+  the group of stones. Note: this is not about a given board postion, just
+  a general computation - enemy stones are not checked.
+  Method: We compute all neighbours of the boundary, and remove the set
+  of original stones from that."
+  [stones width height]
+  (let [allneighbours (reduce (fn [r pt]
+                                (into r (neighbours pt width height)))
+                              #{}
+                              stones)]
+    (remove (set stones) allneighbours)))
+

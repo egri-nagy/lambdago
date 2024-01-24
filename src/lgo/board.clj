@@ -15,8 +15,7 @@
   below produce a changed version of the board. These are called 'updating'
   functions in this sense only."
   (:require
-   [lgo.grid :refer [neighbours points]]
-   [lgo.chain :refer [envelope]]
+   [lgo.grid :refer [neighbours points envelope]]
    [lgo.util :refer [vec-rm-all vec-rm index]]
    [clojure.string :as string]))
 
