@@ -13,10 +13,15 @@
   The evolution of the board is traced by creating newer versions of the
   immutable data structure representing the board. Several of the functions
   below produce a changed version of the board. These are called 'updating'
-  functions in this sense only."
+  functions in this sense only.
+   
+  The basic unit is the chain. A single stone is just a one-stone chain.
+  Thus anything that can happen to the board happens through add-chain and
+   remove-chain."
   (:require
    [lgo.grid :refer [neighbours points envelope]]
    [lgo.util :refer [vec-rm-all vec-rm index]]
+   [clojure.set :refer [difference]]
    [clojure.string :as string]))
 
 ;;for switching between the colors
@@ -39,7 +44,8 @@
    :height height
    :chains [] ;; ordered by the age of the chains
    :liberties {} ;; chains to sets of liberties
-   :lookup {}}) ;; points to chains
+   :lookup {} ;;points to chains
+   :empties (set (points width height))}) ;; set of empty points
 
 (defn single-stone-chain
   "Creates a single stone chain given a point and color of the stone."
@@ -77,7 +83,8 @@
   "Adding a new chain to a board. This involves:
   1. adding a chain at the end of the chains vector
   2. registering it in the lookup
-  3. associating the set of liberties with the chain."
+  3. associating the set of liberties with the chain
+  4. removing the chain stones from the empty empties."
   [board chain]
   (-> board
       ;;adding it to the vector of chains
@@ -85,7 +92,9 @@
       ;;updating the reverse lookup
       (register-chain chain)
       ;;recomputing liberties
-      (update-liberties chain)))
+      (update-liberties chain)
+      ;;updating empties
+      (update :empties (fn [s] (difference s (set (:stones chain)))))))
 
 (defn remove-chain
   "The inverse of add-chain, same order of steps, also removing liberties."
@@ -97,7 +106,14 @@
       (update :liberties #(dissoc % chain))
       (update :lookup
               (fn [m]
-                (apply dissoc m (:stones chain))))))
+                (apply dissoc m (:stones chain))))
+      (update :empties (fn [s] (into s (:stones chain))))))
+
+(defn bulk-remove-chains
+  [board chains]
+  (reduce (fn [b c] (remove-chain b c))
+          board
+          chains))
 
 (defn capture-chain
   "Capturing a chain involves
@@ -150,8 +166,9 @@
           (update-in [:chains  (first chain_indices)]
                      (constantly upd_chain))
           ;;removing all the merged ones
-          (update :chains
-                  (fn [chains] (vec-rm-all chains (rest chain_indices))))
+;          (update :chains
+;                  (fn [chains] (vec-rm-all chains (rest chain_indices))))
+          (bulk-remove-chains (map chains (rest chain_indices)))
           (register-chain upd_chain) ;; the merged stones have wrong lookup values
           (update-liberties upd_chain)))))
 
@@ -187,7 +204,7 @@
       ;;if the new has no liberties, then it's a self-capture
       (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
         (remove-chain updated_board ((:lookup updated_board) point))
-        updated_board))))
+        updated_board)))) ;TODO it should return nil here too
 
 ;; INFORMATION ABOUT THE BOARD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; These functions query the properties of the board position and hypothetical

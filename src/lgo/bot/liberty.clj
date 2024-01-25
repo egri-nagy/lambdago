@@ -14,8 +14,7 @@
                               (map (:liberties board)
                                    (filter #(= (opponent color) (:color %))
                                            (:chains board))))))
-        empties (set (empty-points board))
-        extras (remove (set libs) empties)]
+        extras (remove (set libs) (:empties board))]
     (concat (shuffle libs) (shuffle extras))))
 
 (defn genmove
