@@ -140,6 +140,8 @@
   [raw title]
   (clay/start!)
   (clay/make! {:format      [:html]
+               :show true
+               :run-quarto false
                :single-value (create-game-report raw title)})
   ;(clay/handle-value! (create-game-report raw title))
   )

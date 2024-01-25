@@ -20,7 +20,6 @@
    remove-chain."
   (:require
    [lgo.grid :refer [neighbours points envelope]]
-   [lgo.util :refer [vec-rm-all vec-rm index]]
    [clojure.set :refer [difference]]
    [clojure.string :as string]))
 
@@ -42,7 +41,7 @@
   [width height]
   {:width width
    :height height
-   :chains [] ;; ordered by the age of the chains
+   :chains #{} ;; set of chains
    :liberties {} ;; chains to sets of liberties
    :lookup {} ;;points to chains
    :empties (set (points width height))}) ;; set of empty points
@@ -81,7 +80,7 @@
 
 (defn add-chain
   "Adding a new chain to a board. This involves:
-  1. adding a chain at the end of the chains vector
+  1. adding a chain to the set of chains
   2. registering it in the lookup
   3. associating the set of liberties with the chain
   4. removing the chain stones from the empty empties."
@@ -100,13 +99,9 @@
   "The inverse of add-chain, same order of steps, also removing liberties."
   [board chain]
   (-> board
-      (update :chains
-              (fn [chains] (vec-rm  chains
-                                    (index chains chain))))
+      (update :chains (fn [chains] (disj chains chain)))
       (update :liberties #(dissoc % chain))
-      (update :lookup
-              (fn [m]
-                (apply dissoc m (:stones chain))))
+      (update :lookup (fn [m] (apply dissoc m (:stones chain))))
       (update :empties (fn [s] (into s (:stones chain))))))
 
 (defn bulk-remove-chains
@@ -136,7 +131,7 @@
 (defn capture-chains
   "Just capturing several chains in one go."
   [board chains]
-  (reduce capture-chain board chains))
+  (reduce remove-chain board chains))
 
 (defn remove-liberty
   "Removes a single point from the liberties of all given chains."
@@ -154,26 +149,20 @@
    connector] ; the newly created single-stone chain
   (if (empty? friendly_chains)
     (add-chain  board connector) ;;nothing to merge, just add the connector chain
-    (let [chain_indices (map (partial index chains) friendly_chains)
-          upd_chain (reduce
+    (let [upd_chain (reduce
                      (fn [ch1 ch2]
                        {:color (:color ch1)
                         :stones (into (:stones ch1) (:stones ch2))})
-                     (first friendly_chains) ; merge into the oldest chain
-                     (concat (rest friendly_chains) [connector]))]
+                     connector ; merge into the connector
+                     friendly_chains)]
       (-> board
-          ;; updating the oldest chain
-          (update-in [:chains  (first chain_indices)]
-                     (constantly upd_chain))
           ;;removing all the merged ones
-;          (update :chains
-;                  (fn [chains] (vec-rm-all chains (rest chain_indices))))
-          (bulk-remove-chains (map chains (rest chain_indices)))
-          (register-chain upd_chain) ;; the merged stones have wrong lookup values
+          (bulk-remove-chains chains)
+          (add-chain upd_chain) ;; the merged stones have wrong lookup values
           (update-liberties upd_chain)))))
 
 (defn put-stone
-  "Places a single stone  on the board, updating the chain list.
+  "Places a single stone  on the board, updating the set of chains.
   The following things can happen to adjacent points:
   1. if an adjacent point is empty, then it becomes a liberty of the new chain
   2. when occupied by enemy stones,
