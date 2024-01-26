@@ -1,9 +1,10 @@
 (ns lgo.board
   "Functions for representing a board state and its evolution by adding stones,
   and by possibly capturing and merging the existing chains accordingly.
-  The board position is stored as a vector of chains, in the order of creation.
-  A chain has a color and a set of stones.
-  When connecting friendly chains newer chains are merged into the oldest one.
+  The board position is stored as a set of chains.
+  A chain has a color and a set of stones and it is the basic unit of all
+  operations. A single stone is a one-stone chain.
+
   Liberties for chains are stored separately, as the set of liberties may change
   even if the chain remains the same.
   For quick access we also have a lookup table from points to chains.
@@ -13,11 +14,7 @@
   The evolution of the board is traced by creating newer versions of the
   immutable data structure representing the board. Several of the functions
   below produce a changed version of the board. These are called 'updating'
-  functions in this sense only.
-   
-  The basic unit is the chain. A single stone is just a one-stone chain.
-  Thus anything that can happen to the board happens through add-chain and
-   remove-chain."
+  functions in this sense only."
   (:require
    [lgo.grid :refer [neighbours points envelope]]
    [clojure.set :refer [difference]]
@@ -27,6 +24,14 @@
 (def opponent {:b :w, :w :b})
 
 (declare empty-board ;; data structure for an empty board
+         single-stone-chain ;;shows the data structure for a chain
+         compute-liberties ;;based on the envelope of the chain
+         update-liberties ;;using compute-liberties, it updates the board
+         bulk-update-liberties ;;for several chains in one go
+         affected-chains ;; find negihbouring chains to a chain
+         add-chain
+         remove-chain
+         bulk-remove-chains
          put-stone ;; this puts a stone on a board position
          self-capture? ;;is a move self-capture?
          merge-chains ;;merging friendly chains
@@ -37,7 +42,9 @@
 
 (defn empty-board
   "Creates an empty board with the given dimensions. It returns a hash-map with
-  an empty vector of chains, and two hash-maps for lookup and liberties."
+  the dimensions of the board, an empty set of chains, a set of the empty
+  intersections (all of them for the empty board), and two hash-maps: one for
+  intersection to chain lookup, and one fro chain to set of liberties."
   [width height]
   {:width width
    :height height
@@ -54,13 +61,14 @@
 
 (defn compute-liberties
   "Computes liberties of a chain. This is a fresh calculation (not incremental).
-  The algorithm works by removing the occupied points from its envelope.
-  Note that these occupied points must be enemy stones, otherwise they would
-  belong to the chain."
+  The algorithm works by removing the occupied points from the envelope of the
+  chain.
+  Note that these occupied points might be friendly stones as well, before
+   merging. This does not change the liberty count of the unmerged chain."
   [{width :width height :height lookup :lookup} ;; board
    chain]
   (let [e (envelope (:stones chain) width height)]
-    (set (remove lookup e)))) ;using truthy-falsey
+    (set (remove lookup e)))) ;using truthy-falsey we remove the occupied ones
 
 (defn update-liberties
   "Updates a board by recomputing liberties of an existing chain.
@@ -71,6 +79,8 @@
              (constantly (compute-liberties board chain))))
 
 (defn bulk-update-liberties
+  "Updates liberties for several chains. Technical functions for the ease of
+   use of the threading macro."
   [board chains]
   (reduce update-liberties board chains))
 
@@ -82,7 +92,6 @@
   (remove nil? (distinct
                 (map (:lookup board)
                      (envelope (:stones chain) (:width board) (:height board))))))
-
 
 (defn add-chain
   "Adding a new chain to a board. This involves:
@@ -118,16 +127,9 @@
        (update :empties (fn [s] (into s (:stones chain)))))))
 
 (defn bulk-remove-chains
+  "Removing several chains in one go. Needed for the threading macro."
   [board chains]
   (reduce (fn [b c] (remove-chain b c))
-          board
-          chains))
-
-(defn remove-liberty
-  "Removes a single point from the liberties of all given chains."
-  [board chains point]
-  (reduce (fn [brd chn]
-            (update-in brd [:liberties chn] #(disj % point)))
           board
           chains))
 
@@ -138,12 +140,11 @@
    liberties."
   [{chains :chains liberties :liberties :as board}
    chains_to_be_merged] 
-  (let [stones (reduce
-                   (fn [result chain]
-                     (into result (:stones chain)))
-                   #{}
-                   chains_to_be_merged)
-        merged {:stones stones
+  (let [merged {:stones (reduce
+                         (fn [result chain]
+                           (into result (:stones chain)))
+                         #{}
+                         chains_to_be_merged)
                 :color (:color (first chains_to_be_merged))}]
     (-> board
         ;;removing all the merged ones
@@ -186,7 +187,6 @@
           nchain (single-stone-chain color point)
           updated_board (-> board
                             (bulk-remove-chains captured)
-                            (remove-liberty affected point)
                             (add-chain nchain)
                             (merge-chains (conj friendly_chains nchain)))
           finished_new_chain ((:lookup updated_board) point)]
