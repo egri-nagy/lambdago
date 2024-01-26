@@ -52,14 +52,6 @@
   {:color color
    :stones [point]})
 
-(defn register-chain
-  "Updating the lookup table of the board by registering a given chain.
-  Each stone in the chain is mapped to the chain itself in the lookup table."
-  [board chain]
-  (update board :lookup
-          (fn [m] (into m (map (fn [pt] [pt chain])
-                               (:stones chain))))))
-
 (defn compute-liberties
   "Computes liberties of a chain. This is a fresh calculation (not incremental).
   The algorithm works by removing the occupied points from its envelope.
@@ -78,60 +70,58 @@
   (update-in board [:liberties  chain]
              (constantly (compute-liberties board chain))))
 
+(defn bulk-update-liberties
+  [board chains]
+  (reduce update-liberties board chains))
+
+(defn affected-chains
+  "Finds all the chains that can be affected by the given chain's
+   addition or removal. Calculates the envelope and finds the chains on
+   those points."
+  [board chain]
+  (remove nil? (distinct
+                (map (:lookup board)
+                     (envelope (:stones chain) (:width board) (:height board))))))
+
+
 (defn add-chain
   "Adding a new chain to a board. This involves:
   1. adding a chain to the set of chains
   2. registering it in the lookup
   3. associating the set of liberties with the chain
-  4. removing the chain stones from the empty empties."
+  4. updating liberties of affected chains 
+  5. removing the chain stones from the empty empties."
   [board chain]
-  (-> board
-      ;;adding it to the vector of chains
-      (update :chains #(conj % chain))
-      ;;updating the reverse lookup
-      (register-chain chain)
-      ;;recomputing liberties
-      (update-liberties chain)
-      ;;updating empties
-      (update :empties (fn [s] (difference s (set (:stones chain)))))))
+  (let [affected (affected-chains board chain)]
+    (-> board
+        ;adding it to the set of chains, m stands for map
+        (update :chains (fn [m] (conj m chain)))
+        ;updating the reverse lookup
+        (update :lookup (fn [m] (into m (map (fn [pt] [pt chain])
+                                             (:stones chain)))))
+        ;computing liberties for the new chain
+        (update-liberties chain)
+        ;recompute liberties for affected chains
+        (bulk-update-liberties affected)
+        ;removing newly occupied points from empty intersections
+        (update :empties (fn [s] (difference s (set (:stones chain))))))))
 
 (defn remove-chain
   "The inverse of add-chain, same order of steps, also removing liberties."
   [board chain]
-  (-> board
-      (update :chains (fn [chains] (disj chains chain)))
-      (update :liberties #(dissoc % chain))
-      (update :lookup (fn [m] (apply dissoc m (:stones chain))))
-      (update :empties (fn [s] (into s (:stones chain))))))
+  (let [affected (affected-chains board chain)]
+   (-> board
+       (update :chains (fn [chains] (disj chains chain)))
+       (update :lookup (fn [m] (apply dissoc m (:stones chain))))
+       (update :liberties #(dissoc % chain))
+       (bulk-update-liberties affected)
+       (update :empties (fn [s] (into s (:stones chain)))))))
 
 (defn bulk-remove-chains
   [board chains]
   (reduce (fn [b c] (remove-chain b c))
           board
           chains))
-
-(defn capture-chain
-  "Capturing a chain involves
-  1. removing the chain from the vector of chains
-  2. updating the liberties of neighbouring chains of opponent color.
-  Friendly chains cannot be affected."
-  [{lookup :lookup width :width height :height :as board}
-   {stones :stones color :color :as chain}]
-  (let [opp (opponent color)
-        affected_chains (filter #(= opp (:color %))
-                                (distinct
-                                 (map lookup
-                                      (envelope stones width height))))
-        bulk-update-liberties (fn [board chains] ;for the threading macro
-                                (reduce update-liberties board chains))]
-    (-> board
-        (remove-chain chain)
-        (bulk-update-liberties affected_chains))))
-
-(defn capture-chains
-  "Just capturing several chains in one go."
-  [board chains]
-  (reduce remove-chain board chains))
 
 (defn remove-liberty
   "Removes a single point from the liberties of all given chains."
@@ -142,27 +132,35 @@
           chains))
 
 (defn merge-chains
-  "Merging chains to the first one and updating the board through a new
-  connecting single-stone chain, the newly placed stone."
-  [{chains :chains :as board}
-   friendly_chains
-   connector] ; the newly created single-stone chain
-  (if (empty? friendly_chains)
-    (add-chain  board connector) ;;nothing to merge, just add the connector chain
-    (let [upd_chain (reduce
-                     (fn [ch1 ch2]
-                       {:color (:color ch1)
-                        :stones (into (:stones ch1) (:stones ch2))})
-                     connector ; merge into the connector
-                     friendly_chains)]
-      (-> board
-          ;;removing all the merged ones
-          (bulk-remove-chains chains)
-          (add-chain upd_chain) ;; the merged stones have wrong lookup values
-          (update-liberties upd_chain)))))
+  "Merging the given existing chains by removing them and adding their
+   unified chains.
+   Not adding through the dedicated methods, since we can save recomputing
+   liberties."
+  [{chains :chains liberties :liberties :as board}
+   chains_to_be_merged] 
+  (let [stones (reduce
+                   (fn [result chain]
+                     (into result (:stones chain)))
+                   #{}
+                   chains_to_be_merged)
+        merged {:stones stones
+                :color (:color (first chains_to_be_merged))}]
+    (-> board
+        ;;removing all the merged ones
+        (update :chains (fn [m] (reduce disj m chains_to_be_merged)))
+        ;;add the merged one
+        (update :chains (fn [m] (conj m merged)))
+        ;;update lookup table
+        (update :lookup (fn [m] (into m (map (fn [pt] [pt merged])
+                                             (:stones merged))))) ;TODO bring back register-chain
+        (update-in [:liberties  merged]
+                   (constantly (reduce into (map liberties chains_to_be_merged))))
+        (update :liberties (fn [m] (reduce dissoc m chains_to_be_merged))))))
 
 (defn put-stone
-  "Places a single stone  on the board, updating the set of chains.
+  "Places a single stone on the board. The general strategy is to place
+   the stone as a new chain. Removed the captured chains if any, and finally
+   merge the friendly chains.
   The following things can happen to adjacent points:
   1. if an adjacent point is empty, then it becomes a liberty of the new chain
   2. when occupied by enemy stones,
@@ -184,16 +182,19 @@
           ;;opponent chains with a single liberty (must be this point) captured
           captured (set (filter #(= 1 (count (liberties %)))
                                 opponent_chains))
-          affected (remove captured opponent_chains)
+          affected (remove captured adj_chains)
+          nchain (single-stone-chain color point)
           updated_board (-> board
-                            (capture-chains captured)
+                            (bulk-remove-chains captured)
                             (remove-liberty affected point)
-                            (merge-chains friendly_chains
-                                          (single-stone-chain color point)))]
+                            (add-chain nchain)
+                            (merge-chains (conj friendly_chains nchain)))
+          finished_new_chain ((:lookup updated_board) point)]
+      
       ;;if the new has no liberties, then it's a self-capture
-      (if (empty? ((:liberties updated_board) ((:lookup updated_board) point)))
-        (remove-chain updated_board ((:lookup updated_board) point))
-        updated_board)))) ;TODO it should return nil here too
+      (if (empty? ((:liberties updated_board) finished_new_chain))
+        (remove-chain updated_board finished_new_chain) ;technically we allow self-capture
+        updated_board))))
 
 ;; INFORMATION ABOUT THE BOARD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; These functions query the properties of the board position and hypothetical
