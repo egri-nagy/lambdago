@@ -11,7 +11,7 @@
                  [io.github.clojure/tools.build "0.9.6"]
                  [instaparse "1.4.12"]
                  [org.clojure/math.numeric-tower "0.0.5"]
-                 [org.clojure/data.json "2.4.0"]
+                 [org.clojure/data.json "2.5.0"]
                  [meander/epsilon "0.0.650"]
                  [org.scicloj/clay "2-alpha49"]]
   :plugins [[lein-cloverage "1.2.4"]
@@ -19,7 +19,7 @@
             [lein-ancient "0.7.0"]
             [jonase/eastwood "1.4.2"]
             [fourtytoo/record-deps "0.3.3-SNAPSHOT"]
-            [cider/cider-nrepl "0.44.0"]]
+            [cider/cider-nrepl "0.45.0"]]
   :main lgo.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot [lgo.core]}})

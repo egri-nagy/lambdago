@@ -153,7 +153,7 @@
         (update :chains (fn [m] (conj m merged)))
         ;;update lookup table
         (update :lookup (fn [m] (into m (map (fn [pt] [pt merged])
-                                             (:stones merged))))) ;TODO bring back register-chain
+                                             (:stones merged)))))
         (update-in [:liberties  merged]
                    (constantly (reduce into (map liberties chains_to_be_merged))))
         (update :liberties (fn [m] (reduce dissoc m chains_to_be_merged))))))
@@ -258,7 +258,7 @@
                (symbols (:color (lookup [c r]))))
              '(\newline))))))
 
-;;
+;; for converting 'images' to colors, allow for lower/upper case mixing
 (def colors {\X :b \x :b \O :w \o :w})
 
 (defn build-position
@@ -267,7 +267,7 @@
   [rows]
   (let [w (count (first rows)) ;;width
         h (count rows) ;;height
-        ;;pairing colors (indicating whose turn is it) and points
+        ;;pairing colors and points - putting the stones is not turn-based
         paired (map vector
                     (map colors (apply concat rows)) ;converting chars to colors
                     (points w h))

@@ -4,7 +4,7 @@
   org.clojure/tools.reader {:mvn/version "1.3.7"},
   instaparse/instaparse {:mvn/version "1.4.12"},
   org.clojure/math.numeric-tower {:mvn/version "0.0.5"},
-  org.clojure/data.json {:mvn/version "2.4.0"},
+  org.clojure/data.json {:mvn/version "2.5.0"},
   meander/epsilon {:mvn/version "0.0.650"},
   org.scicloj/clay {:mvn/version "2-alpha49"}
   io.github.clojure/tools.build {:mvn/version "0.9.6"}}
