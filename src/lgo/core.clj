@@ -1,12 +1,12 @@
 (ns lgo.core
   (:gen-class)
-  (:require [lgo.gtp :refer [gtp-loop]]
-            [lgo.analysis.lizzie :refer [sgf-report]]
-            [lgo.analysis.katago :refer [katago-output process-sgf]]
-            [lgo.analysis.clay :refer [game-report]]
-            [lgo.sgf :refer [simplified-sgf-string]]
-            [lgo.util :refer [filename-without-extension version]]
-            [clojure.java.io :as jio]))
+  (:require
+   [lgo.analysis.lizzie :refer [sgf-report]]
+   [lgo.analysis.katago :refer [katago-output process-sgf]]
+   [lgo.analysis.clay :refer [game-report]]
+   [lgo.sgf :refer [simplified-sgf-string]]
+   [lgo.util :refer [filename-without-extension version]]
+   [clojure.java.io :as jio]))
 
 (defn -main
   "The first argument is a command."
@@ -16,8 +16,6 @@
     (case command
       "version"  (println (str "LambdaGo "
                                (version)))
-      "gtp" (when (= numargs 2)
-              (gtp-loop (second args)))
       "simplify-sgf" (if (= 2 numargs)
                        (println (simplified-sgf-string (slurp (second args))))
                        (println "Usage: simplify-sgf sgf-file"))
